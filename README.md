@@ -15,13 +15,23 @@ tarde y responde dos veces.
 
 | Ruta | Qué contiene |
 |---|---|
+| `paquetes/` | El código: un paquete por contexto acotado —hexagonal— más `kernel` |
 | `docs/` | La base de conocimiento importada de `aas`: caso de negocio (Entrega 1), modelamiento (Entrega 2) y el material del curso digitalizado. Es la fuente de verdad y se publica como [wiki](https://github.com/alejoriosm04/TicketRight/wiki) |
 | `docs/proyecto/decisiones/` | Los ADR: el material con el que se defiende la Entrega 3 |
 | `docs/proyecto/02-modelamiento/` | Los diseños que la implementación convierte en código |
 | `herramientas/` | `publica-wiki.py`: publica `docs/` como wiki |
 | `docs/herramientas/` | Verificador de enlaces y utilidades de los entregables |
+| `docker-compose.yml` | Ambiente local: PostgreSQL, Redis y Kafka |
 
-El código de la Entrega 3 vive en este repositorio. `PENDIENTE: definir su estructura.`
+El código es un monorepo de npm workspaces con TypeScript y Vitest
+([AD-007](docs/proyecto/decisiones/0007-stack-de-implementacion.md), 🟣 propuesto).
+
+```bash
+npm install                                    # dependencias
+npm test                                       # pruebas (Vitest)
+npm run typecheck                              # tipos estrictos
+cp .env.example .env && docker compose up -d   # PostgreSQL, Redis y Kafka locales
+```
 
 ## Cómo navegar
 

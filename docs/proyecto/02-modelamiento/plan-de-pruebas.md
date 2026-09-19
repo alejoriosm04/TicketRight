@@ -175,10 +175,10 @@ caso de este plan** antes de mirar el porcentaje agregado.
 
 ## Automatización
 
-La arquitectura de implementación (entregable 4, aún sin escribir) fijará el lenguaje y el
-marco de pruebas de cada servicio; este plan no lo anticipa para no inventar una decisión que
-no es suya. Lo que sí se fija aquí, porque depende del diseño de dominio y no de la
-tecnología:
+La [arquitectura de implementación](arquitectura-de-implementacion.md) fija la topología, y
+[AD-007](../decisiones/0007-stack-de-implementacion.md) propone el lenguaje y el marco de
+pruebas —TypeScript sobre Node.js con Vitest—, pendiente de ratificación del equipo. Lo que
+sí se fija aquí, porque depende del diseño de dominio y no de la tecnología:
 
 - Las pruebas unitarias vivirán junto al código de cada contexto acotado (Oferta de eventos,
   Admisión e identidad, Venta y recaudo, Derecho de asistencia), nunca en un módulo aparte que
@@ -218,8 +218,9 @@ implementación. Cuando existan, se conservarán:
   de modo que a los diez minutos exactos ya no bloquea inventario. El valor de diez minutos
   sigue `[S]` hasta la ratificación de umbrales de
   [`atributos-de-calidad.md`](../01-caso-de-negocio/atributos-de-calidad.md#ratificación-pendiente-del-equipo).
-- `PENDIENTE: fijar el lenguaje, el marco de pruebas (equivalente a xUnit) y la herramienta de
-  cobertura una vez se escriba la arquitectura de implementación (entregable 4).`
+- `PENDIENTE:` ratificar el stack propuesto en
+  [AD-007](../decisiones/0007-stack-de-implementacion.md) —TypeScript sobre Node.js con
+  Vitest y cobertura V8— y fijarlo como aceptado.
 - `PENDIENTE: escribir el código de los veintiún casos, ejecutarlos y anexar el reporte de
   cobertura en la Entrega 3.`
 

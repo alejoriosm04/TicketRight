@@ -17,6 +17,7 @@ Este repositorio es donde ese diseño se convierte en código, se prueba y se de
 
 ```
 ESTADO.md     Estado vivo del repo y de la Entrega 3. Empieza aquí siempre
+paquetes/     El código: kernel + un paquete por contexto acotado, hexagonal dentro
 docs/         Base de conocimiento importada de aas
   ESTADO.md     Estado del proyecto y del curso hasta la Entrega 2 (bitácora del diseño)
   proyecto/     Entregas 1 y 2, ADRs y decisiones
@@ -26,10 +27,28 @@ docs/         Base de conocimiento importada de aas
     material/     Originales del profesor — SOLO LECTURA
   herramientas/ Verificador de enlaces y utilidades de los entregables
 herramientas/ publica-wiki.py — publica docs/ como wiki del repositorio
+docker-compose.yml  Ambiente local (PostgreSQL, Redis y Kafka)
 ```
 
-El código de la Entrega 3 va en este repositorio; su estructura está
-`PENDIENTE` de decisión del equipo.
+## El código
+
+TypeScript sobre Node.js 24 en un monorepo con npm workspaces.
+[AD-007](docs/proyecto/decisiones/0007-stack-de-implementacion.md) lo propone y el equipo
+debe ratificarlo antes de escribir la lógica de dominio.
+
+- **Un paquete por contexto acotado** —Oferta de eventos, Admisión e identidad, Venta y
+  recaudo, Derecho de asistencia— más `kernel` para los tipos compartidos.
+- **Hexágono dentro de cada paquete:** `dominio/`, `aplicacion/`, `puertos/`, `adaptadores/`.
+  El dominio no importa infraestructura ni otros contextos; un paquete no importa a otro.
+- **Pruebas junto al código**, con Vitest, como exige el
+  [plan de pruebas](docs/proyecto/02-modelamiento/plan-de-pruebas.md#automatización).
+- **El diseño manda:** el código implementa el
+  [diagrama de clases](docs/proyecto/02-modelamiento/diagrama-de-clases.md) y el
+  [de secuencia](docs/proyecto/02-modelamiento/diagrama-de-secuencia.md); los cambios de
+  contrato se resuelven primero en `docs/`.
+- Comandos: `npm install` · `npm run typecheck` · `npm test` · `npm run test:coverage`.
+  Ambiente local: `cp .env.example .env && docker compose up -d`. El CI (GitHub Actions)
+  corre `typecheck` y pruebas en cada push y pull request.
 
 ## La wiki
 
@@ -60,6 +79,7 @@ los grandes se leen por secciones, nunca enteros.
 | **Los 12 atributos de calidad con su umbral** | `docs/proyecto/01-caso-de-negocio/atributos-de-calidad.md` | 28 KB |
 | El estilo de arquitectura y por qué se eligió | `docs/proyecto/decisiones/0005-estilo-de-arquitectura.md` | 20 KB |
 | Cómo se escribe un ADR y cuáles son los cinco | `docs/proyecto/decisiones/README.md` | 12 KB |
+| El stack de implementación y sus alternativas | `docs/proyecto/decisiones/0007-stack-de-implementacion.md` | 16 KB |
 | **Los diseños que hay que implementar** | `docs/proyecto/02-modelamiento/README.md` | 28 KB · con índice |
 | El modelo de dominio (32 conceptos, 12 raíces) | `docs/proyecto/02-modelamiento/modelo-de-dominio.md` | 40 KB · con índice |
 | La arquitectura de referencia (capas y patrones) | `docs/proyecto/02-modelamiento/arquitectura-de-referencia.md` | 36 KB · con índice |

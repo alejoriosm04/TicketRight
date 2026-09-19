@@ -91,9 +91,14 @@ arquitectónica. Los cinco evaluables son AD-002 a AD-006.
 | [AD-004](0004-datos-personales-almacenamiento-y-acceso.md) | Seguridad por capas, admisión firmada e identidad aislada | Transversal | ✅ Aceptado el 16 sep 2026 |
 | [AD-005](0005-estilo-de-arquitectura.md) | Arquitectura híbrida Event-Driven con Space-Based bajo demanda | Estructura | ✅ Aceptado el 16 sep 2026 |
 | [AD-006](0006-escalado-programado-por-ventana-de-venta.md) | Activación bajo demanda de la sala Space-Based y escalado elástico | Despliegue | ✅ Aceptado el 16 sep 2026 |
+| [AD-007](0007-stack-de-implementacion.md) | Stack de implementación: TypeScript sobre Node.js | Implementación | 🟣 Propuesto el 19 sep 2026. No cuenta entre las cinco arquitectónicas |
 
 [AD-001](0001-idea-de-negocio.md) permanece **Aceptada** como antecedente: explica por qué el
 equipo eligió una boletería de alta demanda, no cómo se estructura el software.
+[AD-007](0007-stack-de-implementacion.md) registra la decisión de lenguaje y herramientas que
+el [plan de pruebas](../02-modelamiento/plan-de-pruebas.md#automatización) dejó pendiente para
+la Entrega 3; no compite con las cinco decisiones arquitectónicas y espera ratificación del
+equipo.
 
 ## Cómo se complementan sin duplicarse
 
