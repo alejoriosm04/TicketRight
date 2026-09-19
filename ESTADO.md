@@ -1,0 +1,76 @@
+# Estado del repositorio — TicketRight
+
+> Archivo vivo. Quien avance algo, lo actualiza.
+> Última actualización: **2026-09-19**. Este archivo registra el estado del **repositorio de
+> código** y de la **Entrega 3**. La bitácora del proyecto y del curso hasta la Entrega 2
+> está en [`docs/ESTADO.md`](docs/ESTADO.md).
+
+## Dónde vamos
+
+**Semana 3 de 4.** La Entrega 1 (caso de negocio) se entregó el 12 de septiembre y la
+Entrega 2 (modelamiento) cerró con sus once entregables de diseño. **Entrega activa:
+Entrega 3 — Implementación · Sustentación · Simulación · Defensa**, el **sábado 26 de
+septiembre de 2026** (30%).
+
+El diseño ya está hecho: **no hay que rediseñar, hay que implementar lo diseñado y
+demostrarlo**. Los diseños que esta entrega convierte en realidad están en
+[`docs/proyecto/02-modelamiento/`](docs/proyecto/02-modelamiento/README.md).
+
+## La Entrega 3
+
+Según el [syllabus](docs/curso/syllabus.md) y el
+[README de la entrega](docs/proyecto/03-implementacion/README.md):
+
+| Frente | Qué es | Estado |
+|---|---|---|
+| Implementación | El código y la plataforma funcionando | ⚪ PENDIENTE |
+| Sustentación | Presentar la solución | ⚪ PENDIENTE |
+| Simulación | `PENDIENTE: confirmar qué se espera` | ❓ |
+| Defensa | Sostener las decisiones ante preguntas | 🟡 Material listo: los cinco ADR |
+
+La **defensa** se apoya en los ADR: para cada decisión visible en la demo hay que responder
+qué atributo de calidad la justifica y qué se sacrificó a cambio
+([`docs/proyecto/decisiones/`](docs/proyecto/decisiones/README.md)).
+
+## Lo que hay que sacar
+
+De los entregables de diseño a la ejecución. **El orden importa**: primero el esqueleto y el
+caso de uso principal, y encima de eso pruebas, carga, observabilidad y fallos.
+
+| # | Frente | Insumo ya escrito | Qué falta |
+|---|---|---|---|
+| 1 | Estructura del código | [Arquitectura de referencia](docs/proyecto/02-modelamiento/arquitectura-de-referencia.md) · [arquitectura hexagonal](docs/proyecto/02-modelamiento/diagrama-de-clases.md) | `PENDIENTE: decisión de stack y esqueleto de servicios` |
+| 2 | Caso de uso principal: *comprar en la ventana de alta demanda* | [Diagrama de clases](docs/proyecto/02-modelamiento/diagrama-de-clases.md) (39 clases) y [de secuencia](docs/proyecto/02-modelamiento/diagrama-de-secuencia.md) (38 mensajes, errores y compensaciones) | Implementarlo |
+| 3 | Pruebas | [Plan de pruebas](docs/proyecto/02-modelamiento/plan-de-pruebas.md): 21 casos UT sobre las reglas R1–R14 | Escribirlas, ejecutarlas y reportar |
+| 4 | Carga | [Volumetría](docs/proyecto/02-modelamiento/volumetria.md): nominal, pico, estrés y resistencia; 30.000 usuarios en 60 s contra 5.000 boletas | Corridas y resultados |
+| 5 | Observabilidad | [Observabilidad](docs/proyecto/02-modelamiento/observabilidad.md): métricas doradas, tableros, alertas y responsables | Instrumentar y demostrar con datos reales |
+| 6 | Inyección de fallos | [Inyección de fallos](docs/proyecto/02-modelamiento/inyeccion-de-fallos.md): Chaos Mesh, catálogo e hipótesis | Módulo funcionando y bitácora |
+| 7 | Prototipo | [Prototipo](docs/proyecto/02-modelamiento/prototipo/index.html): 16 pantallas, tres roles | `PENDIENTE: redesplegar en Netlify con los cambios del 18 sep` |
+| 8 | Defensa | [Los ADR](docs/proyecto/decisiones/README.md) | Repasar trazabilidad atributo → decisión → sacrificio |
+
+## Pendientes y preguntas abiertas
+
+- `PENDIENTE: confirmar qué se espera de «simulación» y el formato de la sustentación.`
+- `PENDIENTE: ratificar los doce umbrales de` [`atributos-de-calidad.md`](docs/proyecto/01-caso-de-negocio/atributos-de-calidad.md).
+- `PENDIENTE: la nota y la retroalimentación de la Entrega 1.`
+- `PENDIENTE: confirmar que el paquete de la Entrega 2 quedó subido a Teams` — el paquete
+  quedó armado en `aas/exportaciones/entrega-02-modelamiento/`.
+- `PENDIENTE: verificar disponibilidad de dominio y marca de «TicketRight».`
+
+## Organización del repositorio
+
+El **19 de septiembre de 2026** la documentación del repositorio `aas` se importó a
+[`docs/`](docs/README.md) y se publicó como
+[wiki](https://github.com/alejoriosm04/TicketRight/wiki). Al importar se recuperó la carpeta
+`proyecto/01-caso-de-negocio/ideas/` —las cuatro ideas originales—, que estaba borrada por
+accidente y dejaba 25 enlaces rotos; los tres avisos de importación están en
+[`docs/README.md`](docs/README.md), [`docs/ESTADO.md`](docs/ESTADO.md) y
+[`docs/AGENTS.md`](docs/AGENTS.md).
+
+## Tablero
+
+| # | Entrega | Peso | Fecha | Estado |
+|---|---|---|---|---|
+| 1 | Caso de negocio | 20% | sáb 12 sep 2026 | ✅ Entregada. Falta la nota |
+| 2 | Modelamiento de la solución | 30% | sáb 19 sep 2026, 3 p.m. | ✅ Diseño completo; `PENDIENTE: subida a Teams` |
+| 3 | Implementación, sustentación y defensa | 30% | **sáb 26 sep 2026** | ⚪ **Activa.** Sin empezar el código |
