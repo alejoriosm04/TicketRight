@@ -1,0 +1,9 @@
+{
+  "name": "@ticketright/admision-e-identidad",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  }
+}
