@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TicketRight — Tu reserva</title>
+<link rel="stylesheet" href="estilos.css">
+<script>(function(){try{document.documentElement.setAttribute('data-tema', localStorage.getItem('tr-tema')||'dark');}catch(e){}})();</script>
+<script>
+  window.ESTADOS_SIMULADOS = {
+    grupo: "reserva",
+    inicial: "vigente",
+    opciones: [
+      { valor: "vigente", etiqueta: "Vigente" },
+      { valor: "vencida", etiqueta: "Error — reserva vencida" }
+    ]
+  };
+</script>
+</head>
+<body>
+<div class="app-layout">
+  <aside class="barra-lateral" id="barra-lateral"></aside>
+  <main class="contenido-principal">
+    <div class="contenedor">
+
+      <div class="encabezado-pagina">
+        <span class="etiqueta">Tu reserva</span>
+        <h1>2 boletas — General</h1>
+      </div>
+
+      <div data-estado-panel="vigente" data-grupo-panel="reserva" class="visible">
+        <div class="tarjeta">
+          <div class="etiqueta" style="text-align:center;display:block">Tu inventario está reservado por</div>
+          <div class="anillo-envoltorio">
+            <svg viewBox="0 0 160 160" role="img" aria-labelledby="reloj">
+              <circle class="anillo-fondo" cx="80" cy="80" r="70"></circle>
+              <circle class="anillo-progreso" id="anillo" cx="80" cy="80" r="70"
+                stroke-dasharray="439.8" stroke-dashoffset="0"></circle>
+              <text class="anillo-texto" x="80" y="82" id="reloj">09:47</text>
+            </svg>
+          </div>
+          <p style="text-align:center">Si no completas el pago dentro de este tiempo, tu
+          reserva se libera automáticamente y otra persona puede tomar el cupo.</p>
+        </div>
+
+        <div class="tarjeta">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px">
+            <h3 style="margin-bottom:0">Resumen de tu reserva</h3>
+            <a href="fan-eventos.html" style="font-size:13px">Cancelar reserva</a>
+          </div>
+          <a href="fan-evento.html" style="display:block;font-weight:700;color:var(--color-accent-text);text-decoration:none;margin-bottom:4px">Cardio Fest — Estéreo Picnic</a>
+
+          <div class="fila-datos"><span class="k">2 x General ($200.000 c/u)</span><span class="v">$400.000</span></div>
+          <div class="fila-datos"><span class="k">Cargo por servicio</span><span class="v">$48.000</span></div>
+          <div class="fila-datos"><span class="k">Contribución parafiscal</span><span class="v">$40.000</span></div>
+          <div class="fila-datos">
+            <span class="k" style="display:flex;align-items:center;gap:8px"><span class="insignia-cantidad">2</span><strong>Total</strong></span>
+            <span class="v"><strong>$488.000</strong></span>
+          </div>
+        </div>
+
+        <a href="fan-datos.html" class="btn btn-primario btn-ancho">Continuar</a>
+      </div>
+
+      <div data-estado-panel="vencida" data-grupo-panel="reserva">
+        <div class="tarjeta">
+          <div class="alerta alerta-peligro">
+            <strong>Tu reserva venció</strong>
+            Pasaron más de 10 minutos sin completar el pago, así que liberamos el inventario
+            para otros compradores. No se te cobró nada.
+          </div>
+          <a href="fan-eventos.html" class="btn btn-secundario btn-ancho">Volver a intentarlo</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+<script src="nav.js"></script>
+<script>
+  var totalSegundos = 600;
+  var segundos = 587;
+  var circunferencia = 439.8;
+  var anillo = document.getElementById('anillo');
+  var reloj = document.getElementById('reloj');
+  function pintar() {
+    var m = String(Math.floor(segundos / 60)).padStart(2, '0');
+    var s = String(segundos % 60).padStart(2, '0');
+    reloj.textContent = m + ':' + s;
+    var fraccion = segundos / totalSegundos;
+    anillo.setAttribute('stroke-dashoffset', String(circunferencia * (1 - fraccion)));
+    if (fraccion < 0.34) anillo.style.stroke = 'var(--color-danger)';
+    else if (fraccion < 0.6) anillo.style.stroke = 'var(--color-warning)';
+  }
+  pintar();
+  setInterval(function () {
+    if (segundos <= 0) return;
+    segundos -= 1;
+    pintar();
+  }, 1000);
+</script>
+</body>
+</html>

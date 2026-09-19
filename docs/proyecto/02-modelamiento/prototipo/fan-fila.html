@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TicketRight — Fila de venta</title>
+<link rel="stylesheet" href="estilos.css">
+<script>(function(){try{document.documentElement.setAttribute('data-tema', localStorage.getItem('tr-tema')||'dark');}catch(e){}})();</script>
+<script>
+  window.ESTADOS_SIMULADOS = {
+    grupo: "fila",
+    inicial: "vacio",
+    opciones: [
+      { valor: "vacio", etiqueta: "Antes de abrir" },
+      { valor: "carga", etiqueta: "Conectando" },
+      { valor: "encola", etiqueta: "En cola" },
+      { valor: "admitido", etiqueta: "Turno admitido" },
+      { valor: "vencido", etiqueta: "Error — turno vencido" },
+      { valor: "rechazado", etiqueta: "Error — turno rechazado" }
+    ]
+  };
+</script>
+</head>
+<body>
+<div class="app-layout">
+  <aside class="barra-lateral" id="barra-lateral"></aside>
+  <main class="contenido-principal">
+    <div class="contenedor">
+
+      <div class="encabezado-pagina">
+        <span class="etiqueta">Cardio Fest — Estéreo Picnic</span>
+        <h1>Tu turno</h1>
+      </div>
+
+      <div class="tarjeta">
+        <div data-estado-panel="vacio" class="vacio visible" data-grupo-panel="fila">
+          <h3>La fila todavía no abre</h3>
+          <p>La venta de Cardio Fest abre el sábado 14 de marzo a las 10:00 a.m. Vuelve en ese
+          momento — no necesitas hacer nada más por ahora.</p>
+        </div>
+
+        <div data-estado-panel="carga" data-grupo-panel="fila">
+          <div class="carga">
+            <div class="spinner"></div>
+            <h3>Conectando con la fila…</h3>
+            <p>Estamos registrando tu turno.</p>
+          </div>
+        </div>
+
+        <div data-estado-panel="encola" data-grupo-panel="fila">
+          <div class="pista-cola-envoltorio">
+            <div class="etiquetas-cola"><span>Posición <strong id="posicion-fila">4.812</strong></span><span>Meta</span></div>
+            <div class="pista-cola">
+              <div class="avance" id="avance-cola"></div>
+              <div class="icono-cola" id="icono-cola" style="left:0%">🎫</div>
+              <span class="meta">🏁</span>
+            </div>
+          </div>
+
+          <div class="fila-datos"><span class="k">Estado del turno</span><span class="v"><span class="insignia insignia-neutro">enEspera</span></span></div>
+          <div class="fila-datos"><span class="k">Ingresaste</span><span class="v">Hace 2 min</span></div>
+          <div class="fila-datos"><span class="k">Ritmo de admisión</span><span class="v">≈ 500 turnos / min</span></div>
+
+          <div class="tarjeta" style="margin-top:16px;margin-bottom:0;box-shadow:none;border:1px solid var(--color-border)">
+            <strong style="display:block;margin-bottom:4px">Te avisamos por correo cuando sea tu turno</strong>
+            <p style="margin-bottom:0">Puedes cerrar esta ventana con tranquilidad — te
+            escribimos a quinn.villa@ejemplo.com.</p>
+          </div>
+        </div>
+
+        <div data-estado-panel="admitido" data-grupo-panel="fila">
+          <div class="alerta alerta-exito">
+            <strong>¡Es tu turno!</strong>
+            Tienes un tiempo limitado para elegir tu localidad antes de que tu turno expire.
+          </div>
+          <div class="fila-datos"><span class="k">Estado del turno</span><span class="v"><span class="insignia insignia-exito">admitido</span></span></div>
+          <a href="fan-seleccion.html" class="btn btn-primario btn-ancho" style="margin-top:16px">Elegir localidad</a>
+        </div>
+
+        <div data-estado-panel="vencido" data-grupo-panel="fila">
+          <div class="alerta alerta-peligro">
+            <strong>Tu turno venció</strong>
+            No alcanzaste a elegir localidad dentro del tiempo permitido. Puedes volver a
+            entrar a la fila, aunque tu nueva posición no conserva la anterior.
+          </div>
+          <a href="fan-evento.html" class="btn btn-secundario btn-ancho">Volver al evento</a>
+        </div>
+
+        <div data-estado-panel="rechazado" data-grupo-panel="fila">
+          <div class="alerta alerta-peligro">
+            <strong>No pudimos darte un turno</strong>
+            Bloqueamos este intento por tu seguridad. Puedes volver a intentarlo o
+            escribirnos a soporte si el problema persiste.
+          </div>
+          <a href="fan-evento.html" class="btn btn-secundario btn-ancho">Volver al evento</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+<script src="nav.js"></script>
+<script>
+  // Animación ilustrativa: la posición baja y el icono avanza por la pista.
+  var posicionInicial = 4812;
+  var posicion = posicionInicial;
+  var posicionEl = document.getElementById('posicion-fila');
+  var avanceEl = document.getElementById('avance-cola');
+  var iconoEl = document.getElementById('icono-cola');
+
+  function pintarCola() {
+    var avance = Math.min(1 - posicion / posicionInicial, 0.97);
+    avanceEl.style.width = (avance * 100) + '%';
+    iconoEl.style.left = (avance * 100) + '%';
+  }
+  pintarCola();
+  setInterval(function () {
+    if (posicion <= 40) return;
+    posicion -= Math.floor(Math.random() * 35) + 5;
+    if (posicion < 40) posicion = 40;
+    posicionEl.textContent = posicion.toLocaleString('es-CO');
+    pintarCola();
+  }, 1800);
+</script>
+</body>
+</html>

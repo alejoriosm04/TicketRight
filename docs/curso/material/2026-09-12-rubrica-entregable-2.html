@@ -1,0 +1,1081 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rúbrica de calificación — Proyecto Integrador</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#0B2E6B;
+    --navy-deep:#071F4A;
+    --blue:#1B62C4;
+    --blue-tint:#E9F1FB;
+    --yellow:#FFC72C;
+    --yellow-tint:#FFF6DE;
+    --ink:#16233A;
+    --muted:#5C6B84;
+    --line:#D6DFEC;
+    --paper:#FFFFFF;
+    --bg:#F3F6FB;
+    --ok:#1F7A4D;
+    --warn:#B8860B;
+    --bad:#A32C2C;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:"IBM Plex Sans","Segoe UI",Helvetica,Arial,sans-serif;
+    font-size:15px;
+    line-height:1.55;
+    font-variant-numeric:tabular-nums;
+  }
+  .wrap{max-width:1180px;margin:0 auto;padding:0 24px 96px}
+
+  /* ---------- Encabezado ---------- */
+  header.masthead{
+    background:var(--navy);
+    color:#fff;
+    padding:44px 0 38px;
+    border-bottom:6px solid var(--yellow);
+  }
+  header.masthead .wrap{padding-bottom:0}
+  .kicker{
+    color:var(--yellow);
+    font-weight:600;
+    font-size:14px;
+    letter-spacing:.01em;
+    margin:0 0 8px;
+  }
+  h1{
+    font-size:clamp(30px,4.4vw,46px);
+    line-height:1.08;
+    font-weight:700;
+    margin:0 0 14px;
+    letter-spacing:-.02em;
+  }
+  .sub{color:#C9DAF3;max-width:62ch;margin:0;font-size:17px}
+  .meta{
+    margin-top:26px;display:flex;flex-wrap:wrap;gap:10px 28px;
+    font-size:14px;color:#9FBCE6;border-top:1px solid rgba(255,255,255,.18);padding-top:16px;
+  }
+  .meta b{color:#fff;font-weight:600}
+
+  /* ---------- Secciones genéricas ---------- */
+  section{margin-top:52px}
+  h2{
+    font-size:24px;font-weight:700;margin:0 0 6px;letter-spacing:-.01em;color:var(--navy);
+  }
+  h2 .num{color:var(--blue)}
+  .lead{color:var(--muted);max-width:75ch;margin:0 0 20px}
+
+  .panel{
+    background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:26px 26px 22px;
+  }
+
+  /* ---------- Escala ---------- */
+  .scale{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
+  .lvl{
+    border:1px solid var(--line);border-radius:8px;padding:14px 14px 16px;background:var(--paper);
+    display:flex;flex-direction:column;gap:6px;
+  }
+  .lvl .n{font-size:30px;font-weight:700;line-height:1;color:var(--navy)}
+  .lvl .t{font-weight:600;font-size:14px}
+  .lvl .d{font-size:13px;color:var(--muted);line-height:1.45}
+  .lvl.l5{border-top:5px solid #1F7A4D}
+  .lvl.l4{border-top:5px solid #4E9E6A}
+  .lvl.l3{border-top:5px solid var(--yellow)}
+  .lvl.l2{border-top:5px solid #E08A3C}
+  .lvl.l1{border-top:5px solid #C2504A}
+  .lvl.l0{border-top:5px solid #8A94A6}
+
+  /* ---------- Tablas ---------- */
+  table{width:100%;border-collapse:collapse;font-size:13.5px}
+  th,td{text-align:left;vertical-align:top;padding:11px 12px;border-bottom:1px solid var(--line)}
+  thead th{
+    background:var(--navy);color:#fff;font-weight:600;font-size:12.5px;border-bottom:none;
+  }
+  thead th:first-child{border-top-left-radius:7px}
+  thead th:last-child{border-top-right-radius:7px}
+  tbody tr:nth-child(even){background:#FAFCFF}
+  .tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--paper)}
+  td.crit{font-weight:600;width:20%;min-width:190px;color:var(--navy)}
+  td.w{width:62px;text-align:right;font-weight:600;color:var(--blue);white-space:nowrap}
+  th.lv5,th.lv3,th.lv1{width:24%}
+  .lv5-c{background:#F4FBF6}
+  .lv3-c{background:#FFFCF2}
+  .lv1-c{background:#FDF5F5}
+
+  /* ---------- Resumen de pesos ---------- */
+  .weights td.pct{text-align:right;font-weight:700;color:var(--navy);width:90px}
+  .weights td.pts{text-align:right;color:var(--muted);width:120px}
+  .weights tfoot td{font-weight:700;background:var(--blue-tint);border-bottom:none}
+  .bar{height:8px;background:var(--blue-tint);border-radius:4px;overflow:hidden;min-width:120px}
+  .bar span{display:block;height:100%;background:var(--blue)}
+  .bar.zero span{background:#B7C2D4}
+
+  /* ---------- Ficha de entregable ---------- */
+  .deliv{
+    background:var(--paper);border:1px solid var(--line);border-radius:10px;
+    padding:0 0 24px;margin-top:26px;overflow:hidden;
+  }
+  .deliv-head{
+    display:flex;align-items:flex-start;gap:16px;padding:20px 24px;
+    border-bottom:1px solid var(--line);background:linear-gradient(180deg,#FBFDFF,#F4F8FD);
+  }
+  .badge{
+    flex:0 0 auto;width:42px;height:42px;border-radius:50%;background:var(--navy);color:#fff;
+    display:grid;place-items:center;font-weight:700;font-size:19px;
+  }
+  .deliv-head h3{margin:0;font-size:20px;font-weight:700;color:var(--navy);letter-spacing:-.01em}
+  .deliv-head p{margin:4px 0 0;color:var(--muted);font-size:14px;max-width:70ch}
+  .pill{
+    margin-left:auto;flex:0 0 auto;background:var(--yellow);color:var(--navy);font-weight:700;
+    padding:7px 14px;border-radius:999px;font-size:15px;white-space:nowrap;
+  }
+  .pill.zero{background:#E4E9F1;color:var(--muted)}
+  .deliv-body{padding:22px 24px 0}
+  .deliv-body h4{
+    font-size:13px;font-weight:600;color:var(--navy);margin:24px 0 10px;
+    padding-bottom:6px;border-bottom:2px solid var(--yellow);display:inline-block;
+  }
+  ul.ev{margin:0;padding-left:0;list-style:none;columns:2;column-gap:32px}
+  ul.ev li{
+    font-size:13.5px;padding:4px 0 4px 24px;position:relative;break-inside:avoid;
+  }
+  ul.ev li::before{
+    content:"";position:absolute;left:4px;top:11px;width:9px;height:9px;border-radius:2px;
+    border:2px solid var(--blue);
+  }
+  ul.err{margin:0;padding-left:20px;font-size:13.5px;color:#6A4A4A}
+  ul.err li{padding:3px 0}
+  .cap{
+    margin-top:16px;font-size:13px;color:var(--muted);background:var(--blue-tint);
+    border-left:3px solid var(--blue);padding:10px 14px;border-radius:0 6px 6px 0;
+  }
+
+  /* ---------- Cálculo / calculadora ---------- */
+  .formula{
+    background:var(--navy-deep);color:#E7F0FF;border-radius:10px;padding:22px 26px;
+    font-size:16px;line-height:1.7;
+  }
+  .formula code{color:var(--yellow);font-weight:600;font-family:inherit}
+  .calc{display:grid;grid-template-columns:1fr 300px;gap:26px;align-items:start}
+  .calc table td{padding:8px 12px}
+  select{
+    font-family:inherit;font-size:14px;padding:6px 8px;border:1px solid var(--line);
+    border-radius:6px;background:#fff;color:var(--ink);width:100%;
+  }
+  select:focus-visible{outline:3px solid var(--yellow);outline-offset:1px}
+  .result{
+    background:var(--navy);color:#fff;border-radius:10px;padding:24px;position:sticky;top:20px;
+  }
+  .result .big{font-size:60px;font-weight:700;line-height:1;color:var(--yellow)}
+  .result .lbl{font-size:13px;color:#A9C4EA;margin-bottom:4px}
+  .result .row{display:flex;justify-content:space-between;font-size:14px;padding:7px 0;border-top:1px solid rgba(255,255,255,.15)}
+  .result .row:first-of-type{margin-top:18px}
+
+  .note{font-size:13.5px;color:var(--muted);margin-top:14px}
+  footer{
+    margin-top:64px;border-top:1px solid var(--line);padding-top:20px;
+    font-size:13px;color:var(--muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;
+  }
+
+  @media (max-width:900px){
+    .scale{grid-template-columns:repeat(3,1fr)}
+    .calc{grid-template-columns:1fr}
+    ul.ev{columns:1}
+    .result{position:static}
+  }
+  @media (max-width:560px){
+    .scale{grid-template-columns:repeat(2,1fr)}
+    .deliv-head{flex-wrap:wrap}
+    .pill{margin-left:58px}
+  }
+
+  @media print{
+    body{background:#fff;font-size:10.5px}
+    .wrap{max-width:none;padding:0 10mm}
+    header.masthead{padding:14mm 0 8mm;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    .no-print{display:none !important}
+    .deliv,.panel,.tbl-wrap{break-inside:avoid;page-break-inside:avoid}
+    section{margin-top:10mm}
+    thead th{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    a{text-decoration:none;color:inherit}
+  }
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="wrap">
+    <p class="kicker">Universidad EAFIT — Arquitectura de software</p>
+    <h1>Rúbrica de calificación<br>Proyecto Integrador</h1>
+    <p class="sub">Criterios de evaluación para los once entregables del proyecto. Cada entregable se califica de 0 a 5 sobre varios criterios y aporta a la nota final según su porcentaje de participación.</p>
+    <div class="meta">
+      <span><b>11</b> entregables</span>
+      <span><b>100%</b> distribuido en 9 entregables calificables</span>
+      <span><b>2</b> entregables de bonificación</span>
+      <span>Escala <b>0 – 5</b></span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+<!-- ============ ESCALA ============ -->
+<section id="escala">
+  <h2>Escala de valoración</h2>
+  <p class="lead">La misma escala aplica a cada criterio dentro de cada entregable. El nivel se asigna por evidencia observable en el artefacto entregado, no por intención declarada.</p>
+  <div class="scale">
+    <div class="lvl l5">
+      <span class="n">5</span><span class="t">Excelente</span>
+      <span class="d">Cumple todo lo pedido y además demuestra criterio arquitectónico propio: justifica, anticipa consecuencias y conecta el artefacto con el resto del proyecto. Nivel presentable ante un comité técnico real.</span>
+    </div>
+    <div class="lvl l4">
+      <span class="n">4</span><span class="t">Sobresaliente</span>
+      <span class="d">Cumple todo lo pedido con buena calidad. Hay detalles menores por pulir (una relación, una justificación corta, una inconsistencia aislada) que no comprometen el resultado.</span>
+    </div>
+    <div class="lvl l3">
+      <span class="n">3</span><span class="t">Aceptable</span>
+      <span class="d">Cumple lo mínimo exigido. El artefacto es correcto pero superficial: describe sin justificar, o deja vacíos que obligan a preguntar para entenderlo.</span>
+    </div>
+    <div class="lvl l2">
+      <span class="n">2</span><span class="t">Deficiente</span>
+      <span class="d">Entrega parcial o con errores conceptuales que afectan su utilidad. Falta más de la mitad de lo esperado o hay contradicciones con otros entregables.</span>
+    </div>
+    <div class="lvl l1">
+      <span class="n">1</span><span class="t">Insuficiente</span>
+      <span class="d">Hay entrega, pero es anecdótica o incorrecta: no permite tomar ninguna decisión ni construir sobre ella. Notación equivocada o contenido genérico sin relación con el dominio del proyecto.</span>
+    </div>
+    <div class="lvl l0">
+      <span class="n">0</span><span class="t">Sin entregar</span>
+      <span class="d">No se entregó el artefacto, se entregó fuera de plazo sin autorización, o lo entregado no corresponde a lo solicitado.</span>
+    </div>
+  </div>
+  <p class="note">Los niveles 4 y 2 son intermedios: se asignan cuando la evidencia está claramente entre dos descriptores anclados (5, 3 y 1). Ante duda entre dos niveles, se asigna el menor y se documenta la razón en la retroalimentación.</p>
+</section>
+
+<!-- ============ PESOS ============ -->
+<section id="pesos">
+  <h2>Distribución de la calificación</h2>
+  <p class="lead">Los entregables 10 y 11 tienen participación 0% en la nota base y se evalúan como bonificación, según se define al final del documento.</p>
+  <div class="tbl-wrap">
+    <table class="weights">
+      <thead>
+        <tr><th style="width:44px">#</th><th>Entregable</th><th>Participación</th><th style="width:100px">Peso</th><th class="no-print">Aporte máximo</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>1</td><td>Modelo de dominio (completo)</td><td><div class="bar"><span style="width:20%"></span></div></td><td class="pct">5%</td><td class="pts no-print">0,25</td></tr>
+        <tr><td>2</td><td>ADR — Architectural Decision Record</td><td><div class="bar"><span style="width:100%"></span></div></td><td class="pct">25%</td><td class="pts no-print">1,25</td></tr>
+        <tr><td>3</td><td>Arquitectura de referencia</td><td><div class="bar"><span style="width:80%"></span></div></td><td class="pct">20%</td><td class="pts no-print">1,00</td></tr>
+        <tr><td>4</td><td>Arquitectura de implementación</td><td><div class="bar"><span style="width:80%"></span></div></td><td class="pct">20%</td><td class="pts no-print">1,00</td></tr>
+        <tr><td>5</td><td>Diagrama de clases (de un caso)</td><td><div class="bar"><span style="width:20%"></span></div></td><td class="pct">5%</td><td class="pts no-print">0,25</td></tr>
+        <tr><td>6</td><td>Diagrama de secuencia (de un caso)</td><td><div class="bar"><span style="width:20%"></span></div></td><td class="pct">5%</td><td class="pts no-print">0,25</td></tr>
+        <tr><td>7</td><td>Prototipo de interfaz de usuario</td><td><div class="bar"><span style="width:40%"></span></div></td><td class="pct">10%</td><td class="pts no-print">0,50</td></tr>
+        <tr><td>8</td><td>Plataforma de observabilidad</td><td><div class="bar"><span style="width:20%"></span></div></td><td class="pct">5%</td><td class="pts no-print">0,25</td></tr>
+        <tr><td>9</td><td>Plan de pruebas unitarias</td><td><div class="bar"><span style="width:20%"></span></div></td><td class="pct">5%</td><td class="pts no-print">0,25</td></tr>
+        <tr><td>10</td><td>Definición de volumetría para pruebas</td><td><div class="bar zero"><span style="width:4%"></span></div></td><td class="pct">0%</td><td class="pts no-print">+0,25 bonif.</td></tr>
+        <tr><td>11</td><td>Módulo de inyección de fallos</td><td><div class="bar zero"><span style="width:4%"></span></div></td><td class="pct">0%</td><td class="pts no-print">+0,25 bonif.</td></tr>
+      </tbody>
+      <tfoot>
+        <tr><td></td><td>Total nota base</td><td></td><td class="pct">100%</td><td class="pts no-print">5,00</td></tr>
+      </tfoot>
+    </table>
+  </div>
+</section>
+
+<!-- ============ ENTREGABLE 1 ============ -->
+<section id="e1">
+  <h2><span class="num">Entregables</span> — criterios detallados</h2>
+  <p class="lead">Cada entregable se descompone en criterios con peso interno. La nota del entregable es el promedio ponderado de sus criterios, en escala 0 a 5.</p>
+
+  <article class="deliv">
+    <div class="deliv-head">
+      <span class="badge">1</span>
+      <div>
+        <h3>Modelo de dominio (completo)</h3>
+        <p>Diagrama que muestra las entidades del dominio, sus atributos, relaciones y reglas de negocio.</p>
+      </div>
+      <span class="pill">5%</span>
+    </div>
+    <div class="deliv-body">
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Criterio</th><th class="w">Peso</th><th class="lv5">5 — Excelente</th><th class="lv3">3 — Aceptable</th><th class="lv1">1 — Insuficiente</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="crit">Cobertura del dominio</td><td class="w">30%</td>
+              <td class="lv5-c">Modela todo el dominio del problema, no solo los casos de uso implementados. Distingue subdominios o contextos acotados y explica el porqué de los límites.</td>
+              <td class="lv3-c">Cubre las entidades principales necesarias para los casos de uso, pero deja fuera conceptos del dominio mencionados en el enunciado.</td>
+              <td class="lv1-c">Solo hay tres o cuatro entidades genéricas (usuario, producto, pedido) que podrían pertenecer a cualquier proyecto.</td>
+            </tr>
+            <tr>
+              <td class="crit">Entidades y atributos</td><td class="w">20%</td>
+              <td class="lv5-c">Cada entidad tiene identidad clara, atributos con tipo y semántica, y se distingue entre entidades, objetos de valor y agregados con su raíz.</td>
+              <td class="lv3-c">Entidades con atributos razonables, pero sin tipos, o mezclando conceptos de persistencia (llaves foráneas, tablas puente) con conceptos de dominio.</td>
+              <td class="lv1-c">Atributos incompletos, sin nombre significativo, o el modelo es en realidad un esquema de base de datos disfrazado.</td>
+            </tr>
+            <tr>
+              <td class="crit">Relaciones y cardinalidades</td><td class="w">20%</td>
+              <td class="lv5-c">Todas las relaciones están nombradas, con cardinalidad y direccionalidad correctas, y las decisiones de navegabilidad están justificadas.</td>
+              <td class="lv3-c">Relaciones presentes con cardinalidad, pero sin nombre o con algunas multiplicidades imprecisas.</td>
+              <td class="lv1-c">Líneas sin cardinalidad, relaciones ambiguas o cardinalidades que contradicen las reglas del negocio.</td>
+            </tr>
+            <tr>
+              <td class="crit">Reglas de negocio e invariantes</td><td class="w">20%</td>
+              <td class="lv5-c">Documenta invariantes y restricciones del dominio, indicando dónde se hacen cumplir y qué pasa cuando se violan.</td>
+              <td class="lv3-c">Enuncia algunas reglas en texto libre, sin vincularlas explícitamente a entidades o relaciones.</td>
+              <td class="lv1-c">No hay reglas de negocio, o las que aparecen son validaciones de formulario, no reglas del dominio.</td>
+            </tr>
+            <tr>
+              <td class="crit">Notación y lenguaje ubicuo</td><td class="w">10%</td>
+              <td class="lv5-c">Notación consistente y legible; los nombres coinciden con el vocabulario del negocio y se mantienen idénticos en todos los demás entregables.</td>
+              <td class="lv3-c">Diagrama legible, con mezcla ocasional de notaciones o nombres técnicos en lugar de términos del negocio.</td>
+              <td class="lv1-c">Diagrama ilegible, sin convención reconocible, o con nombres que cambian entre documentos.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4>Evidencias mínimas</h4>
+      <ul class="ev">
+        <li>Diagrama del dominio completo, exportado en alta resolución</li>
+        <li>Glosario de términos del dominio</li>
+        <li>Listado de reglas de negocio numeradas</li>
+        <li>Identificación de agregados y sus raíces</li>
+      </ul>
+
+      <h4>Errores que bajan la nota</h4>
+      <ul class="err">
+        <li>Entregar un modelo entidad-relación de base de datos en lugar de un modelo de dominio.</li>
+        <li>Modelar solo lo que se va a construir y llamarlo «dominio completo».</li>
+        <li>Nombres de entidades que no aparecen luego en el diagrama de clases ni en el código.</li>
+      </ul>
+    </div>
+  </article>
+
+  <!-- ============ ENTREGABLE 2 ============ -->
+  <article class="deliv">
+    <div class="deliv-head">
+      <span class="badge">2</span>
+      <div>
+        <h3>ADR — Architectural Decision Record</h3>
+        <p>Documento que registra las decisiones clave de arquitectura, con su contexto, alternativas, motivación y consecuencias.</p>
+      </div>
+      <span class="pill">25%</span>
+    </div>
+    <div class="deliv-body">
+      <div class="cap">Es el entregable de mayor peso del proyecto. Evalúa el pensamiento arquitectónico, no la cantidad de páginas: un ADR sin alternativas descartadas no es un ADR, es una justificación a posteriori.</div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Criterio</th><th class="w">Peso</th><th class="lv5">5 — Excelente</th><th class="lv3">3 — Aceptable</th><th class="lv1">1 — Insuficiente</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="crit">Selección de decisiones</td><td class="w">15%</td>
+              <td class="lv5-c">Registra las decisiones verdaderamente significativas —las costosas de revertir— cubriendo estructura, datos, integración, despliegue y transversales. No documenta trivialidades.</td>
+              <td class="lv3-c">Hay varios ADR, pero mezclan decisiones estructurales con elecciones menores (librería de fechas, nombre de carpetas) y falta alguna decisión crítica.</td>
+              <td class="lv1-c">Uno o dos ADR, o se documentan solo preferencias de herramienta sin impacto arquitectónico.</td>
+            </tr>
+            <tr>
+              <td class="crit">Contexto y fuerzas</td><td class="w">20%</td>
+              <td class="lv5-c">El contexto expone el problema, las restricciones reales (presupuesto, plazos, equipo, regulación, legado) y los atributos de calidad en tensión que fuerzan la decisión.</td>
+              <td class="lv3-c">Describe la situación de forma general, pero no identifica las fuerzas en conflicto ni los atributos de calidad involucrados.</td>
+              <td class="lv1-c">El contexto es una descripción del producto, no del problema que obliga a decidir.</td>
+            </tr>
+            <tr>
+              <td class="crit">Alternativas y criterios de comparación</td><td class="w">25%</td>
+              <td class="lv5-c">Al menos dos alternativas viables por decisión, evaluadas contra criterios explícitos y comparables. Queda claro qué se sacrifica al descartar cada una.</td>
+              <td class="lv3-c">Menciona alternativas, pero las descarta con una frase y sin criterios comunes de comparación.</td>
+              <td class="lv1-c">No hay alternativas, o las alternativas son de paja: opciones evidentemente inviables puestas para justificar la elegida.</td>
+            </tr>
+            <tr>
+              <td class="crit">Decisión y justificación</td><td class="w">20%</td>
+              <td class="lv5-c">La decisión está enunciada de forma inequívoca y su justificación se deriva directamente del contexto y de los criterios declarados. Es trazable hasta la arquitectura entregada.</td>
+              <td class="lv3-c">La decisión es clara, pero la justificación apela a popularidad o preferencia del equipo más que a los criterios definidos.</td>
+              <td class="lv1-c">La decisión es ambigua, o no se encuentra reflejada en la arquitectura de referencia ni de implementación.</td>
+            </tr>
+            <tr>
+              <td class="crit">Consecuencias</td><td class="w">15%</td>
+              <td class="lv5-c">Registra consecuencias positivas y negativas, deuda técnica asumida, riesgos, nuevas restricciones y condiciones bajo las cuales la decisión debería revisarse.</td>
+              <td class="lv3-c">Lista beneficios y alguna desventaja genérica, sin riesgos ni deuda técnica.</td>
+              <td class="lv1-c">Solo consecuencias positivas: la sección es publicidad de la decisión tomada.</td>
+            </tr>
+            <tr>
+              <td class="crit">Formato, estado y trazabilidad</td><td class="w">5%</td>
+              <td class="lv5-c">Formato uniforme y numerado, con estado (propuesto, aceptado, reemplazado), fecha, responsables y enlaces entre ADR relacionados.</td>
+              <td class="lv3-c">Formato consistente pero sin estado ni relación entre decisiones.</td>
+              <td class="lv1-c">Documentos sueltos, sin numeración ni estructura común.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4>Evidencias mínimas</h4>
+      <ul class="ev">
+        <li>Índice de ADR con número, título y estado</li>
+        <li>Cada ADR con las cuatro secciones: contexto, decisión, alternativas, consecuencias</li>
+        <li>Matriz de comparación de alternativas para las decisiones mayores</li>
+        <li>Referencia cruzada entre cada ADR y los componentes afectados</li>
+      </ul>
+
+      <h4>Errores que bajan la nota</h4>
+      <ul class="err">
+        <li>Redactar el ADR después de construir, describiendo lo que ya se hizo.</li>
+        <li>Confundir decisión arquitectónica con requisito funcional.</li>
+        <li>Repetir el mismo contexto en todos los ADR sin diferenciar las fuerzas de cada uno.</li>
+      </ul>
+    </div>
+  </article>
+
+  <!-- ============ ENTREGABLE 3 ============ -->
+  <article class="deliv">
+    <div class="deliv-head">
+      <span class="badge">3</span>
+      <div>
+        <h3>Arquitectura de referencia</h3>
+        <p>Vista de alto nivel de la solución, con sus capas, componentes, tecnologías y patrones.</p>
+      </div>
+      <span class="pill">20%</span>
+    </div>
+    <div class="deliv-body">
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Criterio</th><th class="w">Peso</th><th class="lv5">5 — Excelente</th><th class="lv3">3 — Aceptable</th><th class="lv1">1 — Insuficiente</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="crit">Estructura en capas y separación de responsabilidades</td><td class="w">20%</td>
+              <td class="lv5-c">Capas bien delimitadas (canales, aplicación, servicios, datos) con reglas explícitas de dependencia y de qué no puede cruzar cada frontera.</td>
+              <td class="lv3-c">Las capas aparecen dibujadas, pero no se explicitan las reglas de dependencia ni qué se prohíbe.</td>
+              <td class="lv1-c">Cajas apiladas sin criterio de separación; hay componentes que pertenecen a varias capas a la vez.</td>
+            </tr>
+            <tr>
+              <td class="crit">Componentes y responsabilidades</td><td class="w">20%</td>
+              <td class="lv5-c">Cada componente tiene una responsabilidad única y enunciada, con sus interfaces expuestas y consumidas. Se entiende sin explicación verbal.</td>
+              <td class="lv3-c">Componentes nombrados con una descripción breve, pero con responsabilidades solapadas o interfaces no declaradas.</td>
+              <td class="lv1-c">Componentes con nombres genéricos («backend», «lógica») sin responsabilidad definida.</td>
+            </tr>
+            <tr>
+              <td class="crit">Patrones arquitectónicos</td><td class="w">20%</td>
+              <td class="lv5-c">Los patrones aplicados están nombrados, justificados por el problema que resuelven y consistentes con los ADR. Se reconocen sus contraindicaciones.</td>
+              <td class="lv3-c">Se nombran patrones correctamente, pero sin justificar por qué ese y no otro.</td>
+              <td class="lv1-c">Se invocan patrones de moda sin que la arquitectura los implemente realmente.</td>
+            </tr>
+            <tr>
+              <td class="crit">Atributos de calidad</td><td class="w">20%</td>
+              <td class="lv5-c">Define escenarios de calidad medibles (disponibilidad, latencia, escalabilidad, seguridad, mantenibilidad) y muestra qué decisión arquitectónica los soporta.</td>
+              <td class="lv3-c">Enumera atributos de calidad deseables sin métricas ni vínculo con los componentes que los garantizan.</td>
+              <td class="lv1-c">No se consideran atributos de calidad, o se mencionan como adjetivos («debe ser rápida y segura»).</td>
+            </tr>
+            <tr>
+              <td class="crit">Selección tecnológica</td><td class="w">10%</td>
+              <td class="lv5-c">Tecnologías coherentes entre sí, alineadas con los ADR y con las capacidades del equipo; se explicita qué es decisión y qué es supuesto.</td>
+              <td class="lv3-c">Tecnologías listadas y razonables, pero sin relación con las decisiones registradas.</td>
+              <td class="lv1-c">Listado de logos sin criterio ni compatibilidad entre las piezas.</td>
+            </tr>
+            <tr>
+              <td class="crit">Notación y comunicación</td><td class="w">10%</td>
+              <td class="lv5-c">Notación consistente con convención declarada (C4, UML u otra), con leyenda, niveles de abstracción claros y un diagrama que comunica por sí solo.</td>
+              <td class="lv3-c">Diagrama entendible, pero mezcla niveles de abstracción o carece de leyenda.</td>
+              <td class="lv1-c">Diagrama sobrecargado o ilegible, sin convención reconocible.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4>Evidencias mínimas</h4>
+      <ul class="ev">
+        <li>Diagrama de arquitectura de referencia con leyenda</li>
+        <li>Tabla de componentes y responsabilidades</li>
+        <li>Escenarios de atributos de calidad (estímulo, respuesta, medida)</li>
+        <li>Patrones aplicados y su justificación</li>
+      </ul>
+
+      <h4>Errores que bajan la nota</h4>
+      <ul class="err">
+        <li>Presentar la arquitectura de implementación como si fuera la de referencia.</li>
+        <li>Diagramas con quince tecnologías y ninguna responsabilidad declarada.</li>
+        <li>Atributos de calidad sin métrica: no se pueden verificar ni probar.</li>
+      </ul>
+    </div>
+  </article>
+
+  <!-- ============ ENTREGABLE 4 ============ -->
+  <article class="deliv">
+    <div class="deliv-head">
+      <span class="badge">4</span>
+      <div>
+        <h3>Arquitectura de implementación</h3>
+        <p>Detalle técnico de cómo se despliegan los componentes, integraciones, infraestructura y configuraciones.</p>
+      </div>
+      <span class="pill">20%</span>
+    </div>
+    <div class="deliv-body">
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Criterio</th><th class="w">Peso</th><th class="lv5">5 — Excelente</th><th class="lv3">3 — Aceptable</th><th class="lv1">1 — Insuficiente</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="crit">Topología de despliegue</td><td class="w">20%</td>
+              <td class="lv5-c">Nodos, zonas, redes, subredes y fronteras de confianza definidos; se entiende dónde corre cada componente y cómo se comunica con los demás.</td>
+              <td class="lv3-c">Muestra dónde se despliega cada componente, pero sin redes, zonas ni fronteras.</td>
+              <td class="lv1-c">Un diagrama de nube genérico sin correspondencia con los componentes de la arquitectura de referencia.</td>
+            </tr>
+            <tr>
+              <td class="crit">Integraciones y contratos</td><td class="w">20%</td>
+              <td class="lv5-c">Cada integración declara protocolo, formato, sincronía, contrato, versionado y manejo de errores y reintentos.</td>
+              <td class="lv3-c">Las integraciones están dibujadas con su protocolo, pero sin contratos ni política de errores.</td>
+              <td class="lv1-c">Flechas entre cajas sin indicar qué viaja, en qué formato ni con qué protocolo.</td>
+            </tr>
+            <tr>
+              <td class="crit">Infraestructura y configuración</td><td class="w">20%</td>
+              <td class="lv5-c">Contenedores, orquestación y configuración parametrizada por ambiente; hay infraestructura como código o manifiestos reproducibles.</td>
+              <td class="lv3-c">Define la infraestructura necesaria y algunos parámetros, pero la configuración es manual o está embebida.</td>
+              <td class="lv1-c">No se distingue entre ambientes ni se explica cómo se configura o despliega la solución.</td>
+            </tr>
+            <tr>
+              <td class="crit">Escalabilidad, disponibilidad y resiliencia</td><td class="w">15%</td>
+              <td class="lv5-c">Estrategia explícita de escalamiento, redundancia, tolerancia a fallos y recuperación, coherente con los escenarios de calidad definidos.</td>
+              <td class="lv3-c">Menciona balanceo o réplicas sin dimensionar ni explicar el comportamiento ante fallo.</td>
+              <td class="lv1-c">Arquitectura con puntos únicos de falla no identificados y sin ninguna consideración de disponibilidad.</td>
+            </tr>
+            <tr>
+              <td class="crit">Seguridad</td><td class="w">15%</td>
+              <td class="lv5-c">Autenticación, autorización, gestión de secretos, cifrado en tránsito y en reposo, y segmentación de red, con el modelo de amenazas que los motiva.</td>
+              <td class="lv3-c">Incluye autenticación y HTTPS, pero omite secretos, autorización fina o cifrado en reposo.</td>
+              <td class="lv1-c">La seguridad no aparece, o se reduce a una mención de «login».</td>
+            </tr>
+            <tr>
+              <td class="crit">Trazabilidad con la arquitectura de referencia</td><td class="w">10%</td>
+              <td class="lv5-c">Cada elemento de implementación se puede rastrear hasta un componente de la referencia y hasta un ADR.</td>
+              <td class="lv3-c">Hay correspondencia general, con algunos componentes que aparecen o desaparecen sin explicación.</td>
+              <td class="lv1-c">Las dos arquitecturas describen soluciones distintas.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4>Evidencias mínimas</h4>
+      <ul class="ev">
+        <li>Diagrama de despliegue por ambiente</li>
+        <li>Tabla de integraciones con protocolo y contrato</li>
+        <li>Manifiestos, scripts o definición de infraestructura</li>
+        <li>Matriz de trazabilidad referencia → implementación</li>
+      </ul>
+
+      <h4>Errores que bajan la nota</h4>
+      <ul class="err">
+        <li>Copiar un diagrama de referencia del proveedor de nube sin adaptarlo al proyecto.</li>
+        <li>Declarar alta disponibilidad con una sola instancia de base de datos.</li>
+        <li>Credenciales visibles en archivos de configuración entregados.</li>
+      </ul>
+    </div>
+  </article>
+
+  <!-- ============ ENTREGABLE 5 ============ -->
+  <article class="deliv">
+    <div class="deliv-head">
+      <span class="badge">5</span>
+      <div>
+        <h3>Diagrama de clases (de un caso)</h3>
+        <p>Representa las clases, atributos, métodos y relaciones para un caso específico del sistema.</p>
+      </div>
+      <span class="pill">5%</span>
+    </div>
+    <div class="deliv-body">
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Criterio</th><th class="w">Peso</th><th class="lv5">5 — Excelente</th><th class="lv3">3 — Aceptable</th><th class="lv1">1 — Insuficiente</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="crit">Selección y alcance del caso</td><td class="w">10%</td>
+              <td class="lv5-c">El caso elegido es representativo y con complejidad suficiente; se justifica por qué se escogió y qué deja fuera.</td>
+              <td class="lv3-c">El caso está identificado, pero es trivial (un CRUD simple) o no se acota explícitamente.</td>
+              <td class="lv1-c">No se indica a qué caso corresponde el diagrama.</td>
+            </tr>
+            <tr>
+              <td class="crit">Clases, atributos y métodos</td><td class="w">30%</td>
+              <td class="lv5-c">Clases con responsabilidad única, atributos y métodos con tipo, visibilidad y firma completa. Se distinguen entidades, servicios, repositorios y objetos de valor.</td>
+              <td class="lv3-c">Clases razonables con atributos y algunos métodos, pero sin tipos o sin visibilidad.</td>
+              <td class="lv1-c">Cajas con nombres sin atributos ni métodos, o clases que son en realidad tablas.</td>
+            </tr>
+            <tr>
+              <td class="crit">Relaciones y multiplicidad</td><td class="w">25%</td>
+              <td class="lv5-c">Usa correctamente asociación, agregación, composición, herencia y dependencia, con multiplicidades y navegabilidad justificadas.</td>
+              <td class="lv3-c">Relaciones presentes y en su mayoría correctas, con confusión entre agregación y composición o multiplicidades faltantes.</td>
+              <td class="lv1-c">Todas las relaciones son líneas iguales sin semántica ni multiplicidad.</td>
+            </tr>
+            <tr>
+              <td class="crit">Coherencia con dominio y arquitectura</td><td class="w">20%</td>
+              <td class="lv5-c">Las clases se derivan del modelo de dominio y respetan las capas y patrones de la arquitectura de referencia.</td>
+              <td class="lv3-c">Hay correspondencia parcial: algunos nombres o conceptos difieren del modelo de dominio.</td>
+              <td class="lv1-c">El diagrama contradice el modelo de dominio o ignora la estructura en capas.</td>
+            </tr>
+            <tr>
+              <td class="crit">Notación UML</td><td class="w">15%</td>
+              <td class="lv5-c">Notación UML impecable: compartimentos, estereotipos, símbolos y direcciones correctos; diagrama limpio y legible.</td>
+              <td class="lv3-c">Notación mayormente correcta con errores puntuales de símbolo o dirección.</td>
+              <td class="lv1-c">Notación inventada o sistemáticamente incorrecta.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <h4>Evidencias mínimas</h4>
+      <ul class="ev">
+        <li>Diagrama de clases UML del caso seleccionado</li>
+        <li>Identificación del caso de uso y su alcance</li>
+        <li>Correspondencia con las entidades del modelo de dominio</li>
+      </ul>
+    </div>
+  </article>
+
+  <!-- ============ ENTREGABLE 6 ============ -->
+  <article class="deliv">
+    <div class="deliv-head">
+      <span class="badge">6</span>
+      <div>
+        <h3>Diagrama de secuencia (de un caso)</h3>
+        <p>Muestra la interacción entre objetos y el flujo de mensajes en un escenario específico.</p>
+      </div>
+      <span class="pill">5%</span>
+    </div>
+    <div class="deliv-body">
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Criterio</th><th class="w">Peso</th><th class="lv5">5 — Excelente</th><th class="lv3">3 — Aceptable</th><th class="lv1">1 — Insuficiente</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="crit">Correspondencia con el caso de uso</td><td class="w">15%</td>
+              <td class="lv5-c">El escenario cubre por completo el caso seleccionado, con precondiciones y postcondiciones declaradas.</td>
+              <td class="lv3-c">Representa el caso, pero solo el flujo feliz y sin condiciones de entrada o salida.</td>
+              <td class="lv1-c">El escenario no corresponde a ningún caso de uso definido.</td>
+            </tr>
+            <tr>
+              <td class="crit">Participantes y líneas de vida</td><td class="w">15%</td>
+              <td class="lv5-c">Actores, componentes y objetos correctos, con líneas de vida y barras de activación bien usadas; los participantes coinciden con el diagrama de clases.</td>
+              <td class="lv3-c">Participantes adecuados, pero sin activaciones o con granularidad inconsistente.</td>
+              <td class="lv1-c">Participantes arbitrarios que no existen en la arquitectura ni en el diagrama de clases.</td>
+            </tr>
+            <tr>
+              <td class="crit">Flujo de mensajes</td><td class="w">25%</td>
+              <td class="lv5-c">Mensajes numerados, con nombre de operación, parámetros relevantes y retorno; distingue llamadas síncronas, asíncronas y respuestas.</td>
+              <td class="lv3-c">Orden correcto de mensajes con nombres genéricos y sin distinguir sincronía.</td>
+              <td class="lv1-c">Flechas sin nombre ni orden, o secuencia lógicamente imposible.</td>
+            </tr>
+            <tr>
+              <td class="crit">Flujos alternativos y de error</td><td class="w">20%</td>
+              <td class="lv5-c">Usa fragmentos combinados (alt, opt, loop, par) para representar excepciones, timeouts, reintentos y compensaciones.</td>
+              <td class="lv3-c">Menciona una alternativa o error, sin usar fragmentos o sin cubrir los casos críticos.</td>
+              <td class="lv1-c">Solo flujo feliz: el diagrama supone que nada falla.</td>
+            </tr>
+            <tr>
+              <td class="crit">Coherencia con clases y componentes</td><td class="w">15%</td>
+              <td class="lv5-c">Cada mensaje corresponde a un método existente en el diagrama de clases y respeta las fronteras entre capas.</td>
+              <td class="lv3-c">Correspondencia parcial; algunos mensajes no tienen método equivalente.</td>
+              <td class="lv1-c">La secuencia salta capas o invoca operaciones inexistentes.</td>
+            </tr>
+            <tr>
+              <td class="crit">Notación UML</td><td class="w">10%</td>
+              <td class="lv5-c">Notación correcta y legible, con leyenda cuando se requiere.</td>
+              <td class="lv3-c">Errores menores de notación que no impiden la lectura.</td>
+              <td class="lv1-c">Notación incorrecta o diagrama ilegible.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <h4>Evidencias mínimas</h4>
+      <ul class="ev">
+        <li>Diagrama de secuencia UML del caso</li>
+        <li>Precondiciones y postcondiciones del escenario</li>
+        <li>Al menos un flujo alternativo o de error representado</li>
+      </ul>
+    </div>
+  </article>
+
+  <!-- ============ ENTREGABLE 7 ============ -->
+  <article class="deliv">
+    <div class="deliv-head">
+      <span class="badge">7</span>
+      <div>
+        <h3>Prototipo de interfaz de usuario</h3>
+        <p>Diseño funcional de las pantallas principales que muestran la experiencia del usuario (UI/UX).</p>
+      </div>
+      <span class="pill">10%</span>
+    </div>
+    <div class="deliv-body">
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Criterio</th><th class="w">Peso</th><th class="lv5">5 — Excelente</th><th class="lv3">3 — Aceptable</th><th class="lv1">1 — Insuficiente</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="crit">Cobertura de pantallas y flujos</td><td class="w">25%</td>
+              <td class="lv5-c">Cubre todos los flujos principales de extremo a extremo, incluyendo estados vacíos, de carga y de error.</td>
+              <td class="lv3-c">Incluye las pantallas principales del flujo feliz, sin estados vacíos ni de error.</td>
+              <td class="lv1-c">Dos o tres pantallas sueltas que no forman un flujo completo.</td>
+            </tr>
+            <tr>
+              <td class="crit">Navegación y arquitectura de información</td><td class="w">20%</td>
+              <td class="lv5-c">Mapa de navegación explícito, jerarquía de contenidos clara y el usuario siempre sabe dónde está y cómo volver.</td>
+              <td class="lv3-c">La navegación se infiere de las pantallas, pero no hay mapa ni jerarquía declarada.</td>
+              <td class="lv1-c">Pantallas sin conexión entre sí; no se entiende cómo se llega a cada una.</td>
+            </tr>
+            <tr>
+              <td class="crit">Usabilidad y accesibilidad</td><td class="w">20%</td>
+              <td class="lv5-c">Aplica heurísticas reconocidas y criterios de accesibilidad (contraste, foco, tamaños táctiles, textos alternativos), y lo justifica.</td>
+              <td class="lv3-c">Interfaz usable e intuitiva, pero sin consideraciones explícitas de accesibilidad.</td>
+              <td class="lv1-c">Interfaz confusa, con acciones ambiguas o sin retroalimentación al usuario.</td>
+            </tr>
+            <tr>
+              <td class="crit">Consistencia visual</td><td class="w">15%</td>
+              <td class="lv5-c">Sistema de diseño coherente: tipografía, color, espaciado y componentes reutilizables definidos y aplicados sin excepción.</td>
+              <td class="lv3-c">Estilo razonablemente consistente con variaciones no intencionales entre pantallas.</td>
+              <td class="lv1-c">Cada pantalla parece de un producto distinto.</td>
+            </tr>
+            <tr>
+              <td class="crit">Fidelidad e interactividad</td><td class="w">10%</td>
+              <td class="lv5-c">Prototipo navegable con transiciones reales, que permite recorrer el flujo sin explicación externa.</td>
+              <td class="lv3-c">Maquetas estáticas de fidelidad media, con el flujo indicado mediante flechas.</td>
+              <td class="lv1-c">Bocetos a mano alzada sin estructura ni flujo definido.</td>
+            </tr>
+            <tr>
+              <td class="crit">Alineación con dominio y casos de uso</td><td class="w">10%</td>
+              <td class="lv5-c">Los datos, campos y acciones de la interfaz corresponden exactamente a las entidades y operaciones del dominio.</td>
+              <td class="lv3-c">Correspondencia general, con campos inventados o faltantes respecto al modelo.</td>
+              <td class="lv1-c">La interfaz muestra un producto distinto al modelado.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <h4>Evidencias mínimas</h4>
+      <ul class="ev">
+        <li>Prototipo navegable o enlace a la herramienta de diseño</li>
+        <li>Mapa de navegación entre pantallas</li>
+        <li>Pantallas de estado vacío, carga y error</li>
+        <li>Definición de componentes y estilos reutilizables</li>
+      </ul>
+    </div>
+  </article>
+
+  <!-- ============ ENTREGABLE 8 ============ -->
+  <article class="deliv">
+    <div class="deliv-head">
+      <span class="badge">8</span>
+      <div>
+        <h3>Plataforma de observabilidad</h3>
+        <p>Monitoreo, métricas, trazas y logs para garantizar la operación, rendimiento y resiliencia del sistema.</p>
+      </div>
+      <span class="pill">5%</span>
+    </div>
+    <div class="deliv-body">
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Criterio</th><th class="w">Peso</th><th class="lv5">5 — Excelente</th><th class="lv3">3 — Aceptable</th><th class="lv1">1 — Insuficiente</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="crit">Métricas</td><td class="w">25%</td>
+              <td class="lv5-c">Métricas técnicas y de negocio con indicadores y objetivos de nivel de servicio declarados; se justifica qué se mide y por qué.</td>
+              <td class="lv3-c">Métricas básicas de infraestructura (CPU, memoria) sin indicadores de servicio ni objetivos.</td>
+              <td class="lv1-c">Se nombra una herramienta de monitoreo sin definir ninguna métrica.</td>
+            </tr>
+            <tr>
+              <td class="crit">Trazas distribuidas</td><td class="w">25%</td>
+              <td class="lv5-c">Trazabilidad de extremo a extremo con propagación de contexto entre servicios; permite reconstruir una transacción completa.</td>
+              <td class="lv3-c">Hay trazas instrumentadas, pero se pierden al cruzar componentes o no se correlacionan.</td>
+              <td class="lv1-c">No hay trazas o se confunden con registros de log.</td>
+            </tr>
+            <tr>
+              <td class="crit">Logs</td><td class="w">20%</td>
+              <td class="lv5-c">Logs estructurados, con niveles, identificador de correlación y política de retención; sin datos sensibles expuestos.</td>
+              <td class="lv3-c">Logs presentes y centralizados, pero en texto libre y sin correlación.</td>
+              <td class="lv1-c">Impresiones por consola sin centralización ni estructura.</td>
+            </tr>
+            <tr>
+              <td class="crit">Tableros y alertas</td><td class="w">15%</td>
+              <td class="lv5-c">Tableros orientados a preguntas operativas concretas y alertas accionables con umbral, severidad y responsable.</td>
+              <td class="lv3-c">Existe un tablero general; las alertas son genéricas o no están definidas.</td>
+              <td class="lv1-c">No hay tableros ni alertas.</td>
+            </tr>
+            <tr>
+              <td class="crit">Evidencia de implementación</td><td class="w">15%</td>
+              <td class="lv5-c">Plataforma funcionando con capturas o demostración en vivo, y la instrumentación visible en el código.</td>
+              <td class="lv3-c">Configuración parcial con evidencia limitada de funcionamiento.</td>
+              <td class="lv1-c">Solo se describe la intención; no hay nada operando.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <h4>Evidencias mínimas</h4>
+      <ul class="ev">
+        <li>Capturas de tableros con datos reales del sistema</li>
+        <li>Catálogo de métricas e indicadores de nivel de servicio</li>
+        <li>Ejemplo de traza completa de una transacción</li>
+        <li>Definición de alertas con umbrales</li>
+      </ul>
+    </div>
+  </article>
+
+  <!-- ============ ENTREGABLE 9 ============ -->
+  <article class="deliv">
+    <div class="deliv-head">
+      <span class="badge">9</span>
+      <div>
+        <h3>Plan de pruebas unitarias</h3>
+        <p>Estrategia, casos y resultados de pruebas unitarias que validan el correcto funcionamiento del código sobre los casos de uso definidos.</p>
+      </div>
+      <span class="pill">5%</span>
+    </div>
+    <div class="deliv-body">
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Criterio</th><th class="w">Peso</th><th class="lv5">5 — Excelente</th><th class="lv3">3 — Aceptable</th><th class="lv1">1 — Insuficiente</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="crit">Estrategia y alcance</td><td class="w">20%</td>
+              <td class="lv5-c">Declara qué se prueba, qué no y por qué; cubre todos los casos de uso definidos y explicita el uso de dobles de prueba.</td>
+              <td class="lv3-c">Cubre los casos de uso principales sin declarar exclusiones ni criterios de alcance.</td>
+              <td class="lv1-c">Pruebas sueltas sin relación con los casos de uso del proyecto.</td>
+            </tr>
+            <tr>
+              <td class="crit">Diseño de casos de prueba</td><td class="w">30%</td>
+              <td class="lv5-c">Cada caso define escenario, datos de entrada, resultado esperado y criterio de aceptación; los datos son deliberados, no aleatorios.</td>
+              <td class="lv3-c">Los casos tienen escenario y resultado esperado, pero los datos de prueba son improvisados o incompletos.</td>
+              <td class="lv1-c">Casos sin resultado esperado: no se puede determinar si pasan o fallan.</td>
+            </tr>
+            <tr>
+              <td class="crit">Cobertura y casos borde</td><td class="w">20%</td>
+              <td class="lv5-c">Incluye valores límite, entradas inválidas, condiciones de error y reglas de negocio críticas; reporta cobertura con interpretación, no solo el número.</td>
+              <td class="lv3-c">Prueba caminos felices y algún caso negativo; la cobertura se reporta sin análisis.</td>
+              <td class="lv1-c">Solo caminos felices o pruebas que verifican el lenguaje, no la lógica.</td>
+            </tr>
+            <tr>
+              <td class="crit">Evidencia de ejecución</td><td class="w">20%</td>
+              <td class="lv5-c">Reporte de ejecución completo con resultados, fallos encontrados, corrección aplicada y nueva ejecución.</td>
+              <td class="lv3-c">Captura de una ejecución exitosa sin trazabilidad de los defectos encontrados.</td>
+              <td class="lv1-c">No hay evidencia de que las pruebas se hayan ejecutado.</td>
+            </tr>
+            <tr>
+              <td class="crit">Automatización</td><td class="w">10%</td>
+              <td class="lv5-c">Pruebas automatizadas e integradas en el flujo de construcción, ejecutándose en cada cambio.</td>
+              <td class="lv3-c">Pruebas automatizadas ejecutables localmente, sin integración continua.</td>
+              <td class="lv1-c">Pruebas manuales descritas en un documento.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <h4>Evidencias mínimas</h4>
+      <ul class="ev">
+        <li>Documento de estrategia de pruebas</li>
+        <li>Matriz caso de uso → casos de prueba</li>
+        <li>Código de las pruebas en el repositorio</li>
+        <li>Reporte de ejecución y de cobertura</li>
+      </ul>
+    </div>
+  </article>
+
+  <!-- ============ ENTREGABLE 10 ============ -->
+  <article class="deliv">
+    <div class="deliv-head">
+      <span class="badge">10</span>
+      <div>
+        <h3>Definición de volumetría para pruebas</h3>
+        <p>Estimación de volúmenes de datos, usuarios y transacciones para escenarios de prueba.</p>
+      </div>
+      <span class="pill zero">0% · bonificación</span>
+    </div>
+    <div class="deliv-body">
+      <div class="cap">Sin participación en la nota base. Se califica igual de 0 a 5 y aporta hasta 0,25 puntos adicionales sobre la nota final.</div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Criterio</th><th class="w">Peso</th><th class="lv5">5 — Excelente</th><th class="lv3">3 — Aceptable</th><th class="lv1">1 — Insuficiente</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="crit">Volúmenes de datos</td><td class="w">25%</td>
+              <td class="lv5-c">Estima volumen inicial, crecimiento en el tiempo y tamaño por entidad, con la fuente o supuesto que sustenta cada cifra.</td>
+              <td class="lv3-c">Da cifras globales de datos sin desagregar por entidad ni proyectar crecimiento.</td>
+              <td class="lv1-c">Números sin justificación ni unidad.</td>
+            </tr>
+            <tr>
+              <td class="crit">Usuarios y perfiles de carga</td><td class="w">25%</td>
+              <td class="lv5-c">Define usuarios totales, concurrentes, perfiles de comportamiento y distribución horaria o estacional.</td>
+              <td class="lv3-c">Define un número de usuarios concurrentes sin perfiles ni distribución.</td>
+              <td class="lv1-c">No distingue entre usuarios registrados y concurrentes.</td>
+            </tr>
+            <tr>
+              <td class="crit">Transacciones</td><td class="w">25%</td>
+              <td class="lv5-c">Transacciones por segundo promedio y pico por operación, con relación de lectura/escritura y tiempos de respuesta objetivo.</td>
+              <td class="lv3-c">Transacciones estimadas de forma agregada, sin picos ni objetivos de respuesta.</td>
+              <td class="lv1-c">No hay estimación de transaccionalidad.</td>
+            </tr>
+            <tr>
+              <td class="crit">Escenarios de prueba</td><td class="w">25%</td>
+              <td class="lv5-c">Define escenarios nominal, pico, estrés y resistencia, con criterios de aceptación y punto de quiebre esperado.</td>
+              <td class="lv3-c">Define un escenario de carga nominal sin condiciones límite.</td>
+              <td class="lv1-c">La volumetría no se traduce en ningún escenario ejecutable.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <h4>Evidencias mínimas</h4>
+      <ul class="ev">
+        <li>Tabla de volumetría por entidad y operación</li>
+        <li>Supuestos y fuentes de cada estimación</li>
+        <li>Escenarios de carga con criterios de aceptación</li>
+      </ul>
+    </div>
+  </article>
+
+  <!-- ============ ENTREGABLE 11 ============ -->
+  <article class="deliv">
+    <div class="deliv-head">
+      <span class="badge">11</span>
+      <div>
+        <h3>Módulo de inyección de fallos</h3>
+        <p>Mecanismo para simular fallos y validar la resiliencia del sistema en red, servicios, base de datos y recursos.</p>
+      </div>
+      <span class="pill zero">0% · bonificación</span>
+    </div>
+    <div class="deliv-body">
+      <div class="cap">Sin participación en la nota base. Se califica igual de 0 a 5 y aporta hasta 0,25 puntos adicionales sobre la nota final.</div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Criterio</th><th class="w">Peso</th><th class="lv5">5 — Excelente</th><th class="lv3">3 — Aceptable</th><th class="lv1">1 — Insuficiente</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="crit">Catálogo de fallos</td><td class="w">30%</td>
+              <td class="lv5-c">Cubre las cuatro dimensiones —red, servicios, base de datos y recursos— con fallos derivados de los riesgos reales de la arquitectura entregada.</td>
+              <td class="lv3-c">Cubre dos dimensiones con fallos genéricos no vinculados a los riesgos identificados.</td>
+              <td class="lv1-c">Un único tipo de fallo, o fallos que no pueden ocurrir en esta arquitectura.</td>
+            </tr>
+            <tr>
+              <td class="crit">Mecanismo de inyección</td><td class="w">25%</td>
+              <td class="lv5-c">Módulo funcional, parametrizable, reversible y con control de radio de impacto; se activa sin modificar el código de producción.</td>
+              <td class="lv3-c">Mecanismo funcional pero manual, sin parámetros ni control de alcance.</td>
+              <td class="lv1-c">Se describe el mecanismo sin implementarlo.</td>
+            </tr>
+            <tr>
+              <td class="crit">Hipótesis y experimentos</td><td class="w">25%</td>
+              <td class="lv5-c">Cada experimento parte de una hipótesis de estado estable, define la perturbación, la métrica de verificación y el criterio de aborto.</td>
+              <td class="lv3-c">Se ejecutan fallos y se observa qué pasa, sin hipótesis previa formulada.</td>
+              <td class="lv1-c">Se inyectan fallos sin definir qué se espera comprobar.</td>
+            </tr>
+            <tr>
+              <td class="crit">Resultados y aprendizajes</td><td class="w">20%</td>
+              <td class="lv5-c">Documenta el comportamiento observado con evidencia de la plataforma de observabilidad, las debilidades encontradas y las mejoras aplicadas.</td>
+              <td class="lv3-c">Reporta resultados descriptivos sin acciones derivadas.</td>
+              <td class="lv1-c">No hay resultados documentados.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <h4>Evidencias mínimas</h4>
+      <ul class="ev">
+        <li>Código o configuración del módulo de inyección</li>
+        <li>Catálogo de fallos por dimensión</li>
+        <li>Bitácora de experimentos con hipótesis y resultado</li>
+        <li>Evidencia observada en tableros o trazas</li>
+      </ul>
+    </div>
+  </article>
+</section>
+
+<!-- ============ CÁLCULO ============ -->
+<section id="calculo">
+  <h2>Cálculo de la nota</h2>
+  <p class="lead">La nota de cada entregable es el promedio ponderado de sus criterios. La nota final es la suma de las notas por entregable multiplicadas por su participación.</p>
+  <div class="formula">
+    <code>Nota del entregable</code> = Σ ( nivel del criterio × peso interno del criterio )<br>
+    <code>Nota final</code> = Σ ( nota del entregable × participación del entregable )<br>
+    <code>Bonificación</code> = (nota E10 ÷ 5 × 0,25) + (nota E11 ÷ 5 × 0,25)<br>
+    <code>Nota definitiva</code> = mínimo entre (nota final + bonificación) y 5,00
+  </div>
+  <p class="note">Reglas complementarias: un entregable en 0 no invalida el proyecto, pero los entregables 2, 3 y 4 concentran el 65% de la calificación y su ausencia hace imposible aprobar. Las incoherencias entre entregables se penalizan en el entregable posterior, que es el que debía mantener la trazabilidad. La entrega tardía sin autorización previa se califica sobre 3,0 como máximo.</p>
+
+  <div class="panel no-print" style="margin-top:26px">
+    <h2 style="font-size:19px">Calculadora</h2>
+    <p class="lead" style="margin-bottom:18px">Asigne el nivel obtenido en cada entregable para obtener la nota definitiva.</p>
+    <div class="calc">
+      <div class="tbl-wrap">
+        <table id="calc-table">
+          <thead><tr><th style="width:40px">#</th><th>Entregable</th><th style="width:80px">Peso</th><th style="width:110px">Nivel</th><th style="width:90px">Aporte</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="result">
+        <div class="lbl">Nota definitiva</div>
+        <div class="big" id="final">0,00</div>
+        <div class="row"><span>Nota base</span><b id="base">0,00</b></div>
+        <div class="row"><span>Bonificación</span><b id="bonus">0,00</b></div>
+        <div class="row"><span>Estado</span><b id="estado">—</b></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <span>Rúbrica del Proyecto Integrador — Universidad EAFIT</span>
+  <span>Escala 0 a 5 · 11 entregables · Versión 1.0</span>
+</footer>
+
+</div>
+
+<script>
+(function(){
+  const items = [
+    [1,"Modelo de dominio (completo)",5],
+    [2,"ADR — Architectural Decision Record",25],
+    [3,"Arquitectura de referencia",20],
+    [4,"Arquitectura de implementación",20],
+    [5,"Diagrama de clases (de un caso)",5],
+    [6,"Diagrama de secuencia (de un caso)",5],
+    [7,"Prototipo de interfaz de usuario",10],
+    [8,"Plataforma de observabilidad",5],
+    [9,"Plan de pruebas unitarias",5],
+    [10,"Definición de volumetría para pruebas",0],
+    [11,"Módulo de inyección de fallos",0]
+  ];
+  const labels = {5:"5 Excelente",4:"4 Sobresaliente",3:"3 Aceptable",2:"2 Deficiente",1:"1 Insuficiente",0:"0 Sin entregar"};
+  const tbody = document.querySelector("#calc-table tbody");
+
+  items.forEach(([n,name,peso])=>{
+    const tr = document.createElement("tr");
+    const opts = [5,4,3,2,1,0].map(v=>`<option value="${v}">${labels[v]}</option>`).join("");
+    tr.innerHTML = `<td>${n}</td><td>${name}</td><td>${peso===0?"Bonif.":peso+"%"}</td>`+
+      `<td><label class="sr" style="position:absolute;left:-9999px">Nivel entregable ${n}</label>`+
+      `<select data-peso="${peso}" aria-label="Nivel del entregable ${n}">${opts}</select></td>`+
+      `<td class="ap" style="text-align:right;font-weight:600">0,00</td>`;
+    tbody.appendChild(tr);
+  });
+
+  const fmt = v => v.toFixed(2).replace(".",",");
+
+  function recalc(){
+    let base = 0, bonus = 0;
+    tbody.querySelectorAll("tr").forEach(tr=>{
+      const sel = tr.querySelector("select");
+      const peso = parseFloat(sel.dataset.peso);
+      const nivel = parseFloat(sel.value);
+      let aporte;
+      if(peso === 0){ aporte = nivel/5*0.25; bonus += aporte; }
+      else { aporte = nivel*peso/100; base += aporte; }
+      tr.querySelector(".ap").textContent = (peso===0?"+":"")+fmt(aporte);
+    });
+    const finalN = Math.min(base + bonus, 5);
+    document.getElementById("base").textContent = fmt(base);
+    document.getElementById("bonus").textContent = "+"+fmt(bonus);
+    document.getElementById("final").textContent = fmt(finalN);
+    const e = document.getElementById("estado");
+    e.textContent = finalN >= 3 ? "Aprobado" : "No aprobado";
+    e.style.color = finalN >= 3 ? "#8FE0B0" : "#FFB4A8";
+  }
+
+  tbody.addEventListener("change", recalc);
+  recalc();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TicketRight — Mapa de navegación del prototipo</title>
+<link rel="stylesheet" href="estilos.css">
+<script>(function(){try{document.documentElement.setAttribute('data-tema', localStorage.getItem('tr-tema')||'dark');}catch(e){}})();</script>
+</head>
+<body>
+<div class="app-layout">
+  <aside class="barra-lateral" id="barra-lateral"></aside>
+  <main class="contenido-principal">
+    <div class="contenedor-ancho">
+
+      <div class="encabezado-pagina">
+        <span class="etiqueta">Entregable 7 · Prototipo de interfaz</span>
+        <h1>Mapa de navegación</h1>
+      </div>
+
+      <!-- Vista horizontal: diagrama con coordenadas fijas, se ajusta al ancho disponible -->
+      <div id="vista-horizontal" class="contenedor-mapa">
+        <div class="mapa-figma-escalable" id="mapa-escalable">
+          <div class="mapa-figma" style="width:1850px;height:650px">
+            <svg class="mapa-lineas" viewBox="0 0 1850 650" width="1850" height="650" aria-hidden="true">
+              <defs>
+                <marker id="fl-normal" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                  <path d="M0,0 L10,5 L0,10 z" fill="var(--color-text-muted)"></path>
+                </marker>
+                <marker id="fl-error" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                  <path d="M0,0 L10,5 L0,10 z" fill="var(--color-danger)"></path>
+                </marker>
+                <marker id="fl-alerta" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                  <path d="M0,0 L10,5 L0,10 z" fill="var(--color-warning)"></path>
+                </marker>
+              </defs>
+
+              <line x1="200" y1="88" x2="238" y2="88" stroke="var(--color-text-muted)" stroke-width="2" marker-end="url(#fl-normal)"></line>
+              <line x1="400" y1="88" x2="438" y2="88" stroke="var(--color-text-muted)" stroke-width="2" marker-end="url(#fl-normal)"></line>
+              <line x1="600" y1="88" x2="638" y2="88" stroke="var(--color-text-muted)" stroke-width="2" marker-end="url(#fl-normal)"></line>
+              <line x1="800" y1="88" x2="838" y2="88" stroke="var(--color-text-muted)" stroke-width="2" marker-end="url(#fl-normal)"></line>
+              <line x1="1000" y1="88" x2="1038" y2="88" stroke="var(--color-text-muted)" stroke-width="2" marker-end="url(#fl-normal)"></line>
+              <line x1="1200" y1="88" x2="1238" y2="88" stroke="var(--color-text-muted)" stroke-width="2" marker-end="url(#fl-normal)"></line>
+              <line x1="1400" y1="88" x2="1438" y2="88" stroke="var(--color-text-muted)" stroke-width="2" marker-end="url(#fl-normal)"></line>
+              <line x1="1600" y1="88" x2="1638" y2="88" stroke="var(--color-text-muted)" stroke-width="2" marker-end="url(#fl-normal)"></line>
+
+              <line x1="720" y1="116" x2="720" y2="216" stroke="var(--color-danger)" stroke-width="2" stroke-dasharray="4 4" marker-end="url(#fl-error)"></line>
+              <line x1="920" y1="116" x2="920" y2="216" stroke="var(--color-danger)" stroke-width="2" stroke-dasharray="4 4" marker-end="url(#fl-error)"></line>
+              <line x1="1120" y1="116" x2="1120" y2="216" stroke="var(--color-danger)" stroke-width="2" stroke-dasharray="4 4" marker-end="url(#fl-error)"></line>
+              <line x1="1520" y1="116" x2="1450" y2="216" stroke="var(--color-danger)" stroke-width="2" stroke-dasharray="4 4" marker-end="url(#fl-error)"></line>
+              <line x1="1520" y1="116" x2="1610" y2="216" stroke="var(--color-warning)" stroke-width="2" stroke-dasharray="4 4" marker-end="url(#fl-alerta)"></line>
+
+              <line x1="200" y1="448" x2="238" y2="448" stroke="var(--color-text-muted)" stroke-width="2" marker-end="url(#fl-normal)"></line>
+
+              <line x1="200" y1="568" x2="238" y2="568" stroke="var(--color-text-muted)" stroke-width="2" marker-end="url(#fl-normal)"></line>
+              <line x1="400" y1="568" x2="438" y2="568" stroke="var(--color-text-muted)" stroke-width="2" marker-end="url(#fl-normal)"></line>
+              <line x1="600" y1="568" x2="638" y2="568" stroke="var(--color-text-muted)" stroke-width="2" marker-end="url(#fl-normal)"></line>
+            </svg>
+
+            <div class="mapa-marco" style="left:10px;top:10px;width:1790px;height:290px"><span class="titulo-marco">Fan · flujo principal</span></div>
+            <div class="mapa-marco" style="left:10px;top:400px;width:420px;height:90px"><span class="titulo-marco">Promotor · solo lectura</span></div>
+            <div class="mapa-marco" style="left:10px;top:520px;width:820px;height:90px"><span class="titulo-marco">Operación interna</span></div>
+
+            <a href="fan-login.html" class="nodo-mapa" style="left:40px;top:60px" title="Previo al flujo de compra: aquí se autentica el fan">🔑 Iniciar sesión</a>
+            <a href="fan-eventos.html" class="nodo-mapa" style="left:240px;top:60px">1 · Inicio</a>
+            <a href="fan-evento.html" class="nodo-mapa" style="left:440px;top:60px">2 · Evento</a>
+            <a href="fan-fila.html" class="nodo-mapa" style="left:640px;top:60px">3 · Fila de venta</a>
+            <a href="fan-seleccion.html" class="nodo-mapa" style="left:840px;top:60px">4 · Selección de localidad</a>
+            <a href="fan-reserva.html" class="nodo-mapa" style="left:1040px;top:60px">5 · Tu reserva</a>
+            <a href="fan-datos.html" class="nodo-mapa" style="left:1240px;top:60px">6 · Confirmar titular</a>
+            <a href="fan-pago.html" class="nodo-mapa" style="left:1440px;top:60px">7 · Pago</a>
+            <a href="fan-boleta.html" class="nodo-mapa" style="left:1640px;top:60px">8 · Boleta emitida</a>
+
+            <a href="fan-fila.html?estado=vencido" class="nodo-mapa nodo-error" style="left:640px;top:220px">Error — turno vencido</a>
+            <a href="fan-seleccion.html?estado=agotado" class="nodo-mapa nodo-error" style="left:840px;top:220px">Error — aforo agotado</a>
+            <a href="fan-reserva.html?estado=vencida" class="nodo-mapa nodo-error" style="left:1040px;top:220px">Error — reserva vencida</a>
+            <a href="fan-pago.html?estado=rechazado" class="nodo-mapa nodo-error" style="left:1370px;top:220px">Error — pago rechazado</a>
+            <a href="fan-pago.html?estado=conciliacion" class="nodo-mapa nodo-alerta" style="left:1530px;top:220px">Alerta — en conciliación</a>
+
+            <a href="fan-identidad.html" class="nodo-mapa nodo-satelite" style="left:40px;top:335px" title="Accesible desde cualquier pantalla del fan, vía el chip de la barra superior">🔐 Tu identidad</a>
+            <a href="fan-fila.html?estado=rechazado" class="nodo-mapa nodo-error" style="left:640px;top:335px" title="Otro final posible del turno, además de admitido o vencido">Error — turno rechazado</a>
+
+            <a href="promotor-metricas.html" class="nodo-mapa" style="left:40px;top:420px">9 · Resumen de ventas</a>
+            <a href="promotor-ocupacion.html" class="nodo-mapa" style="left:240px;top:420px">10 · Ocupación y velocidad</a>
+
+            <a href="operacion-convenio.html" class="nodo-mapa" style="left:40px;top:540px">11 · Convenio comercial</a>
+            <a href="operacion-especificaciones.html" class="nodo-mapa" style="left:240px;top:540px">12 · Especificaciones del evento</a>
+            <a href="operacion-discrepancias.html" class="nodo-mapa" style="left:440px;top:540px">13 · Discrepancias abiertas</a>
+            <a href="operacion-detalle.html" class="nodo-mapa" style="left:640px;top:540px">14 · Detalle de discrepancia</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Vista vertical: fluida, sin ancho fijo — pensada para pantallas angostas -->
+      <div id="vista-vertical" class="mapa-vertical" style="display:none">
+        <div class="mapa-lane-v">
+          <span class="titulo-marco-v">Fan · flujo principal</span>
+          <div class="linea-tiempo-mapa">
+            <a href="fan-login.html" class="nodo-tiempo">🔑 Iniciar sesión</a>
+            <a href="fan-eventos.html" class="nodo-tiempo">1 · Inicio</a>
+            <a href="fan-evento.html" class="nodo-tiempo">2 · Evento</a>
+            <a href="fan-fila.html" class="nodo-tiempo">3 · Fila de venta</a>
+            <a href="fan-fila.html?estado=vencido" class="nodo-tiempo nodo-tiempo-error">Error — turno vencido</a>
+            <a href="fan-fila.html?estado=rechazado" class="nodo-tiempo nodo-tiempo-error">Error — turno rechazado</a>
+            <a href="fan-seleccion.html" class="nodo-tiempo">4 · Selección de localidad</a>
+            <a href="fan-seleccion.html?estado=agotado" class="nodo-tiempo nodo-tiempo-error">Error — aforo agotado</a>
+            <a href="fan-reserva.html" class="nodo-tiempo">5 · Tu reserva</a>
+            <a href="fan-reserva.html?estado=vencida" class="nodo-tiempo nodo-tiempo-error">Error — reserva vencida</a>
+            <a href="fan-datos.html" class="nodo-tiempo">6 · Confirmar titular</a>
+            <a href="fan-pago.html" class="nodo-tiempo">7 · Pago</a>
+            <a href="fan-pago.html?estado=rechazado" class="nodo-tiempo nodo-tiempo-error">Error — pago rechazado</a>
+            <a href="fan-pago.html?estado=conciliacion" class="nodo-tiempo nodo-tiempo-alerta">Alerta — en conciliación</a>
+            <a href="fan-boleta.html" class="nodo-tiempo">8 · Boleta emitida</a>
+            <a href="fan-identidad.html" class="nodo-tiempo nodo-tiempo-satelite">🔐 Tu identidad — accesible en cualquier pantalla del fan</a>
+          </div>
+        </div>
+
+        <div class="mapa-lane-v">
+          <span class="titulo-marco-v">Promotor · solo lectura</span>
+          <div class="linea-tiempo-mapa">
+            <a href="promotor-metricas.html" class="nodo-tiempo">9 · Resumen de ventas</a>
+            <a href="promotor-ocupacion.html" class="nodo-tiempo">10 · Ocupación y velocidad</a>
+          </div>
+        </div>
+
+        <div class="mapa-lane-v">
+          <span class="titulo-marco-v">Operación interna</span>
+          <div class="linea-tiempo-mapa">
+            <a href="operacion-convenio.html" class="nodo-tiempo">11 · Convenio comercial</a>
+            <a href="operacion-especificaciones.html" class="nodo-tiempo">12 · Especificaciones del evento</a>
+            <a href="operacion-discrepancias.html" class="nodo-tiempo">13 · Discrepancias abiertas</a>
+            <a href="operacion-detalle.html" class="nodo-tiempo">14 · Detalle de discrepancia</a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+<script src="nav.js"></script>
+<script>
+  var vistaHorizontal = document.getElementById('vista-horizontal');
+  var vistaVertical = document.getElementById('vista-vertical');
+  var UMBRAL_VERTICAL = 860;
+
+  function ajustar() {
+    var vertical = window.innerWidth < UMBRAL_VERTICAL;
+    vistaHorizontal.style.display = vertical ? 'none' : 'block';
+    vistaVertical.style.display = vertical ? 'block' : 'none';
+    if (!vertical) {
+      var escala = Math.min(vistaHorizontal.clientWidth / 1850, 1);
+      document.getElementById('mapa-escalable').style.transform = 'scale(' + escala + ')';
+      vistaHorizontal.style.height = (650 * escala) + 'px';
+    }
+  }
+
+  ajustar();
+  window.addEventListener('resize', ajustar);
+</script>
+</body>
+</html>

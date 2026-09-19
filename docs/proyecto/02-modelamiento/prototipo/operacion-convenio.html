@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TicketRight — Convenio comercial (operación interna)</title>
+<link rel="stylesheet" href="estilos.css">
+<script>(function(){try{document.documentElement.setAttribute('data-tema', localStorage.getItem('tr-tema')||'dark');}catch(e){}})();</script>
+</head>
+<body>
+<div class="app-layout">
+  <aside class="barra-lateral" id="barra-lateral"></aside>
+  <main class="contenido-principal">
+    <div class="contenedor">
+
+      <div class="encabezado-pagina">
+        <span class="etiqueta">Convenio comercial</span>
+        <h1>Cardio Fest Producciones S.A.S.</h1>
+      </div>
+
+      <div class="tarjeta formulario">
+        <h3 style="margin-bottom:16px">Promotor</h3>
+        <label for="nombre-legal">Nombre legal</label>
+        <input id="nombre-legal" type="text" value="Cardio Fest Producciones S.A.S.">
+        <label for="nit">NIT</label>
+        <input id="nit" type="text" value="900.123.456-7">
+        <label for="tipo-productor">Tipo de productor</label>
+        <select id="tipo-productor">
+          <option>Permanente — declara parafiscal con el IVA</option>
+          <option>Ocasional — declara 5 días hábiles después del evento</option>
+        </select>
+      </div>
+
+      <div class="tarjeta formulario">
+        <h3 style="margin-bottom:16px">Recinto</h3>
+        <label for="recinto-nombre">Nombre</label>
+        <input id="recinto-nombre" type="text" value="Parque O2">
+        <label for="recinto-ciudad">Ciudad</label>
+        <input id="recinto-ciudad" type="text" value="Bogotá">
+        <label for="recinto-aforo">Aforo máximo autorizado</label>
+        <input id="recinto-aforo" type="text" value="25.000">
+      </div>
+
+      <div class="tarjeta formulario">
+        <h3 style="margin-bottom:16px">Comercial</h3>
+        <label for="cargo">Cargo por servicio (sobre el valor nominal)</label>
+        <input id="cargo" type="text" value="12%">
+        <label for="comision">Comisión de reventa</label>
+        <input id="comision" type="text" value="8%, tope al valor nominal">
+        <label for="vigencia">Vigencia del convenio</label>
+        <input id="vigencia" type="text" value="2026-01-01 → 2026-12-31">
+        <div class="fila-datos"><span class="k">Estado del convenio</span><span class="v"><span class="insignia insignia-exito">firmado</span></span></div>
+      </div>
+
+      <a href="operacion-especificaciones.html" class="btn btn-primario btn-ancho">Guardar y continuar a especificaciones</a>
+
+    </div>
+  </main>
+</div>
+<script src="nav.js"></script>
+</body>
+</html>

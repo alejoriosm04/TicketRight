@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TicketRight — Resumen de ventas (promotor)</title>
+<link rel="stylesheet" href="estilos.css">
+<script>(function(){try{document.documentElement.setAttribute('data-tema', localStorage.getItem('tr-tema')||'dark');}catch(e){}})();</script>
+</head>
+<body>
+<div class="app-layout">
+  <aside class="barra-lateral" id="barra-lateral"></aside>
+  <main class="contenido-principal">
+    <div class="contenedor-ancho">
+
+      <div class="encabezado-pagina">
+        <span class="etiqueta">Cardio Fest — Estéreo Picnic · en venta <span class="insignia insignia-neutro" style="margin-left:8px">Solo lectura</span></span>
+        <h1>Resumen de ventas</h1>
+      </div>
+
+      <div class="kpis">
+        <div class="kpi">
+          <div class="etiqueta">Ingresos brutos</div>
+          <div class="valor">$1.586M</div>
+          <div class="delta pos">↑ 12% vs. hora anterior</div>
+        </div>
+        <div class="kpi">
+          <div class="etiqueta">Boletas vendidas</div>
+          <div class="valor">5.500</div>
+          <div class="delta">de 5.800 en aforo total (95%)</div>
+        </div>
+        <div class="kpi">
+          <div class="etiqueta">Conversión turno → boleta</div>
+          <div class="valor">60%</div>
+          <div class="delta neg">↓ 5 pts frente al 65% esperado</div>
+        </div>
+        <div class="kpi">
+          <div class="etiqueta">Discrepancias abiertas</div>
+          <div class="valor">1</div>
+          <div class="delta">gestiona operación interna</div>
+        </div>
+      </div>
+
+      <div class="rejilla-graficos">
+        <div class="tarjeta" id="tarjeta-embudo">
+          <div class="cabecera-grafico">
+            <h3>Embudo de la venta
+              <span class="info-ayuda" tabindex="0">ⓘ<span class="globo">Cada barra es cuánta gente llegó a esa etapa de la
+              compra en los últimos 60 minutos. La caída entre dos barras es dónde se pierden
+              ventas — ahí conviene revisar si un paso es demasiado fricción.</span></span>
+            </h3>
+            <button class="boton-expandir" onclick="alternarExpandir(this, 'tarjeta-embudo')" aria-label="Expandir gráfica">⤢</button>
+          </div>
+          <div id="grafico-embudo" class="embudo cuerpo-grafico" role="img" aria-label="Embudo de la venta en los últimos 60 minutos"></div>
+        </div>
+
+        <div class="tarjeta" id="tarjeta-tendencia">
+          <div class="cabecera-grafico">
+            <h3>Ritmo de venta
+              <span class="info-ayuda" tabindex="0">ⓘ<span class="globo">Boletas vendidas acumuladas, minuto a minuto, desde
+              que abrió la venta. Si la curva se aplana, la demanda se está enfriando; si sigue
+              subiendo fuerte, puede valer la pena abrir más aforo.</span></span>
+            </h3>
+            <button class="boton-expandir" onclick="alternarExpandir(this, 'tarjeta-tendencia')" aria-label="Expandir gráfica">⤢</button>
+          </div>
+          <div id="grafico-tendencia" class="cuerpo-grafico" role="img" aria-label="Ritmo de venta acumulado desde la apertura"></div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+<script src="nav.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js" onerror="window.__chartOk=false;window.__chartDecidido=true"></script>
+<script src="graficos.js"></script>
+<script>
+  dibujarEmbudo('grafico-embudo', [
+    { etiqueta: 'Turnos ingresados', valor: 9200 },
+    { etiqueta: 'Turnos admitidos', valor: 7450 },
+    { etiqueta: 'Reservas creadas', valor: 6100 },
+    { etiqueta: 'Pagos confirmados', valor: 5501 },
+    { etiqueta: 'Boletas emitidas', valor: 5500 }
+  ]);
+  dibujarTendencia('grafico-tendencia',
+    ['0', '10', '20', '30', '40', '50', '60'],
+    [0, 640, 2050, 3280, 4200, 4950, 5500]);
+
+  function alternarExpandir(boton, idTarjeta) {
+    var tarjeta = document.getElementById(idTarjeta);
+    tarjeta.classList.toggle('expandida');
+    boton.textContent = tarjeta.classList.contains('expandida') ? '⤡' : '⤢';
+    window.dispatchEvent(new Event('resize'));
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net">
+    <diagram id="ticketright-reference-clear" name="Arquitectura de referencia">
+        <mxGraphModel dx="1500" dy="1030" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1500" pageHeight="1030" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="title" value="&lt;b&gt;Arquitectura de referencia - TicketRight&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#64748b&quot; style=&quot;font-size:11px;&quot;&gt;Vista logica de alto nivel - responsabilidades, relaciones y decisiones arquitectonicas&lt;/font&gt;" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;fontSize=22;fontColor=#0f172a;" parent="1" vertex="1">
+                    <mxGeometry x="35" y="18" width="900" height="52" as="geometry"/>
+                </mxCell>
+                <mxCell id="channelBG" value="Canal de interaccion" style="swimlane;html=1;horizontal=1;startSize=28;rounded=1;dashed=1;dashPattern=6 4;fillColor=#ecfeff;strokeColor=#0891b2;fontColor=#0e7490;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="400" y="90" width="410" height="105" as="geometry"/>
+                </mxCell>
+                <mxCell id="edgeBG" value="Acceso y proteccion perimetral" style="swimlane;html=1;horizontal=1;startSize=28;rounded=1;dashed=1;dashPattern=6 4;fillColor=#fff1f2;strokeColor=#e11d48;fontColor=#be123c;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="350" y="215" width="510" height="125" as="geometry"/>
+                </mxCell>
+                <mxCell id="domainBG" value="Servicios principales de TicketRight" style="swimlane;html=1;horizontal=1;startSize=28;rounded=1;dashed=1;dashPattern=6 4;fillColor=#fffbeb;strokeColor=#d97706;fontColor=#b45309;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="35" y="365" width="1110" height="255" as="geometry"/>
+                </mxCell>
+                <mxCell id="asyncBG" value="Integracion y procesamiento asincrono" style="swimlane;html=1;horizontal=1;startSize=28;rounded=1;dashed=1;dashPattern=6 4;fillColor=#fff7ed;strokeColor=#ea580c;fontColor=#c2410c;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="35" y="675" width="1110" height="125" as="geometry"/>
+                </mxCell>
+                <mxCell id="dataBG" value="Persistencia y modelos de lectura" style="swimlane;html=1;horizontal=1;startSize=28;rounded=1;dashed=1;dashPattern=6 4;fillColor=#faf5ff;strokeColor=#8b5cf6;fontColor=#7c3aed;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="35" y="825" width="1110" height="135" as="geometry"/>
+                </mxCell>
+                <mxCell id="externalBG" value="Sistemas externos" style="swimlane;html=1;horizontal=1;startSize=30;rounded=1;dashed=1;dashPattern=6 4;fillColor=#f8fafc;strokeColor=#94a3b8;fontColor=#475569;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="1180" y="90" width="285" height="450" as="geometry"/>
+                </mxCell>
+                <mxCell id="crossBG" value="Capacidades transversales" style="swimlane;html=1;horizontal=1;startSize=30;rounded=1;dashed=1;dashPattern=6 4;fillColor=#f8fafc;strokeColor=#94a3b8;fontColor=#475569;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="1180" y="575" width="285" height="385" as="geometry"/>
+                </mxCell>
+                <mxCell id="portal" value="&lt;b&gt;Portal web&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#64748b&quot;&gt;Compra y boletas.&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#0891b2;strokeWidth=2;fontColor=#0f172a;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="430" y="128" width="350" height="52" as="geometry"/>
+                </mxCell>
+                <mxCell id="edge" value="&lt;b&gt;API Gateway y protección perimetral&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#64748b&quot;&gt;CDN, WAF, TLS, cuotas y enrutamiento.&lt;/font&gt;&lt;br&gt;&lt;font color=&quot;#be123c&quot; style=&quot;font-size:10px;&quot;&gt;Seguridad por capas - AD-004&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#e11d48;strokeWidth=2;fontColor=#0f172a;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="385" y="255" width="440" height="68" as="geometry"/>
+                </mxCell>
+                <mxCell id="identity" value="&lt;b&gt;Identidad y consentimiento&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#64748b&quot;&gt;OIDC/OAuth 2.0, permisos y consentimiento.&lt;/font&gt;&lt;br&gt;&lt;font color=&quot;#be123c&quot; style=&quot;font-size:10px;&quot;&gt;Datos personales aislados - AD-004&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff1f2;strokeColor=#e11d48;fontColor=#0f172a;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="70" y="415" width="235" height="88" as="geometry"/>
+                </mxCell>
+                <mxCell id="catalog" value="&lt;b&gt;Catálogo y reglas de eventos&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#64748b&quot;&gt;Reglas, aforo y configuración de eventos.&lt;/font&gt;&lt;br&gt;&lt;font color=&quot;#047857&quot; style=&quot;font-size:10px;&quot;&gt;Oferta de eventos&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ecfdf5;strokeColor=#059669;fontColor=#0f172a;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="335" y="415" width="235" height="88" as="geometry"/>
+                </mxCell>
+                <mxCell id="admission" value="&lt;b&gt;Admisión y fila virtual&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#64748b&quot;&gt;Space-Based: grilla + procesos paralelos.&lt;/font&gt;&lt;br&gt;&lt;font color=&quot;#047857&quot; style=&quot;font-size:10px;&quot;&gt;El turno no reserva - AD-005/006&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ecfdf5;strokeColor=#059669;fontColor=#0f172a;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="600" y="415" width="235" height="88" as="geometry"/>
+                </mxCell>
+                <mxCell id="inventory" value="&lt;b&gt;Inventario y reservas&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#64748b&quot;&gt;Base relacional/ACID: reserva y aforo definitivos.&lt;/font&gt;&lt;br&gt;&lt;font color=&quot;#047857&quot; style=&quot;font-size:10px;&quot;&gt;Única autoridad de aforo - AD-003&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ecfdf5;strokeColor=#059669;fontColor=#0f172a;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="865" y="415" width="235" height="88" as="geometry"/>
+                </mxCell>
+                <mxCell id="payment" value="&lt;b&gt;Compra y pagos&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#64748b&quot;&gt;SAGA, idempotencia y conciliación.&lt;/font&gt;&lt;br&gt;&lt;font color=&quot;#047857&quot; style=&quot;font-size:10px;&quot;&gt;Cobro, emisión o compensación - AD-002&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ecfdf5;strokeColor=#059669;fontColor=#0f172a;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="600" y="530" width="235" height="76" as="geometry"/>
+                </mxCell>
+                <mxCell id="tickets" value="&lt;b&gt;Boletas y titularidad&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#64748b&quot;&gt;Emisión y titularidad durable.&lt;/font&gt;&lt;br&gt;&lt;font color=&quot;#047857&quot; style=&quot;font-size:10px;&quot;&gt;Una titularidad vigente&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ecfdf5;strokeColor=#059669;fontColor=#0f172a;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="865" y="530" width="235" height="76" as="geometry"/>
+                </mxCell>
+                <mxCell id="eventBus" value="&lt;b&gt;Bus de eventos y colas&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#64748b&quot;&gt;Plataforma de eventos durables + outbox.&lt;/font&gt;&lt;br&gt;&lt;font color=&quot;#c2410c&quot; style=&quot;font-size:10px;&quot;&gt;Event-Driven - AD-002/005&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff7ed;strokeColor=#ea580c;fontColor=#0f172a;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="190" y="710" width="335" height="72" as="geometry"/>
+                </mxCell>
+                <mxCell id="workers" value="&lt;b&gt;Procesadores asíncronos&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#64748b&quot;&gt;Consumidores idempotentes, reintentos y proyecciones.&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff7ed;strokeColor=#ea580c;fontColor=#0f172a;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="655" y="710" width="335" height="72" as="geometry"/>
+                </mxCell>
+                <mxCell id="identityData" value="&lt;b&gt;Datos de identidad&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#64748b&quot;&gt;Almacén cifrado y aislado.&lt;/font&gt;" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;fillColor=#f5f3ff;strokeColor=#7c3aed;fontColor=#0f172a;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="90" y="870" width="265" height="72" as="geometry"/>
+                </mxCell>
+                <mxCell id="transactionalData" value="&lt;b&gt;Base de datos transaccional&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#64748b&quot;&gt;Base relacional/ACID: inventario, compra y boleta.&lt;/font&gt;&lt;br&gt;&lt;font color=&quot;#6d28d9&quot; style=&quot;font-size:10px;&quot;&gt;Única autoridad de escritura&lt;/font&gt;" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;fillColor=#f5f3ff;strokeColor=#7c3aed;fontColor=#0f172a;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="430" y="870" width="300" height="72" as="geometry"/>
+                </mxCell>
+                <mxCell id="readModels" value="&lt;b&gt;Grilla en memoria y modelos de lectura&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#64748b&quot;&gt;CQRS: fila, disponibilidad y búsqueda.&lt;/font&gt;&lt;br&gt;&lt;font color=&quot;#6d28d9&quot; style=&quot;font-size:10px;&quot;&gt;Reconstruibles - AD-003&lt;/font&gt;" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;fillColor=#f5f3ff;strokeColor=#7c3aed;fontColor=#0f172a;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="805" y="870" width="300" height="72" as="geometry"/>
+                </mxCell>
+                <mxCell id="identityProvider" value="&lt;b&gt;Proveedor de identidad&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#64748b&quot;&gt;OIDC/OAuth 2.0; no guarda contraseñas.&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#64748b;fontColor=#0f172a;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="1205" y="135" width="235" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="paymentGateway" value="&lt;b&gt;Pasarela de pago&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#64748b&quot;&gt;API de pago y webhook idempotente.&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#64748b;fontColor=#0f172a;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="1205" y="235" width="235" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="accessControl" value="&lt;b&gt;Control de acceso del recinto&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#64748b&quot;&gt;Consulta API del estado de boleta.&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#64748b;fontColor=#0f172a;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="1205" y="335" width="235" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="authorities" value="&lt;b&gt;Autoridades y registros&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#64748b&quot;&gt;Intercambio de reportes autorizados.&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#64748b;fontColor=#0f172a;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="1205" y="435" width="235" height="82" as="geometry"/>
+                </mxCell>
+                <mxCell id="runtime" value="&lt;b&gt;Ejecución y escalado&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#64748b&quot;&gt;Contenedores y escalado por trabajo pendiente.&lt;/font&gt;&lt;br&gt;&lt;font color=&quot;#475569&quot; style=&quot;font-size:10px;&quot;&gt;AD-006&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#64748b;fontColor=#0f172a;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="1205" y="620" width="235" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="security" value="&lt;b&gt;Seguridad de plataforma&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#64748b&quot;&gt;TLS, secretos, llaves y privilegio mínimo.&lt;/font&gt;&lt;br&gt;&lt;font color=&quot;#475569&quot; style=&quot;font-size:10px;&quot;&gt;Seguridad de plataforma - AD-004&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#64748b;fontColor=#0f172a;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="1205" y="710" width="235" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="observability" value="&lt;b&gt;Observabilidad&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#64748b&quot;&gt;Métricas, logs y trazas interoperables.&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#64748b;fontColor=#0f172a;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="1205" y="800" width="235" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="delivery" value="&lt;b&gt;Entrega automatizada&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#64748b&quot;&gt;CI/CD, artefactos e IaC.&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#64748b;fontColor=#0f172a;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="1205" y="890" width="235" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1" value="HTTPS: solicitud segura" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#0891b2;fontSize=10;labelBackgroundColor=#ffffff;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" parent="1" source="portal" target="edge" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e2" value="OIDC/OAuth 2.0: autentica" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#64748b;fontSize=10;labelBackgroundColor=#ffffff;exitX=0.5;exitY=0;entryX=0;entryY=0.5;" parent="1" source="identityProvider" target="identity" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="1323" y="80"/>
+                            <mxPoint x="20" y="80"/>
+                            <mxPoint x="20" y="459"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="e3" value="HTTPS + JWT/OIDC" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#e11d48;fontSize=10;labelBackgroundColor=#ffffff;exitX=0.45;exitY=1;entryX=0.5;entryY=0;" parent="1" source="edge" target="identity" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="583" y="350"/>
+                            <mxPoint x="188" y="350"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="e4" value="HTTPS/REST: eventos y reglas" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#059669;fontSize=10;labelBackgroundColor=#ffffff;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" parent="1" source="edge" target="catalog" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="605" y="360"/>
+                            <mxPoint x="453" y="360"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="e5" value="HTTPS/REST: solicita turno" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#059669;strokeWidth=2;fontSize=10;labelBackgroundColor=#ffffff;exitX=0.55;exitY=1;entryX=0.5;entryY=0;" parent="1" source="edge" target="admission" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="627" y="370"/>
+                            <mxPoint x="718" y="370"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="e6" value="REST: aplica reglas" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#059669;fontSize=10;labelBackgroundColor=#ffffff;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" parent="1" source="catalog" target="admission" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e7" value="Comando: intenta reservar" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#059669;strokeWidth=2;fontSize=10;labelBackgroundColor=#ffffff;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" parent="1" source="admission" target="inventory" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e8" value="Respuesta: reserva confirmada" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#059669;strokeWidth=2;fontSize=10;labelBackgroundColor=#ffffff;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" parent="1" source="inventory" target="payment" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="983" y="520"/>
+                            <mxPoint x="718" y="520"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="e9" value="Respuesta: pago confirmado" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#059669;strokeWidth=2;fontSize=10;labelBackgroundColor=#ffffff;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" parent="1" source="payment" target="tickets" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e10" value="HTTPS + webhook idempotente" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#64748b;fontSize=10;labelBackgroundColor=#ffffff;exitX=0.5;exitY=0;entryX=0;entryY=0.5;" parent="1" source="payment" target="paymentGateway" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="718" y="515"/>
+                            <mxPoint x="1135" y="515"/>
+                            <mxPoint x="1135" y="270"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="e11" value="API: consulta estado de boleta" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#64748b;fontSize=10;labelBackgroundColor=#ffffff;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" parent="1" source="tickets" target="accessControl" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="1155" y="568"/>
+                            <mxPoint x="1155" y="370"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="e12" value="API/reportes autorizados" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#64748b;fontSize=10;labelBackgroundColor=#ffffff;exitX=0.5;exitY=1;entryX=0;entryY=0.5;" parent="1" source="catalog" target="authorities" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="453" y="640"/>
+                            <mxPoint x="1170" y="640"/>
+                            <mxPoint x="1170" y="476"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="e13" value="Outbox publica evento durable" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;dashed=1;dashPattern=6 4;endArrow=block;endFill=1;strokeColor=#ea580c;fontSize=10;labelBackgroundColor=#ffffff;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" parent="1" source="payment" target="eventBus" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="718" y="660"/>
+                            <mxPoint x="358" y="660"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="e14" value="Contrato versionado entrega evento" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;dashed=1;dashPattern=6 4;endArrow=block;endFill=1;strokeColor=#ea580c;fontSize=10;labelBackgroundColor=#ffffff;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" parent="1" source="eventBus" target="workers" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e15" value="Persistencia cifrada" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#7c3aed;fontSize=10;labelBackgroundColor=#ffffff;exitX=0;exitY=0.5;entryX=0;entryY=0.5;" parent="1" source="identity" target="identityData" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="55" y="459"/>
+                            <mxPoint x="55" y="906"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="e16" value="SQL/ACID: estado definitivo" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#7c3aed;fontSize=10;labelBackgroundColor=#ffffff;exitX=1;exitY=0.5;entryX=0.5;entryY=1;" parent="1" source="inventory" target="transactionalData" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="1175" y="459"/>
+                            <mxPoint x="1175" y="975"/>
+                            <mxPoint x="580" y="975"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="e17" value="Proyección CQRS reconstruible" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;dashed=1;dashPattern=6 4;endArrow=block;endFill=1;strokeColor=#7c3aed;fontSize=10;labelBackgroundColor=#ffffff;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" parent="1" source="workers" target="readModels" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="legend" value="&lt;b&gt;Cómo leerlo:&lt;/b&gt; línea continua = interacción inmediata · línea discontinua = trabajo mediante eventos · cilindro = almacenamiento · AD-xxx = decisión relacionada" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;fontSize=10;fontColor=#64748b;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="985" width="1080" height="26" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>

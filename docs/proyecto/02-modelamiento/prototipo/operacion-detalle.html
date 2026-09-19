@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TicketRight — Detalle de discrepancia (operación interna)</title>
+<link rel="stylesheet" href="estilos.css">
+<script>(function(){try{document.documentElement.setAttribute('data-tema', localStorage.getItem('tr-tema')||'dark');}catch(e){}})();</script>
+</head>
+<body>
+<div class="app-layout">
+  <aside class="barra-lateral" id="barra-lateral"></aside>
+  <main class="contenido-principal">
+    <div class="contenedor-ancho">
+
+      <div class="migas"><a href="operacion-discrepancias.html">← Discrepancias abiertas</a></div>
+
+      <div class="encabezado-pagina">
+        <span class="etiqueta" id="etiqueta-tipo">cobroSinBoleta</span>
+        <h1 id="titulo-caso">Caso pg_7f21</h1>
+      </div>
+
+      <div style="display:grid;grid-template-columns:200px 1fr;gap:24px;align-items:start">
+        <div class="tarjeta" style="text-align:center">
+          <div class="etiqueta">Edad del caso</div>
+          <div class="anillo-envoltorio" style="margin:8px 0">
+            <svg viewBox="0 0 160 160" role="img" aria-labelledby="reloj-edad">
+              <circle class="anillo-fondo" cx="80" cy="80" r="70"></circle>
+              <circle class="anillo-progreso" id="anillo-edad" cx="80" cy="80" r="70"
+                stroke-dasharray="439.8" stroke-dashoffset="263.88" style="stroke:var(--color-warning)"></circle>
+              <text class="anillo-texto" x="80" y="82" id="reloj-edad">06:00</text>
+            </svg>
+          </div>
+          <p>de 15:00 de umbral</p>
+        </div>
+
+        <div class="tarjeta">
+          <div class="fila-datos"><span class="k">Pago</span><span class="v" id="dato-pago">pg_7f21 · $488.000 · confirmado</span></div>
+          <div class="fila-datos"><span class="k">Reserva de origen</span><span class="v" id="dato-reserva">rs_44de</span></div>
+          <div class="fila-datos"><span class="k">Medio de pago</span><span class="v" id="dato-medio">Tarjeta de crédito</span></div>
+          <div class="fila-datos"><span class="k">Referencia de la pasarela</span><span class="v" id="dato-referencia">ext_88213</span></div>
+          <div class="fila-datos"><span class="k">Clave de idempotencia</span><span class="v" id="dato-idempotencia">idp_7f21a</span></div>
+        </div>
+      </div>
+
+      <div class="tarjeta">
+        <h3 style="margin-bottom:8px">Qué ocurrió</h3>
+        <div class="linea-tiempo" id="linea-tiempo">
+          <div class="evento-tiempo"><div class="hora">10:32:04</div><div class="desc">Turno admitido (tn_9c21)</div></div>
+          <div class="evento-tiempo"><div class="hora">10:33:10</div><div class="desc">Reserva creada — 2 ítems, General (el inventario queda retenido aquí, no cuando se cobra)</div></div>
+          <div class="evento-tiempo"><div class="hora">10:36:40</div><div class="desc">Pago iniciado con tarjeta de crédito</div></div>
+          <div class="evento-tiempo alerta"><div class="hora">10:36:55</div><div class="desc">La pasarela no respondió en 15 s → reintento automático #1</div></div>
+          <div class="evento-tiempo"><div class="hora">10:37:20</div><div class="desc">La pasarela confirma el cobro (ext_88213)</div></div>
+          <div class="evento-tiempo peligro"><div class="hora">10:37:21</div><div class="desc">La emisión de boleta no completó antes del reintento → se abre esta discrepancia</div></div>
+        </div>
+        <div class="alerta alerta-exito" style="margin-bottom:0" id="alerta-inventario">
+          <strong>Los 2 cupos de General nunca estuvieron en riesgo</strong>
+          Siguen contabilizados como reservados desde las 10:33:10 — nadie más pudo comprarlos
+          mientras este caso estuvo abierto. Lo único pendiente es crear el registro de la
+          boleta; el inventario ya está resuelto.
+        </div>
+      </div>
+
+      <div class="tarjeta">
+        <h3 style="margin-bottom:16px">Qué compró</h3>
+        <div class="fila-datos"><span class="k">Localidad</span><span class="v" id="dato-localidad">General · 2 boletas</span></div>
+        <div class="fila-datos"><span class="k">Valor nominal</span><span class="v" id="dato-nominal">$400.000</span></div>
+        <div class="fila-datos"><span class="k">Cargo por servicio</span><span class="v" id="dato-cargo">$48.000</span></div>
+        <div class="fila-datos"><span class="k">Contribución parafiscal</span><span class="v" id="dato-parafiscal">$40.000</span></div>
+        <div class="fila-datos"><span class="k"><strong id="etiqueta-total">Total cobrado</strong></span><span class="v" id="dato-total">$488.000</span></div>
+      </div>
+
+      <div class="tarjeta">
+        <h3 style="margin-bottom:12px">Casos similares resueltos hoy</h3>
+        <div class="lista-precedentes">
+          <div class="precedente"><span>pg_5c11 · cobroSinBoleta</span><span class="accion">Reintentar emisión · 2 min</span></div>
+          <div class="precedente"><span>pg_9a02 · respuestaTardiaPasarela</span><span class="accion">Reintentar emisión · 3 min</span></div>
+          <div class="precedente"><span>pg_2b77 · cobroSinBoleta</span><span class="accion">Ejecutar devolución · 6 min (inventario ya agotado)</span></div>
+        </div>
+      </div>
+
+      <div class="tarjeta">
+        <h3 style="margin-bottom:16px">Resolución</h3>
+        <button class="btn btn-primario btn-ancho" style="margin-bottom:12px" id="btn-accion-principal">Reintentar emisión de boleta</button>
+        <button class="btn btn-secundario btn-ancho" style="margin-bottom:12px" id="btn-accion-secundaria">Ejecutar devolución</button>
+        <button class="btn btn-secundario btn-ancho">Marcar sin acción</button>
+      </div>
+
+    </div>
+  </main>
+</div>
+<script src="nav.js"></script>
+<script>
+  var CASOS = {
+    pg_7f21: {
+      tipo: 'cobroSinBoleta',
+      edadInicialSeg: 360,
+      pago: 'pg_7f21 · $488.000 · confirmado',
+      reserva: 'rs_44de',
+      medio: 'Tarjeta de crédito',
+      referencia: 'ext_88213',
+      idempotencia: 'idp_7f21a',
+      eventos: [
+        { hora: '10:32:04', desc: 'Turno admitido (tn_9c21)' },
+        { hora: '10:33:10', desc: 'Reserva creada — 2 ítems, General (el inventario queda retenido aquí, no cuando se cobra)' },
+        { hora: '10:36:40', desc: 'Pago iniciado con tarjeta de crédito' },
+        { hora: '10:36:55', desc: 'La pasarela no respondió en 15 s → reintento automático #1', clase: 'alerta' },
+        { hora: '10:37:20', desc: 'La pasarela confirma el cobro (ext_88213)' },
+        { hora: '10:37:21', desc: 'La emisión de boleta no completó antes del reintento → se abre esta discrepancia', clase: 'peligro' }
+      ],
+      alertaInventario: {
+        titulo: 'Los 2 cupos de General nunca estuvieron en riesgo',
+        texto: 'Siguen contabilizados como reservados desde las 10:33:10 — nadie más pudo comprarlos mientras este caso estuvo abierto. Lo único pendiente es crear el registro de la boleta; el inventario ya está resuelto.'
+      },
+      localidad: 'General · 2 boletas',
+      nominal: '$400.000',
+      cargo: '$48.000',
+      parafiscal: '$40.000',
+      total: '$488.000',
+      etiquetaTotal: 'Total cobrado',
+      accionPrincipal: 'Reintentar emisión de boleta',
+      accionSecundaria: 'Ejecutar devolución'
+    },
+    pg_3a90: {
+      tipo: 'respuestaTardiaPasarela',
+      edadInicialSeg: 720,
+      pago: 'pg_3a90 · $549.000 · pendientePasarela',
+      reserva: 'rs_88ab',
+      medio: 'PSE',
+      referencia: 'Pendiente — la pasarela no ha respondido',
+      idempotencia: 'idp_3a90c',
+      eventos: [
+        { hora: '11:02:10', desc: 'Turno admitido (tn_4b77)' },
+        { hora: '11:03:02', desc: 'Reserva creada — 1 ítem, Platino, silla P-14' },
+        { hora: '11:05:40', desc: 'Pago iniciado con PSE' },
+        { hora: '11:05:55', desc: 'La pasarela no respondió en 15 s → reintento automático #1', clase: 'alerta' },
+        { hora: '11:06:10', desc: 'La pasarela no respondió en 15 s → reintento automático #2', clase: 'alerta' },
+        { hora: '11:06:25', desc: 'Se agotaron los reintentos automáticos sin respuesta → se abre esta discrepancia', clase: 'peligro' }
+      ],
+      alertaInventario: {
+        titulo: 'La silla P-14 de Platino nunca estuvo en riesgo',
+        texto: 'Sigue reservada desde las 11:03:02, sin importar qué responda la pasarela — la reserva retiene el inventario antes de intentar el cobro.'
+      },
+      localidad: 'Platino · 1 boleta (silla P-14)',
+      nominal: '$450.000',
+      cargo: '$54.000',
+      parafiscal: '$45.000',
+      total: '$549.000',
+      etiquetaTotal: 'Total a cobrar',
+      accionPrincipal: 'Reintentar consulta a la pasarela',
+      accionSecundaria: 'Marcar como fallido y liberar reserva'
+    }
+  };
+
+  var idCaso = new URLSearchParams(window.location.search).get('caso');
+  var caso = CASOS[idCaso] || CASOS.pg_7f21;
+
+  document.getElementById('etiqueta-tipo').textContent = caso.tipo;
+  document.getElementById('titulo-caso').textContent = 'Caso ' + (CASOS[idCaso] ? idCaso : 'pg_7f21');
+  document.getElementById('dato-pago').textContent = caso.pago;
+  document.getElementById('dato-reserva').textContent = caso.reserva;
+  document.getElementById('dato-medio').textContent = caso.medio;
+  document.getElementById('dato-referencia').textContent = caso.referencia;
+  document.getElementById('dato-idempotencia').textContent = caso.idempotencia;
+
+  document.getElementById('linea-tiempo').innerHTML = caso.eventos.map(function (e) {
+    return '<div class="evento-tiempo' + (e.clase ? ' ' + e.clase : '') + '"><div class="hora">' + e.hora +
+      '</div><div class="desc">' + e.desc + '</div></div>';
+  }).join('');
+
+  var alertaInventario = document.getElementById('alerta-inventario');
+  alertaInventario.innerHTML = '<strong>' + caso.alertaInventario.titulo + '</strong>' + caso.alertaInventario.texto;
+
+  document.getElementById('dato-localidad').textContent = caso.localidad;
+  document.getElementById('dato-nominal').textContent = caso.nominal;
+  document.getElementById('dato-cargo').textContent = caso.cargo;
+  document.getElementById('dato-parafiscal').textContent = caso.parafiscal;
+  document.getElementById('dato-total').textContent = caso.total;
+  document.getElementById('etiqueta-total').textContent = caso.etiquetaTotal;
+
+  document.getElementById('btn-accion-principal').textContent = caso.accionPrincipal;
+  document.getElementById('btn-accion-secundaria').textContent = caso.accionSecundaria;
+
+  var segundos = caso.edadInicialSeg;
+  var umbral = 900;
+  var circunferencia = 439.8;
+  var anillo = document.getElementById('anillo-edad');
+  var reloj = document.getElementById('reloj-edad');
+  function pintar() {
+    var m = String(Math.floor(segundos / 60)).padStart(2, '0');
+    var s = String(segundos % 60).padStart(2, '0');
+    reloj.textContent = m + ':' + s;
+    var fraccion = Math.min(segundos / umbral, 1);
+    anillo.setAttribute('stroke-dashoffset', String(circunferencia * (1 - fraccion)));
+    anillo.style.stroke = fraccion < 0.33 ? 'var(--color-success)' : fraccion < 0.66 ? 'var(--color-warning)' : 'var(--color-danger)';
+  }
+  pintar();
+  setInterval(function () { segundos += 1; pintar(); }, 1000);
+</script>
+</body>
+</html>

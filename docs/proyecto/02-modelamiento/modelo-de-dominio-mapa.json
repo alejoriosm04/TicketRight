@@ -1,0 +1,424 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Modelo de dominio — mapa de contextos y raíces de agregado",
+    "quality_profile": "standard",
+    "viewBox": [
+      1420,
+      730
+    ],
+    "legend": {
+      "mode": "hidden"
+    },
+    "views": [
+      {
+        "id": "mapa",
+        "label": "Mapa completo",
+        "focus": [
+          "identidad",
+          "fan",
+          "filaVenta",
+          "promotor",
+          "recinto",
+          "evento",
+          "localidad",
+          "reserva",
+          "pago",
+          "discrepancia",
+          "liquidacion",
+          "boleta"
+        ],
+        "note": "Doce raíces de agregado en cuatro contextos; el detalle de atributos está en el diagrama completo."
+      },
+      {
+        "id": "venta",
+        "label": "Venta y recaudo",
+        "focus": [
+          "localidad",
+          "reserva",
+          "pago",
+          "discrepancia",
+          "liquidacion"
+        ],
+        "note": "El camino del dinero: reserva, pago, discrepancia y liquidación."
+      },
+      {
+        "id": "derecho",
+        "label": "Derecho de asistencia",
+        "focus": [
+          "pago",
+          "boleta"
+        ],
+        "note": "El pago confirmado emite la boleta; una sola titularidad vigente."
+      }
+    ]
+  },
+  "components": [
+    {
+      "id": "identidad",
+      "type": "backend",
+      "label": "Identidad",
+      "sublabel": "raíz · datos aislados",
+      "pos": [
+        70,
+        90
+      ],
+      "size": [
+        220,
+        112
+      ]
+    },
+    {
+      "id": "fan",
+      "type": "backend",
+      "label": "Fan",
+      "sublabel": "raíz · participa en la venta",
+      "pos": [
+        70,
+        230
+      ],
+      "size": [
+        220,
+        112
+      ]
+    },
+    {
+      "id": "filaVenta",
+      "type": "backend",
+      "label": "Fila de venta",
+      "sublabel": "raíz · ordena los intentos",
+      "pos": [
+        70,
+        370
+      ],
+      "size": [
+        220,
+        112
+      ]
+    },
+    {
+      "id": "promotor",
+      "type": "backend",
+      "label": "Promotor",
+      "sublabel": "raíz · organiza y comercializa",
+      "pos": [
+        390,
+        90
+      ],
+      "size": [
+        220,
+        112
+      ]
+    },
+    {
+      "id": "recinto",
+      "type": "backend",
+      "label": "Recinto",
+      "sublabel": "raíz · lugar autorizado",
+      "pos": [
+        390,
+        230
+      ],
+      "size": [
+        220,
+        112
+      ]
+    },
+    {
+      "id": "evento",
+      "type": "backend",
+      "label": "Evento",
+      "sublabel": "raíz · la oferta comercial",
+      "pos": [
+        390,
+        370
+      ],
+      "size": [
+        220,
+        112
+      ]
+    },
+    {
+      "id": "localidad",
+      "type": "backend",
+      "label": "Localidad",
+      "sublabel": "raíz · unidad de inventario",
+      "pos": [
+        390,
+        510
+      ],
+      "size": [
+        220,
+        112
+      ]
+    },
+    {
+      "id": "reserva",
+      "type": "backend",
+      "label": "Reserva",
+      "sublabel": "raíz · inventario comprometido",
+      "pos": [
+        710,
+        90
+      ],
+      "size": [
+        220,
+        112
+      ]
+    },
+    {
+      "id": "pago",
+      "type": "backend",
+      "label": "Pago",
+      "sublabel": "raíz · resultado trazable",
+      "pos": [
+        710,
+        230
+      ],
+      "size": [
+        220,
+        112
+      ]
+    },
+    {
+      "id": "discrepancia",
+      "type": "backend",
+      "label": "Discrepancia",
+      "sublabel": "raíz · caso de conciliación",
+      "pos": [
+        710,
+        370
+      ],
+      "size": [
+        220,
+        112
+      ]
+    },
+    {
+      "id": "liquidacion",
+      "type": "backend",
+      "label": "Liquidación",
+      "sublabel": "raíz · cierre del promotor",
+      "pos": [
+        710,
+        510
+      ],
+      "size": [
+        220,
+        112
+      ]
+    },
+    {
+      "id": "boleta",
+      "type": "backend",
+      "label": "Boleta",
+      "sublabel": "raíz · derecho verificable",
+      "pos": [
+        1030,
+        230
+      ],
+      "size": [
+        220,
+        112
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "Contexto: admisión e identidad",
+      "wraps": [
+        "identidad",
+        "fan",
+        "filaVenta"
+      ],
+      "pad": 26
+    },
+    {
+      "kind": "region",
+      "label": "Contexto: oferta de eventos",
+      "wraps": [
+        "promotor",
+        "recinto",
+        "evento",
+        "localidad"
+      ],
+      "pad": 26
+    },
+    {
+      "kind": "region",
+      "label": "Contexto: venta y recaudo",
+      "wraps": [
+        "reserva",
+        "pago",
+        "discrepancia",
+        "liquidacion"
+      ],
+      "pad": 26
+    },
+    {
+      "kind": "region",
+      "label": "Contexto: derecho de asistencia",
+      "wraps": [
+        "boleta"
+      ],
+      "pad": 26
+    }
+  ],
+  "connections": [
+    {
+      "from": "fan",
+      "to": "identidad",
+      "label": "se identifica 1:1",
+      "fromSide": "top",
+      "toSide": "bottom",
+      "labelAt": [
+        180,
+        216
+      ]
+    },
+    {
+      "from": "fan",
+      "to": "filaVenta",
+      "label": "recibe turno 1:0..*",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelAt": [
+        180,
+        356
+      ]
+    },
+    {
+      "from": "promotor",
+      "to": "evento",
+      "label": "organiza 1:0..*",
+      "fromSide": "right",
+      "toSide": "right",
+      "via": [
+        [
+          650,
+          146
+        ],
+        [
+          650,
+          426
+        ]
+      ]
+    },
+    {
+      "from": "recinto",
+      "to": "evento",
+      "label": "alberga 1:0..*",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelAt": [
+        500,
+        356
+      ]
+    },
+    {
+      "from": "evento",
+      "to": "localidad",
+      "label": "define 1:1..*",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelAt": [
+        500,
+        496
+      ]
+    },
+    {
+      "from": "evento",
+      "to": "filaVenta",
+      "label": "controla 1:1",
+      "fromSide": "left",
+      "toSide": "right"
+    },
+    {
+      "from": "fan",
+      "to": "reserva",
+      "label": "crea 1:0..*",
+      "fromSide": "right",
+      "toSide": "top",
+      "via": [
+        [
+          330,
+          286
+        ],
+        [
+          330,
+          60
+        ],
+        [
+          820,
+          60
+        ]
+      ]
+    },
+    {
+      "from": "reserva",
+      "to": "pago",
+      "label": "origina 1:0..1",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelAt": [
+        820,
+        216
+      ]
+    },
+    {
+      "from": "pago",
+      "to": "discrepancia",
+      "label": "abre 1:0..*",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelAt": [
+        820,
+        356
+      ]
+    },
+    {
+      "from": "pago",
+      "to": "liquidacion",
+      "label": "aporta 0..*:1",
+      "fromSide": "right",
+      "toSide": "right",
+      "via": [
+        [
+          970,
+          286
+        ],
+        [
+          970,
+          566
+        ]
+      ]
+    },
+    {
+      "from": "pago",
+      "to": "boleta",
+      "label": "emite 1:1..*",
+      "fromSide": "right",
+      "toSide": "left"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "amber",
+      "title": "Cómo leerlo",
+      "items": [
+        "Cada caja es una raíz de agregado del caso",
+        "El recuadro es el contexto acotado; atributos y objetos de valor están en el diagrama completo"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "Regla de frontera",
+      "items": [
+        "Una operación toca un solo agregado",
+        "Las referencias entre agregados son por identificador"
+      ]
+    }
+  ]
+}

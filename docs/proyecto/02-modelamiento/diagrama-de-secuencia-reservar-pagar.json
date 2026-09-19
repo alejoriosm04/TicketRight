@@ -1,0 +1,365 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Diagrama de secuencia — vista 1: reservar y cobrar (caso «Comprar en la ventana de alta demanda»)",
+    "quality_profile": "standard",
+    "column_fit": "spread",
+    "viewBox": [
+      1820,
+      930
+    ],
+    "legend": {
+      "mode": "hidden"
+    },
+    "views": [
+      {
+        "id": "reservar",
+        "label": "1 · Reservar",
+        "focus": [
+          "fan",
+          "orq",
+          "localidad",
+          "reserva",
+          "repos"
+        ],
+        "note": "La localidad decide aforo y silla; la reserva nace con venceEn (R1–R3)."
+      },
+      {
+        "id": "pagar",
+        "label": "2 · Pagar",
+        "focus": [
+          "fan",
+          "orq",
+          "reserva",
+          "pago",
+          "repos",
+          "eventos",
+          "pasarela"
+        ],
+        "note": "202 y cobro en segundo plano con reintentos e idempotencia (R4)."
+      }
+    ]
+  },
+  "participants": [
+    {
+      "id": "fan",
+      "type": "external",
+      "label": "Fan",
+      "sublabel": "navegador"
+    },
+    {
+      "id": "orq",
+      "type": "frontend",
+      "label": "OrquestadorDeCompra",
+      "sublabel": "SAGA · aplicación"
+    },
+    {
+      "id": "localidad",
+      "type": "backend",
+      "label": "Localidad",
+      "sublabel": "«aggregate root»"
+    },
+    {
+      "id": "reserva",
+      "type": "backend",
+      "label": "Reserva",
+      "sublabel": "«aggregate root»"
+    },
+    {
+      "id": "pago",
+      "type": "backend",
+      "label": "Pago",
+      "sublabel": "«aggregate root»"
+    },
+    {
+      "id": "repos",
+      "type": "database",
+      "label": "Repositorios",
+      "sublabel": "PostgreSQL · una transacción por paso"
+    },
+    {
+      "id": "pasarela",
+      "type": "cloud",
+      "label": "PasarelaDePago",
+      "sublabel": "adaptador tokenizado"
+    },
+    {
+      "id": "eventos",
+      "type": "messagebus",
+      "label": "PublicadorDeEventos",
+      "sublabel": "outbox → Kafka"
+    }
+  ],
+  "segments": [
+    {
+      "from": 273,
+      "to": 342,
+      "label": "alt  [aforo insuficiente o silla ya asignada]"
+    },
+    {
+      "from": 164,
+      "to": 457,
+      "label": "1 · Reservar — síncrono, una transacción"
+    },
+    {
+      "from": 529,
+      "to": 598,
+      "label": "alt  [ahora ≥ venceEn]"
+    },
+    {
+      "from": 721,
+      "to": 756,
+      "label": "loop  [hasta 3 intentos con backoff mientras haya timeout]"
+    },
+    {
+      "from": 765,
+      "to": 852,
+      "label": "alt  [la pasarela rechaza o agota los intentos]"
+    },
+    {
+      "from": 440,
+      "to": 874,
+      "label": "2 · Pagar — aceptar y cobrar en segundo plano"
+    }
+  ],
+  "messages": [
+    {
+      "from": "fan",
+      "to": "orq",
+      "y": 200,
+      "label": "1 reservar(cmd: CrearReserva)",
+      "variant": "emphasis",
+      "note": "1.1 ValidadorDeAdmision.validar(tokenAdmision, fanId) → turnoId"
+    },
+    {
+      "from": "orq",
+      "to": "repos",
+      "y": 228,
+      "label": "1.2 RepositorioDeLocalidades.obtenerParaActualizar(localidadId)  [FOR UPDATE]",
+      "variant": "default"
+    },
+    {
+      "from": "orq",
+      "to": "localidad",
+      "y": 256,
+      "label": "1.3 reservar(cantidad, sillaIds)  {R1, R2}",
+      "variant": "default"
+    },
+    {
+      "from": "localidad",
+      "to": "orq",
+      "y": 296,
+      "label": "✗ AforoExcedido",
+      "variant": "security"
+    },
+    {
+      "from": "orq",
+      "to": "fan",
+      "y": 324,
+      "label": "1.3 ← rechazo del ítem · rollback · sin cobro",
+      "variant": "return"
+    },
+    {
+      "from": "orq",
+      "to": "reserva",
+      "y": 364,
+      "label": "1.4 «create» Reserva.crear(fanId, turnoId, items)  venceEn = ahora + 10 min",
+      "variant": "default",
+      "note": "precio de cada ítem: CalculadoraDePrecio.desglosar(nominal, cantidad)  {R13}"
+    },
+    {
+      "from": "orq",
+      "to": "repos",
+      "y": 404,
+      "label": "1.5 guardar(localidad, reserva, compra.avanzar(reservada))  [COMMIT]",
+      "variant": "default"
+    },
+    {
+      "from": "orq",
+      "to": "fan",
+      "y": 432,
+      "label": "1.6 ← CompraEnCurso{compraId, venceEn}",
+      "variant": "return"
+    },
+    {
+      "from": "fan",
+      "to": "orq",
+      "y": 472,
+      "label": "2 iniciarPago(cmd: IniciarPago)",
+      "variant": "emphasis",
+      "note": "cmd.claveIdempotencia: un reintento devuelve el mismo Pago sin nuevo cobro"
+    },
+    {
+      "from": "orq",
+      "to": "reserva",
+      "y": 512,
+      "label": "2.1 marcarEnPago(ahora)  {R3}",
+      "variant": "default"
+    },
+    {
+      "from": "reserva",
+      "to": "orq",
+      "y": 552,
+      "label": "✗ ReservaVencida",
+      "variant": "security"
+    },
+    {
+      "from": "orq",
+      "to": "fan",
+      "y": 580,
+      "label": "2.1 ← 409 reserva vencida · el worker libera el inventario",
+      "variant": "return"
+    },
+    {
+      "from": "orq",
+      "to": "pago",
+      "y": 620,
+      "label": "2.2 «create» Pago.iniciar(origen{reserva}, monto, medio, clave)  {R4}",
+      "variant": "default"
+    },
+    {
+      "from": "orq",
+      "to": "repos",
+      "y": 648,
+      "label": "2.3 guardar(pago, compra.avanzar(pagoSolicitado)) + outbox(PagoSolicitado)  [COMMIT]",
+      "variant": "default"
+    },
+    {
+      "from": "orq",
+      "to": "fan",
+      "y": 676,
+      "label": "2.4 ← 202 «pago en proceso»",
+      "variant": "return"
+    },
+    {
+      "from": "eventos",
+      "to": "orq",
+      "y": 704,
+      "label": "2.5 PagoSolicitado → worker de cobro",
+      "variant": "dashed"
+    },
+    {
+      "from": "orq",
+      "to": "pasarela",
+      "y": 744,
+      "label": "2.6 cobrar(pago, tokenTarjeta)  timeout 15 s",
+      "variant": "default"
+    },
+    {
+      "from": "pasarela",
+      "to": "orq",
+      "y": 784,
+      "label": "2.6 ← rechazado(motivo)",
+      "variant": "return"
+    },
+    {
+      "from": "orq",
+      "to": "pago",
+      "y": 812,
+      "label": "2.7 registrarRechazo(motivo)",
+      "variant": "default"
+    },
+    {
+      "from": "orq",
+      "to": "fan",
+      "y": 840,
+      "label": "2.8 «medio rechazado · la reserva sigue vigente hasta venceEn»",
+      "variant": "dashed"
+    }
+  ],
+  "activations": [
+    {
+      "participant": "orq",
+      "from": 196,
+      "to": 435,
+      "type": "frontend"
+    },
+    {
+      "participant": "orq",
+      "from": 469,
+      "to": 681,
+      "type": "frontend"
+    },
+    {
+      "participant": "orq",
+      "from": 699,
+      "to": 851,
+      "type": "frontend"
+    },
+    {
+      "participant": "repos",
+      "from": 224,
+      "to": 238,
+      "type": "database"
+    },
+    {
+      "participant": "localidad",
+      "from": 252,
+      "to": 300,
+      "type": "backend"
+    },
+    {
+      "participant": "reserva",
+      "from": 360,
+      "to": 387,
+      "type": "backend"
+    },
+    {
+      "participant": "repos",
+      "from": 401,
+      "to": 414,
+      "type": "database"
+    },
+    {
+      "participant": "reserva",
+      "from": 509,
+      "to": 556,
+      "type": "backend"
+    },
+    {
+      "participant": "pago",
+      "from": 616,
+      "to": 630,
+      "type": "backend"
+    },
+    {
+      "participant": "repos",
+      "from": 644,
+      "to": 658,
+      "type": "database"
+    },
+    {
+      "participant": "pasarela",
+      "from": 741,
+      "to": 788,
+      "type": "cloud"
+    },
+    {
+      "participant": "pago",
+      "from": 808,
+      "to": 822,
+      "type": "backend"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "amber",
+      "title": "Precondiciones",
+      "items": [
+        "Fan autenticado con turno admitido (JWT de la Fila de venta)",
+        "Evento en venta, localidad con aforo, convenio vigente",
+        "Token de tarjeta obtenido por el navegador; TicketRight nunca ve el PAN"
+      ]
+    },
+    {
+      "dot": "orange",
+      "title": "Notación",
+      "items": [
+        "Continua: síncrono · punteada: asíncrono · ✗ roja: excepción · gris: retorno",
+        "Marcos alt / loop / par con guarda · bandas: pasos de la SAGA",
+        "Cada mensaje es un método del diagrama de clases"
+      ]
+    }
+  ]
+}

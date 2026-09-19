@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TicketRight — Confirmar titular</title>
+<link rel="stylesheet" href="estilos.css">
+<script>(function(){try{document.documentElement.setAttribute('data-tema', localStorage.getItem('tr-tema')||'dark');}catch(e){}})();</script>
+</head>
+<body>
+<div class="app-layout">
+  <aside class="barra-lateral" id="barra-lateral"></aside>
+  <main class="contenido-principal">
+    <div class="contenedor">
+
+      <div class="encabezado-pagina">
+        <span class="etiqueta">Ya iniciaste sesión con tu Identidad</span>
+        <h1>Confirma el titular de la boleta</h1>
+      </div>
+
+      <div class="tarjeta formulario">
+        <label for="nombre">Nombre completo</label>
+        <input id="nombre" type="text" value="Quinn Villa" disabled>
+
+        <label for="tipo-doc">Tipo de documento</label>
+        <input id="tipo-doc" type="text" value="Cédula de ciudadanía" disabled>
+
+        <label for="numero-doc">Número de documento</label>
+        <input id="numero-doc" type="text" value="1.020.456.789" disabled>
+
+        <label for="correo">Correo</label>
+        <input id="correo" type="email" value="quinn.villa@ejemplo.com" disabled>
+
+        <a href="fan-identidad.html" style="font-size:13px">¿Estos datos no son correctos? Revísalos en tu Identidad →</a>
+      </div>
+
+      <div class="alerta alerta-alerta">
+        <strong>Por qué lo confirmamos</strong>
+        Tu boleta queda asociada a esta identidad como titular — es lo que valida el control
+        de acceso en la puerta del evento.
+      </div>
+
+      <div class="tarjeta">
+        <h3 style="margin-bottom:4px">Autorización de tratamiento de datos personales</h3>
+        <p style="font-size:13px;color:var(--color-text-muted);margin-bottom:16px">
+          Marca para qué nos autorizas a usar tus datos. Puedes revisarlo o cambiarlo después
+          en <a href="fan-identidad.html">Tu identidad</a>.
+        </p>
+
+        <label class="casilla">
+          <input type="checkbox" checked disabled>
+          <span>Autorizo el tratamiento de mis datos personales para emitir mi boleta a mi
+          nombre y validar mi documento en el ingreso al evento.</span>
+        </label>
+
+        <label class="casilla">
+          <input type="checkbox" checked>
+          <span>Autorizo el tratamiento de mis datos personales para que TicketRight me
+          notifique por correo mi turno, mi compra y mi boleta.</span>
+        </label>
+
+        <label class="casilla">
+          <input type="checkbox">
+          <span>Autorizo el tratamiento de mis datos personales para que TicketRight los
+          comparta con Cardio Fest Producciones S.A.S., el promotor del evento, y pueda
+          contactarme sobre este evento.</span>
+        </label>
+      </div>
+
+      <a href="fan-pago.html" class="btn btn-primario btn-ancho">Continuar al pago</a>
+
+    </div>
+  </main>
+</div>
+<script src="nav.js"></script>
+</body>
+</html>

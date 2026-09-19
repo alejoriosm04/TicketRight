@@ -1,0 +1,89 @@
+---
+title: Arquitectura de referencia de TicketRight
+config:
+  theme: base
+  flowchart:
+    curve: stepAfter
+    nodeSpacing: 45
+    rankSpacing: 55
+---
+flowchart TB
+    ACTORES["Fan · promotor · equipo de operación"]
+
+    subgraph CANALES["1. Canal de interacción"]
+        PORTAL["Portal web<br/>consulta · fila · compra · boletas"]
+    end
+
+    subgraph ACCESO["2. Acceso, entrega y protección perimetral"]
+        ENTRY["API Gateway y protección perimetral<br/>CDN · WAF · TLS · cuotas · enrutamiento"]
+    end
+
+    subgraph APLICACION["3. Servicios de aplicación y dominio"]
+        CORE["Capacidades de negocio<br/>Identidad y consentimiento · Catálogo de eventos · Admisión Space-Based y fila virtual<br/>Inventario y reservas · Orquestación de compra y pagos · Boletas y titularidad"]
+    end
+
+    subgraph INTEGRACION["4. Integración y procesamiento asíncrono"]
+        direction LR
+        BUS[["Bus de eventos y colas durables<br/>contratos versionados · outbox · reintentos · DLQ"]]
+        WORKERS["Procesadores asíncronos<br/>consumidores idempotentes · conciliación · proyecciones"]
+    end
+
+    subgraph DATOS["5. Persistencia y modelos de lectura"]
+        direction LR
+        IDENTIDAD[("Almacén aislado de identidad<br/>datos personales · consentimiento")]
+        TRANSACCIONAL[("Base relacional transaccional<br/>inventario · compra · pago · boleta")]
+        LECTURA[("Grilla distribuida en memoria y modelos de lectura<br/>fila · disponibilidad · búsqueda")]
+    end
+
+    subgraph PLATAFORMA["6. Capacidades transversales de plataforma"]
+        direction LR
+        RUNTIME["Plataforma de ejecución<br/>contenedores · orquestación · escalado por trabajo pendiente"]
+        SECURITY["Seguridad de plataforma<br/>secretos · cifrado · mínimo privilegio"]
+        OBS["Plataforma de observabilidad<br/>métricas · logs · trazas · alertas"]
+        DELIVERY["Entrega automatizada<br/>CI/CD · artefactos · infraestructura como código"]
+    end
+
+    EXTERNOS["Sistemas externos<br/>identidad federada · pasarela de pago · control de acceso · autoridades"]
+
+    ACTORES -->|"HTTPS"| PORTAL
+    PORTAL -->|"HTTPS: solicitud segura"| ENTRY
+    ENTRY -->|"HTTPS/REST + JWT/OIDC"| CORE
+
+    CORE <-->|"OIDC · API de pago · estado de boleta"| EXTERNOS
+    CORE -->|"SQL / ACID"| TRANSACCIONAL
+    CORE -->|"datos personales cifrados"| IDENTIDAD
+    CORE -->|"CQRS y estado temporal"| LECTURA
+    CORE -.->|"evento durable mediante outbox"| BUS
+    BUS -.->|"contratos versionados"| WORKERS
+    WORKERS -->|"proyecciones reconstruibles"| LECTURA
+
+    CORE -.->|"telemetría interoperable"| OBS
+    RUNTIME -.->|"telemetría de infraestructura"| OBS
+    DELIVERY -->|"despliega artefactos versionados"| RUNTIME
+    ENTRY -.->|"aplica políticas transversales"| SECURITY
+    CORE -.->|"usa secretos y llaves"| SECURITY
+
+    classDef actor fill:#ffffff,stroke:#64748b,color:#0f172a,stroke-width:1.5px;
+    classDef channel fill:#eff6ff,stroke:#2563eb,color:#0f172a,stroke-width:2px;
+    classDef edge fill:#fff1f2,stroke:#dc2626,color:#0f172a,stroke-width:2px;
+    classDef service fill:#ecfdf5,stroke:#059669,color:#0f172a,stroke-width:2px;
+    classDef messaging fill:#fff7ed,stroke:#d97706,color:#0f172a,stroke-width:2px;
+    classDef data fill:#f5f3ff,stroke:#7c3aed,color:#0f172a,stroke-width:2px;
+    classDef platform fill:#f8fafc,stroke:#475569,color:#0f172a,stroke-width:1.5px,stroke-dasharray:5 5;
+    classDef external fill:#ffffff,stroke:#64748b,color:#0f172a,stroke-width:1.5px,stroke-dasharray:5 5;
+
+    class ACTORES actor;
+    class PORTAL channel;
+    class ENTRY edge;
+    class CORE,WORKERS service;
+    class BUS messaging;
+    class IDENTIDAD,TRANSACCIONAL,LECTURA data;
+    class RUNTIME,SECURITY,OBS,DELIVERY platform;
+    class EXTERNOS external;
+
+    style CANALES fill:#f8fafc,stroke:#2563eb,stroke-width:1.5px
+    style ACCESO fill:#f8fafc,stroke:#dc2626,stroke-width:1.5px
+    style APLICACION fill:#f8fafc,stroke:#059669,stroke-width:1.5px
+    style INTEGRACION fill:#f8fafc,stroke:#d97706,stroke-width:1.5px
+    style DATOS fill:#f8fafc,stroke:#7c3aed,stroke-width:1.5px
+    style PLATAFORMA fill:#ffffff,stroke:#475569,stroke-width:1px,stroke-dasharray:5 5

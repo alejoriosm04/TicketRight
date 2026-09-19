@@ -1,0 +1,753 @@
+{
+    "schema_version":  1,
+    "diagram_type":  "architecture",
+    "meta":  {
+    "title":  "Arquitectura de referencia de TicketRight",
+    "output":  "arquitectura-de-referencia.html",
+    "quality_profile":  "standard",
+    "legend":  {
+                    "mode":  "all",
+                    "entries":  {
+                                    "frontend":  {
+                                                     "label":  "Canal de interacci\u00f3n"
+                                                 },
+                                    "backend":  {
+                                                    "label":  "Servicio o procesador"
+                                                },
+                                    "database":  {
+                                                     "label":  "Persistencia o modelo de lectura"
+                                                 },
+                                    "cloud":  {
+                                                  "label":  "Capacidad de plataforma"
+                                              },
+                                    "security":  {
+                                                     "label":  "Control de seguridad"
+                                                 },
+                                    "messagebus":  {
+                                                       "label":  "Integraci\u00f3n as\u00edncrona"
+                                                   },
+                                    "external":  {
+                                                     "label":  "Sistema externo"
+                                                 }
+                                }
+                },
+    "viewBox":  [
+        1440,
+                    840
+                             ],
+                 "views":  [
+                               {
+                                   "id":  "compra",
+                                   "label":  "Compra de alta demanda",
+                                   "focus":  [
+                                                 "portal",
+                                                 "borde",
+                                                 "admision",
+                                                 "inventario",
+                                                 "compra",
+                                                 "pasarela",
+                                                 "eventos",
+                                                 "boletas"
+                                             ],
+                      "note":  "Ingreso regulado, reserva definitiva, cobro durable y emisi\u00f3n de la boleta."
+                               },
+                               {
+                                   "id":  "decisiones",
+                      "label":  "Decisiones arquitect\u00f3nicas",
+                                   "focus":  [
+                                                 "identidad",
+                                                 "admision",
+                                                 "inventario",
+                                                 "compra",
+                                                 "eventos",
+                                                 "vistas",
+                                                 "ejecucion"
+                                             ],
+                      "note":  "Seguridad por capas, Space-Based bajo demanda, autoridad transaccional, SAGA, CQRS y eventos."
+                               },
+                               {
+                                   "id":  "soporte",
+                      "label":  "Datos y operaci\u00f3n",
+                                   "focus":  [
+                                                 "datos-identidad",
+                                                 "datos-transaccionales",
+                                                 "vistas",
+                                                 "ejecucion",
+                                                 "seguridad",
+                                                 "observabilidad",
+                                                 "entrega"
+                                             ],
+                      "note":  "Fuentes de verdad y capacidades transversales que no contienen reglas del negocio."
+                               }
+                           ]
+             },
+    "components":  [
+                       {
+                           "id":  "portal",
+                           "type":  "frontend",
+                           "label":  "Portal web",
+                           "sublabel":  "Compra y boletas",
+                           "pos":  [
+                                       430,
+                                       50
+                                   ],
+                           "size":  [
+                                        350,
+                                        62
+                                    ]
+                       },
+                       {
+                           "id":  "borde",
+                           "type":  "security",
+                           "label":  "Punto de entrada y protecci\u00f3n",
+                           "label":  "API Gateway y protecci\u00f3n perimetral",
+                           "sublabel":  "CDN, WAF, TLS, cuotas y enrutamiento",
+                        "tag":  "Seguridad por capas - AD-004",
+                           "pos":  [
+                                       385,
+                                       160
+                                   ],
+                           "size":  [
+                                        440,
+                                        72
+                                    ]
+                       },
+                       {
+                           "id":  "identidad",
+                           "type":  "security",
+                           "label":  "Identidad y consentimiento",
+                           "sublabel":  "OIDC/OAuth 2.0, permisos y consentimiento",
+                        "tag":  "Datos personales aislados - AD-004",
+                           "pos":  [
+                                       70,
+                                       300
+                                   ],
+                           "size":  [
+                                        235,
+                                        88
+                                    ]
+                       },
+                       {
+                           "id":  "catalogo",
+                           "type":  "backend",
+                           "label":  "Cat\u00e1logo y reglas de eventos",
+                        "sublabel":  "Reglas, aforo y configuraci\u00f3n de eventos",
+                        "tag":  "Oferta de eventos",
+                           "pos":  [
+                                       335,
+                                       300
+                                   ],
+                           "size":  [
+                                        235,
+                                        88
+                                    ]
+                       },
+                       {
+                           "id":  "admision",
+                           "type":  "backend",
+                           "label":  "Admisi\u00f3n y fila virtual",
+                        "sublabel":  "Space-Based: grilla + procesos paralelos",
+                        "tag":  "El turno no reserva - AD-005/006",
+                           "pos":  [
+                                       600,
+                                       300
+                                   ],
+                           "size":  [
+                                        235,
+                                        88
+                                    ]
+                       },
+                       {
+                           "id":  "inventario",
+                           "type":  "backend",
+                           "label":  "Inventario y reservas",
+                        "sublabel":  "Base relacional/ACID: reserva y aforo definitivos",
+                        "tag":  "\u00danica autoridad de aforo - AD-003",
+                           "pos":  [
+                                       865,
+                                       300
+                                   ],
+                           "size":  [
+                                        235,
+                                        88
+                                    ]
+                       },
+                       {
+                           "id":  "compra",
+                           "type":  "backend",
+                           "label":  "Compra y pagos",
+                           "sublabel":  "SAGA, idempotencia y conciliaci\u00f3n",
+                        "tag":  "Cobro, emisi\u00f3n o compensaci\u00f3n - AD-002",
+                           "pos":  [
+                                       600,
+                                       415
+                                   ],
+                           "size":  [
+                                        235,
+                                        82
+                                    ]
+                       },
+                       {
+                           "id":  "boletas",
+                           "type":  "backend",
+                           "label":  "Boletas y titularidad",
+                        "sublabel":  "Emisi\u00f3n y titularidad durable",
+                        "tag":  "Una titularidad vigente",
+                           "pos":  [
+                                       865,
+                                       415
+                                   ],
+                           "size":  [
+                                        235,
+                                        82
+                                    ]
+                       },
+                       {
+                           "id":  "eventos",
+                           "type":  "messagebus",
+                           "label":  "Bus de eventos y colas",
+                        "sublabel":  "Plataforma de eventos durables + outbox",
+                           "tag":  "Event-Driven - AD-002/005",
+                           "pos":  [
+                                       190,
+                                       535
+                                   ],
+                           "size":  [
+                                        335,
+                                        76
+                                    ]
+                       },
+                       {
+                           "id":  "procesadores",
+                           "type":  "backend",
+                        "label":  "Procesadores as\u00edncronos",
+                        "sublabel":  "Consumidores idempotentes, reintentos y proyecciones",
+                           "pos":  [
+                                       655,
+                                       535
+                                   ],
+                           "size":  [
+                                        335,
+                                        76
+                                    ]
+                       },
+                       {
+                           "id":  "datos-identidad",
+                           "type":  "database",
+                           "label":  "Datos de identidad",
+                           "sublabel":  "Almac\u00e9n cifrado y aislado",
+                           "pos":  [
+                                       90,
+                                       675
+                                   ],
+                           "size":  [
+                                        265,
+                                        72
+                                    ]
+                       },
+                       {
+                           "id":  "datos-transaccionales",
+                           "type":  "database",
+                           "label":  "Base de datos transaccional",
+                        "sublabel":  "Base relacional/ACID: inventario, compra y boleta",
+                           "tag":  "\u00danica autoridad de escritura",
+                           "pos":  [
+                                       430,
+                                       675
+                                   ],
+                           "size":  [
+                                        300,
+                                        72
+                                    ]
+                       },
+                       {
+                           "id":  "vistas",
+                           "type":  "database",
+                        "label":  "Grilla en memoria y modelos de lectura",
+                           "sublabel":  "CQRS: fila, disponibilidad y b\u00fasqueda",
+                           "tag":  "Reconstruibles - AD-003",
+                           "pos":  [
+                                       805,
+                                       675
+                                   ],
+                           "size":  [
+                                        300,
+                                        72
+                                    ]
+                       },
+                       {
+                           "id":  "proveedor-identidad",
+                           "type":  "external",
+                           "label":  "Proveedor de identidad",
+                           "sublabel":  "OIDC/OAuth 2.0; no guarda contrase\u00f1as",
+                           "pos":  [
+                                       1165,
+                                       95
+                                   ],
+                           "size":  [
+                                        235,
+                                        70
+                                    ]
+                       },
+                       {
+                           "id":  "pasarela",
+                           "type":  "external",
+                           "label":  "Pasarela de pago",
+                           "sublabel":  "API de pago y webhook idempotente",
+                           "pos":  [
+                                       1165,
+                                       180
+                                   ],
+                           "size":  [
+                                        235,
+                                        70
+                                    ]
+                       },
+                       {
+                           "id":  "control-acceso",
+                           "type":  "external",
+                           "label":  "Control de acceso del recinto",
+                           "sublabel":  "Consulta API del estado de boleta",
+                           "pos":  [
+                                       1165,
+                                       265
+                                   ],
+                           "size":  [
+                                        235,
+                                        70
+                                    ]
+                       },
+                       {
+                           "id":  "autoridades",
+                           "type":  "external",
+                           "label":  "Autoridades y registros",
+                           "sublabel":  "Intercambio de reportes autorizados",
+                           "pos":  [
+                                       1165,
+                                       350
+                                   ],
+                           "size":  [
+                                        235,
+                                        76
+                                    ]
+                       },
+                       {
+                           "id":  "ejecucion",
+                           "type":  "cloud",
+                           "label":  "Ejecuci\u00f3n y escalado",
+                        "sublabel":  "Contenedores y escalado por trabajo pendiente",
+                        "tag":  "AD-006",
+                           "pos":  [
+                                       1165,
+                                       455
+                                   ],
+                           "size":  [
+                                        235,
+                                        66
+                                    ]
+                       },
+                       {
+                           "id":  "seguridad",
+                           "type":  "security",
+                           "label":  "Seguridad de plataforma",
+                           "sublabel":  "TLS, secretos, llaves y privilegio m\u00ednimo",
+                           "tag":  "AD-004",
+                           "pos":  [
+                                       1165,
+                                       535
+                                   ],
+                           "size":  [
+                                        235,
+                                        66
+                                    ]
+                       },
+                       {
+                           "id":  "observabilidad",
+                           "type":  "cloud",
+                           "label":  "Observabilidad",
+                        "sublabel":  "M\u00e9tricas, logs y trazas interoperables",
+                           "pos":  [
+                                       1165,
+                                       615
+                                   ],
+                           "size":  [
+                                        235,
+                                        66
+                                    ]
+                       },
+                       {
+                           "id":  "entrega",
+                           "type":  "cloud",
+                           "label":  "Entrega automatizada",
+                           "sublabel":  "CI/CD, artefactos e IaC",
+                           "pos":  [
+                                       1165,
+                                       695
+                                   ],
+                           "size":  [
+                                        235,
+                                        66
+                                    ]
+                       }
+                   ],
+    "boundaries":  [
+                       {
+                           "kind":  "region",
+                           "label":  "Canal de interacci\u00f3n",
+                           "wraps":  [
+                                         "portal"
+                                     ],
+                           "pad":  26
+                       },
+                       {
+                           "kind":  "security-group",
+                           "label":  "Acceso y protecci\u00f3n perimetral",
+                           "wraps":  [
+                                         "borde"
+                                     ],
+                           "pad":  26
+                       },
+                       {
+                           "kind":  "region",
+                           "label":  "Servicios principales de TicketRight",
+                           "wraps":  [
+                                         "identidad",
+                                         "catalogo",
+                                         "admision",
+                                         "inventario",
+                                         "compra",
+                                         "boletas"
+                                     ],
+                           "pad":  30
+                       },
+                       {
+                           "kind":  "region",
+                           "label":  "Integraci\u00f3n y procesamiento as\u00edncrono",
+                           "wraps":  [
+                                         "eventos",
+                                         "procesadores"
+                                     ],
+                           "pad":  28
+                       },
+                       {
+                           "kind":  "region",
+                           "label":  "Persistencia y modelos de lectura",
+                           "wraps":  [
+                                         "datos-identidad",
+                                         "datos-transaccionales",
+                                         "vistas"
+                                     ],
+                           "pad":  28
+                       },
+                       {
+                           "kind":  "region",
+                           "label":  "Sistemas externos",
+                           "wraps":  [
+                                         "proveedor-identidad",
+                                         "pasarela",
+                                         "control-acceso",
+                                         "autoridades"
+                                     ],
+                           "pad":  24
+                       },
+                       {
+                           "kind":  "region",
+                           "label":  "Capacidades transversales",
+                           "wraps":  [
+                                         "ejecucion",
+                                         "seguridad",
+                                         "observabilidad",
+                                         "entrega"
+                                     ],
+                           "pad":  24
+                       }
+                   ],
+    "connections":  [
+                        {
+                            "id":  "portal-borde",
+                            "from":  "portal",
+                            "to":  "borde",
+                            "label":  "HTTPS: solicitud segura",
+                            "variant":  "emphasis",
+                            "fromSide":  "bottom",
+                            "toSide":  "top",
+                            "labelAt":  [
+                                            605,
+                                            135
+                                        ]
+                        },
+                        {
+                            "id":  "proveedor-identidad-servicio",
+                            "from":  "proveedor-identidad",
+                            "to":  "identidad",
+                            "label":  "OIDC/OAuth 2.0: autentica",
+                            "fromSide":  "top",
+                            "toSide":  "left",
+                            "via":  [
+                                        [
+                                            1282.5,
+                                            25
+                                        ],
+                                        [
+                                            30,
+                                            25
+                                        ],
+                                        [
+                                            30,
+                                            344
+                                        ]
+                                    ],
+                            "labelAt":  [
+                                            180,
+                                            15
+                                        ]
+                        },
+                        {
+                            "id":  "borde-identidad",
+                            "from":  "borde",
+                            "to":  "identidad",
+                            "label":  "HTTPS + JWT/OIDC",
+                            "variant":  "security",
+                            "fromSide":  "bottom",
+                            "toSide":  "top"
+                        },
+                        {
+                            "id":  "borde-catalogo",
+                            "from":  "borde",
+                            "to":  "catalogo",
+                            "label":  "HTTPS/REST: eventos y reglas",
+                            "fromSide":  "bottom",
+                            "toSide":  "top"
+                        },
+                        {
+                            "id":  "borde-admision",
+                            "from":  "borde",
+                            "to":  "admision",
+                            "label":  "HTTPS/REST: solicita turno",
+                            "variant":  "emphasis",
+                            "fromSide":  "bottom",
+                            "toSide":  "top"
+                        },
+                        {
+                            "id":  "catalogo-admision",
+                            "from":  "catalogo",
+                            "to":  "admision",
+                            "label":  "REST: aplica reglas",
+                            "fromSide":  "right",
+                            "toSide":  "left",
+                            "labelAt":  [
+                                            585,
+                                            285
+                                        ]
+                        },
+                        {
+                            "id":  "admision-inventario",
+                            "from":  "admision",
+                            "to":  "inventario",
+                            "label":  "Comando: intenta reservar",
+                            "variant":  "emphasis",
+                            "fromSide":  "right",
+                            "toSide":  "left",
+                            "labelAt":  [
+                                            850,
+                                            285
+                                        ]
+                        },
+                        {
+                            "id":  "inventario-compra",
+                            "from":  "inventario",
+                            "to":  "compra",
+                            "label":  "Respuesta: reserva confirmada",
+                            "variant":  "emphasis",
+                            "fromSide":  "bottom",
+                            "toSide":  "top",
+                            "via":  [
+                                        [
+                                            982.5,
+                                            401
+                                        ],
+                                        [
+                                            717.5,
+                                            401
+                                        ]
+                                    ],
+                            "labelAt":  [
+                                            850,
+                                            401
+                                        ]
+                        },
+                        {
+                            "id":  "compra-boletas",
+                            "from":  "compra",
+                            "to":  "boletas",
+                            "label":  "Respuesta: pago confirmado",
+                            "variant":  "emphasis",
+                            "fromSide":  "right",
+                            "toSide":  "left",
+                            "labelAt":  [
+                                            850,
+                                            510
+                                        ]
+                        },
+                        {
+                            "id":  "compra-pasarela",
+                            "from":  "compra",
+                            "to":  "pasarela",
+                            "label":  "HTTPS + webhook idempotente",
+                            "fromSide":  "top",
+                            "toSide":  "left",
+                            "via":  [
+                                        [
+                                            717.5,
+                                            401
+                                        ],
+                                        [
+                                            1120,
+                                            401
+                                        ],
+                                        [
+                                            1120,
+                                            215
+                                        ]
+                                    ],
+                            "labelAt":  [
+                                            1000,
+                                            255
+                                        ]
+                        },
+                        {
+                            "id":  "boletas-control",
+                            "from":  "boletas",
+                            "to":  "control-acceso",
+                            "label":  "API: consulta estado de boleta",
+                            "fromSide":  "right",
+                            "toSide":  "left",
+                            "via":  [
+                                        [
+                                            1125,
+                                            456
+                                        ],
+                                        [
+                                            1125,
+                                            300
+                                        ]
+                                    ],
+                            "labelAt":  [
+                                            1040,
+                                            255
+                                        ]
+                        },
+                        {
+                            "id":  "catalogo-autoridades",
+                            "from":  "catalogo",
+                            "to":  "autoridades",
+                            "label":  "API/reportes autorizados",
+                            "fromSide":  "bottom",
+                            "toSide":  "left",
+                            "via":  [
+                                        [
+                                            452.5,
+                                            510
+                                        ],
+                                        [
+                                            1120,
+                                            510
+                                        ],
+                                        [
+                                            1120,
+                                            388
+                                        ]
+                                    ],
+                            "labelAt":  [
+                                            1080,
+                                            525
+                                        ]
+                        },
+                        {
+                            "id":  "compra-eventos",
+                            "from":  "compra",
+                            "to":  "eventos",
+                            "label":  "Outbox publica evento durable",
+                            "variant":  "dashed",
+                            "fromSide":  "bottom",
+                            "toSide":  "top"
+                        },
+                        {
+                            "id":  "eventos-procesadores",
+                            "from":  "eventos",
+                            "to":  "procesadores",
+                            "label":  "Contrato versionado entrega evento",
+                            "variant":  "dashed",
+                            "fromSide":  "right",
+                            "toSide":  "left",
+                            "labelAt":  [
+                                            590,
+                                            520
+                                        ]
+                        },
+                        {
+                            "id":  "identidad-datos",
+                            "from":  "identidad",
+                            "to":  "datos-identidad",
+                            "label":  "Persistencia cifrada",
+                            "fromSide":  "bottom",
+                            "toSide":  "top",
+                            "via":  [
+                                        [
+                                            187.5,
+                                            645
+                                        ],
+                                        [
+                                            222.5,
+                                            645
+                                        ]
+                                    ],
+                            "labelAt":  [
+                                            170,
+                                            630
+                                        ]
+                        },
+                        {
+                            "id":  "inventario-datos",
+                            "from":  "inventario",
+                            "to":  "datos-transaccionales",
+                            "label":  "SQL/ACID: estado definitivo",
+                            "fromSide":  "right",
+                            "toSide":  "top",
+                            "via":  [
+                                        [
+                                            1135,
+                                            344
+                                        ],
+                                        [
+                                            1135,
+                                            650
+                                        ],
+                                        [
+                                            580,
+                                            650
+                                        ]
+                                    ],
+                            "labelAt":  [
+                                            1080,
+                                            635
+                                        ]
+                        },
+                        {
+                            "id":  "procesadores-vistas",
+                            "from":  "procesadores",
+                            "to":  "vistas",
+                            "label":  "Proyección CQRS reconstruible",
+                            "variant":  "dashed",
+                            "fromSide":  "bottom",
+                            "toSide":  "top",
+                            "labelAt":  [
+                                            920,
+                                            640
+                                        ]
+                        }
+                    ],
+    "cards":  [
+
+              ]
+}

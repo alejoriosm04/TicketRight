@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TicketRight — Guía de estilo</title>
+<link rel="stylesheet" href="estilos.css">
+<script>(function(){try{document.documentElement.setAttribute('data-tema', localStorage.getItem('tr-tema')||'dark');}catch(e){}})();</script>
+</head>
+<body>
+<div class="app-layout">
+  <aside class="barra-lateral" id="barra-lateral"></aside>
+  <main class="contenido-principal">
+    <div class="contenedor-ancho">
+
+      <div class="encabezado-pagina">
+        <span class="etiqueta">Referencia para diseño</span>
+        <h1>Guía de estilo</h1>
+      </div>
+
+      <!-- Tipografía -->
+      <section class="guia-seccion">
+        <h2>Tipografía</h2>
+
+        <div class="tarjeta">
+          <div class="muestra-tipo">
+            <h1 id="m-h1" style="margin-bottom:4px">Título principal</h1>
+            <div class="meta" id="meta-h1"></div>
+          </div>
+          <div class="muestra-tipo">
+            <h2 id="m-h2" style="margin-bottom:4px">Título de sección</h2>
+            <div class="meta" id="meta-h2"></div>
+          </div>
+          <div class="muestra-tipo">
+            <h3 id="m-h3" style="margin-bottom:4px">Título de tarjeta</h3>
+            <div class="meta" id="meta-h3"></div>
+          </div>
+          <div class="muestra-tipo">
+            <p id="m-cuerpo" style="color:var(--color-text);margin-bottom:4px">Cuerpo estándar — para valores y contenido principal.</p>
+            <div class="meta" id="meta-cuerpo"></div>
+          </div>
+          <div class="muestra-tipo">
+            <p id="m-muted" style="margin-bottom:4px">Texto secundario — es el color por defecto de &lt;p&gt;, para descripciones y metadatos.</p>
+            <div class="meta" id="meta-muted"></div>
+          </div>
+          <div class="muestra-tipo" style="margin-bottom:0">
+            <code id="m-code">claveIdempotencia: idp_7f21a</code>
+            <div class="meta" id="meta-code"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Paleta de color -->
+      <section class="guia-seccion">
+        <h2>Paleta de color</h2>
+        <div id="rejilla-color-raiz"></div>
+      </section>
+
+      <!-- Espaciado y radios -->
+      <section class="guia-seccion">
+        <h2>Espaciado</h2>
+        <div class="tarjeta escala-espaciado" id="escala-espaciado"></div>
+      </section>
+
+      <section class="guia-seccion">
+        <h2>Radios y sombra</h2>
+        <div class="fila-componentes">
+          <div style="text-align:center">
+            <div style="width:100px;height:70px;background:var(--color-surface);border-radius:var(--radius-card);box-shadow:var(--sombra-tarjeta);margin-bottom:8px"></div>
+            <div class="meta" style="font-family:monospace;font-size:11px">--radius-card (12px)</div>
+          </div>
+          <div style="text-align:center">
+            <div style="width:100px;height:36px;background:var(--color-surface);border-radius:var(--radius-btn);box-shadow:var(--sombra-tarjeta);margin-bottom:8px"></div>
+            <div class="meta" style="font-family:monospace;font-size:11px">--radius-btn (botones, 8px)</div>
+          </div>
+          <div style="text-align:center">
+            <div style="width:100px;height:36px;background:var(--color-surface);border-radius:var(--radius-chip);box-shadow:var(--sombra-tarjeta);margin-bottom:8px"></div>
+            <div class="meta" style="font-family:monospace;font-size:11px">--radius-chip (insignias, 6px)</div>
+          </div>
+          <div style="text-align:center">
+            <div style="width:100px;height:36px;background:var(--color-surface);border-radius:var(--radius-pill);box-shadow:var(--sombra-tarjeta);margin-bottom:8px"></div>
+            <div class="meta" style="font-family:monospace;font-size:11px">--radius-pill (barras, avatar)</div>
+          </div>
+          <div style="text-align:center">
+            <div style="width:100px;height:70px;background:var(--color-surface);border-radius:var(--radius-card);box-shadow:var(--sombra-tarjeta);margin-bottom:8px;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--color-text-muted)">sombra</div>
+            <div class="meta" style="font-family:monospace;font-size:11px">--sombra-tarjeta</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Componentes -->
+      <section class="guia-seccion">
+        <h2>Botones</h2>
+        <div class="fila-componentes">
+          <button class="btn btn-primario">Botón principal</button>
+          <button class="btn btn-secundario">Botón secundario</button>
+          <button class="btn btn-primario" disabled>Deshabilitado</button>
+        </div>
+      </section>
+
+      <section class="guia-seccion">
+        <h2>Insignias</h2>
+        <div class="fila-componentes">
+          <span class="insignia insignia-exito">admitido</span>
+          <span class="insignia insignia-alerta">6 / 15 min</span>
+          <span class="insignia insignia-peligro">Agotada</span>
+          <span class="insignia insignia-neutro">enEspera</span>
+        </div>
+      </section>
+
+      <section class="guia-seccion">
+        <h2>Alertas</h2>
+        <div class="fila-componentes vertical">
+          <div class="alerta alerta-exito"><strong>Éxito</strong> El pago se confirmó correctamente.</div>
+          <div class="alerta alerta-alerta"><strong>Alerta</strong> Requiere atención, pero no es un error.</div>
+          <div class="alerta alerta-peligro"><strong>Error</strong> Algo no se pudo completar.</div>
+        </div>
+      </section>
+
+      <section class="guia-seccion">
+        <h2>Formulario</h2>
+        <div class="tarjeta formulario" style="max-width:360px">
+          <label for="g-input">Etiqueta de campo</label>
+          <input id="g-input" type="text" placeholder="Texto de ejemplo">
+          <label for="g-select">Campo de selección</label>
+          <select id="g-select"><option>Opción A</option><option>Opción B</option></select>
+        </div>
+      </section>
+
+      <section class="guia-seccion">
+        <h2>Tarjetas de datos</h2>
+        <div class="fila-componentes" style="align-items:stretch">
+          <div class="kpi" style="width:200px">
+            <div class="etiqueta">Boletas vendidas</div>
+            <div class="valor">5.500</div>
+            <div class="delta pos">↑ 12%</div>
+          </div>
+          <div class="tarjeta" style="width:260px;margin:0">
+            <div class="fila-datos"><span class="k">Estado</span><span class="v"><span class="insignia insignia-exito">emitida</span></span></div>
+            <div class="fila-datos"><span class="k">Titular</span><span class="v">Quinn Villa</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="guia-seccion">
+        <h2>Nodos del mapa de navegación</h2>
+        <div class="fila-componentes">
+          <span class="nodo-mapa" style="position:static;display:inline-flex">3 · Fila de venta</span>
+          <span class="nodo-mapa nodo-error" style="position:static;display:inline-flex">Error — turno vencido</span>
+          <span class="nodo-mapa nodo-alerta" style="position:static;display:inline-flex">Alerta — en conciliación</span>
+        </div>
+      </section>
+
+      <section class="guia-seccion">
+        <h2>Indicadores de progreso</h2>
+        <div class="fila-componentes">
+          <div class="barra-disponibilidad" style="width:220px">
+            <div class="rotulo"><span class="k">Ocupación</span><span>94%</span></div>
+            <div class="pista"><div class="relleno" style="width:94%"></div></div>
+          </div>
+          <div class="anillo-envoltorio" style="margin:0">
+            <svg viewBox="0 0 160 160" style="width:90px;height:90px" aria-hidden="true">
+              <circle class="anillo-fondo" cx="80" cy="80" r="70"></circle>
+              <circle class="anillo-progreso" cx="80" cy="80" r="70" stroke-dasharray="439.8" stroke-dashoffset="140"></circle>
+              <text class="anillo-texto" x="80" y="82" style="font-size:22px">06:00</text>
+            </svg>
+          </div>
+        </div>
+      </section>
+
+      <section class="guia-seccion">
+        <h2>Iconografía</h2>
+        <div>
+          <span class="chip-icono"><span class="glifo">🎫</span> avance / posición</span>
+          <span class="chip-icono"><span class="glifo">🏁</span> meta de la fila</span>
+          <span class="chip-icono"><span class="glifo">🔥</span> dato destacado / rápido</span>
+          <span class="chip-icono"><span class="glifo">ⓘ</span> ayuda al pasar el mouse</span>
+          <span class="chip-icono"><span class="glifo">🌙</span> / <span class="glifo">☀️</span> tema oscuro / claro</span>
+          <span class="chip-icono"><span class="glifo">✓</span> confirmado / firmado</span>
+          <span class="chip-icono"><span class="glifo">⤢</span> / <span class="glifo">⤡</span> expandir / colapsar gráfica</span>
+        </div>
+      </section>
+
+    </div>
+  </main>
+</div>
+<script src="nav.js"></script>
+<script>
+  function valorVariable(v) { return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
+
+  function metaDe(id) {
+    var el = document.getElementById(id);
+    var cs = getComputedStyle(el);
+    return cs.fontFamily.split(',')[0].replace(/["']/g, '') + ' · ' + cs.fontSize + ' · peso ' + cs.fontWeight;
+  }
+  ['h1', 'h2', 'h3', 'cuerpo', 'muted', 'code'].forEach(function (id) {
+    document.getElementById('meta-' + id).textContent = metaDe('m-' + id);
+  });
+
+  var GRUPOS_ESPACIADO = ['--space-2', '--space-3', '--space-4', '--space-5', '--space-6', '--space-7'];
+  function construirEspaciado() {
+    var raiz = document.getElementById('escala-espaciado');
+    raiz.innerHTML = GRUPOS_ESPACIADO.map(function (v) {
+      var px = valorVariable(v);
+      return '<div class="fila-espacio"><span class="etiqueta-espacio">' + v + '</span>' +
+        '<div class="barra-espacio" style="width:' + px + '"></div><span>' + px + '</span></div>';
+    }).join('');
+  }
+  construirEspaciado();
+
+  var GRUPOS_COLOR = [
+    { titulo: 'Fondos y superficies', modo: 'fondo', variables: [
+      { v: '--color-bg', uso: 'Fondo de página' },
+      { v: '--color-surface', uso: 'Tarjetas y bloques elevados' },
+      { v: '--color-surface-overlay', uso: 'Paneles translúcidos, hover' }
+    ]},
+    { titulo: 'Texto', modo: 'texto', variables: [
+      { v: '--color-text', uso: 'Texto principal' },
+      { v: '--color-text-muted', uso: 'Texto secundario, metadatos' }
+    ]},
+    { titulo: 'Bordes', modo: 'fondo', variables: [
+      { v: '--color-border', uso: 'Líneas divisorias, contornos' }
+    ]},
+    { titulo: 'Marca y acento', modo: 'fondo', variables: [
+      { v: '--color-primary', uso: 'Botón principal (texto en --color-primary-text-on)' },
+      { v: '--color-primary-soft', uso: 'Fondos suaves de énfasis' }
+    ]},
+    { titulo: 'Texto de marca', modo: 'texto', variables: [
+      { v: '--color-accent-text', uso: 'Navegación activa, enlaces destacados' }
+    ]},
+    { titulo: 'Estado — éxito', modo: 'fondo', variables: [
+      { v: '--color-success', uso: 'Confirmado, emitida, firmado' },
+      { v: '--color-success-soft', uso: 'Fondo suave de éxito' }
+    ]},
+    { titulo: 'Estado — advertencia', modo: 'fondo', variables: [
+      { v: '--color-warning', uso: 'Atención, no es un error' },
+      { v: '--color-warning-soft', uso: 'Fondo suave de advertencia' }
+    ]},
+    { titulo: 'Estado — error', modo: 'fondo', variables: [
+      { v: '--color-danger', uso: 'Rechazado, vencido, agotado' },
+      { v: '--color-danger-soft', uso: 'Fondo suave de error' }
+    ]},
+    { titulo: 'Velocidad de venta (mapa de calor)', modo: 'fondo', variables: [
+      { v: '--color-calor-fria', uso: 'Se vende lento' },
+      { v: '--color-calor-media', uso: 'Ritmo normal' },
+      { v: '--color-calor-alta', uso: 'Se vende muy rápido' }
+    ]}
+  ];
+
+  function construirPaleta() {
+    var raiz = document.getElementById('rejilla-color-raiz');
+    raiz.innerHTML = GRUPOS_COLOR.map(function (grupo) {
+      var fichas = grupo.variables.map(function (item) {
+        var valor = valorVariable(item.v);
+        var estiloMuestra = grupo.modo === 'texto'
+          ? 'background:var(--color-surface);color:var(' + item.v + ')'
+          : 'background:var(' + item.v + ')';
+        var glifo = grupo.modo === 'texto' ? 'Aa' : '';
+        return '<div class="ficha-color">' +
+          '<div class="muestra-color" style="' + estiloMuestra + '">' + glifo + '</div>' +
+          '<div class="nombre-var">' + item.v + '</div>' +
+          '<div class="valor-hex">' + valor + '</div>' +
+          '<div class="uso-var">' + item.uso + '</div>' +
+          '</div>';
+      }).join('');
+      return '<div style="margin-bottom:28px"><h3 style="margin-bottom:12px">' + grupo.titulo + '</h3>' +
+        '<div class="rejilla-color">' + fichas + '</div></div>';
+    }).join('');
+  }
+  construirPaleta();
+
+  new MutationObserver(construirPaleta).observe(document.documentElement, { attributes: true, attributeFilter: ['data-tema'] });
+
+  requestAnimationFrame(function () {
+    setTimeout(function () {
+      var r = document.querySelector('.barra-disponibilidad .relleno');
+      if (r) { var w = r.style.width; r.style.width = '0%'; requestAnimationFrame(function () { r.style.width = w; }); }
+    }, 30);
+  });
+</script>
+</body>
+</html>

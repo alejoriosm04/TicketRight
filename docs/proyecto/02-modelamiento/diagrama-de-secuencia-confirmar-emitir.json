@@ -1,0 +1,385 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Diagrama de secuencia — vista 2: confirmar, emitir y compensar (caso «Comprar en la ventana de alta demanda»)",
+    "quality_profile": "standard",
+    "column_fit": "spread",
+    "viewBox": [
+      2100,
+      880
+    ],
+    "legend": {
+      "mode": "hidden"
+    },
+    "views": [
+      {
+        "id": "confirmar",
+        "label": "3 · Confirmar",
+        "focus": [
+          "pasarela",
+          "orq",
+          "pago",
+          "repos"
+        ],
+        "note": "El webhook repetido produce el mismo resultado (idempotencia, AD-002)."
+      },
+      {
+        "id": "emitir",
+        "label": "4 · Emitir",
+        "focus": [
+          "eventos",
+          "orq",
+          "localidad",
+          "boleta",
+          "reserva",
+          "repos",
+          "fan",
+          "discrepancia"
+        ],
+        "note": "Vender la silla y emitir la boleta en una transacción; si falla, se abre Discrepancia (A-1)."
+      },
+      {
+        "id": "liberar",
+        "label": "5 · Liberar",
+        "focus": [
+          "orq",
+          "repos",
+          "reserva",
+          "localidad"
+        ],
+        "note": "El worker de expiración libera lo no pagado en ≤ 30 s (A-5)."
+      }
+    ]
+  },
+  "participants": [
+    {
+      "id": "fan",
+      "type": "external",
+      "label": "Fan",
+      "sublabel": "navegador"
+    },
+    {
+      "id": "orq",
+      "type": "frontend",
+      "label": "OrquestadorDeCompra",
+      "sublabel": "SAGA · aplicación"
+    },
+    {
+      "id": "localidad",
+      "type": "backend",
+      "label": "Localidad",
+      "sublabel": "«aggregate root»"
+    },
+    {
+      "id": "reserva",
+      "type": "backend",
+      "label": "Reserva",
+      "sublabel": "«aggregate root»"
+    },
+    {
+      "id": "pago",
+      "type": "backend",
+      "label": "Pago",
+      "sublabel": "«aggregate root»"
+    },
+    {
+      "id": "boleta",
+      "type": "backend",
+      "label": "Boleta",
+      "sublabel": "«aggregate root»"
+    },
+    {
+      "id": "discrepancia",
+      "type": "backend",
+      "label": "Discrepancia",
+      "sublabel": "«aggregate root»"
+    },
+    {
+      "id": "repos",
+      "type": "database",
+      "label": "Repositorios",
+      "sublabel": "PostgreSQL · una transacción por paso"
+    },
+    {
+      "id": "pasarela",
+      "type": "cloud",
+      "label": "PasarelaDePago",
+      "sublabel": "adaptador tokenizado"
+    },
+    {
+      "id": "eventos",
+      "type": "messagebus",
+      "label": "PublicadorDeEventos",
+      "sublabel": "outbox → Kafka"
+    }
+  ],
+  "segments": [
+    {
+      "from": 257,
+      "to": 326,
+      "label": "alt  [webhook repetido]"
+    },
+    {
+      "from": 164,
+      "to": 401,
+      "label": "3 · Confirmar — webhook tardío o repetido"
+    },
+    {
+      "from": 585,
+      "to": 671,
+      "label": "alt  [la emisión no completa antes de limiteA1 = 15 min]"
+    },
+    {
+      "from": 384,
+      "to": 690,
+      "label": "4 · Emitir — vender la silla y crear la boleta"
+    },
+    {
+      "from": 693,
+      "to": 772,
+      "label": "par  [worker de expiración, cada ≤ 30 s]"
+    },
+    {
+      "from": 670,
+      "to": 794,
+      "label": "5 · Liberar reservas vencidas"
+    }
+  ],
+  "messages": [
+    {
+      "from": "pasarela",
+      "to": "orq",
+      "y": 200,
+      "label": "3 webhook confirmarPago(cmd: ConfirmarPago)",
+      "variant": "dashed",
+      "note": "3.1 PasarelaDePago.verificarFirma(cmd) antes de procesar"
+    },
+    {
+      "from": "orq",
+      "to": "pago",
+      "y": 240,
+      "label": "3.2 registrarConfirmacion(referenciaExterna, ahora) : boolean",
+      "variant": "default"
+    },
+    {
+      "from": "pago",
+      "to": "orq",
+      "y": 280,
+      "label": "3.2 ← false · referencia ya procesada",
+      "variant": "return"
+    },
+    {
+      "from": "orq",
+      "to": "pasarela",
+      "y": 308,
+      "label": "3.2 ← 200 sin efectos (idempotente)",
+      "variant": "return"
+    },
+    {
+      "from": "orq",
+      "to": "repos",
+      "y": 348,
+      "label": "3.3 guardar(pago, compra.avanzar(pagoConfirmado)) + outbox(PagoConfirmado)  [COMMIT]",
+      "variant": "default"
+    },
+    {
+      "from": "orq",
+      "to": "pasarela",
+      "y": 376,
+      "label": "3.4 ← 200",
+      "variant": "return"
+    },
+    {
+      "from": "eventos",
+      "to": "orq",
+      "y": 416,
+      "label": "4 PagoConfirmado → emitir(compraId)",
+      "variant": "dashed"
+    },
+    {
+      "from": "orq",
+      "to": "localidad",
+      "y": 444,
+      "label": "4.1 vender(cantidad, sillaIds)  {R2: reservada → vendida}",
+      "variant": "default",
+      "note": "misma transacción que la emisión (AD-003)"
+    },
+    {
+      "from": "orq",
+      "to": "boleta",
+      "y": 484,
+      "label": "4.2 «create» Boleta.emitir(item, pago, titular)  por cada ítem  {R7}",
+      "variant": "default"
+    },
+    {
+      "from": "orq",
+      "to": "reserva",
+      "y": 512,
+      "label": "4.3 confirmar()",
+      "variant": "default"
+    },
+    {
+      "from": "orq",
+      "to": "repos",
+      "y": 540,
+      "label": "4.4 guardar(localidad, reserva, boletas, compra.avanzar(emitida))  [COMMIT]",
+      "variant": "default"
+    },
+    {
+      "from": "orq",
+      "to": "fan",
+      "y": 568,
+      "label": "4.5 boletas emitidas · código y titular",
+      "variant": "dashed"
+    },
+    {
+      "from": "orq",
+      "to": "discrepancia",
+      "y": 608,
+      "label": "4.6 «create» Discrepancia.abrir(cobroSinBoleta, pagoId)  {R14}",
+      "variant": "default"
+    },
+    {
+      "from": "orq",
+      "to": "repos",
+      "y": 636,
+      "label": "4.7 guardar(discrepancia, compra.avanzar(enConciliacion))",
+      "variant": "default"
+    },
+    {
+      "from": "orq",
+      "to": "fan",
+      "y": 664,
+      "label": "4.8 «pago confirmado · boleta en emisión · caso abierto»",
+      "variant": "dashed"
+    },
+    {
+      "from": "orq",
+      "to": "repos",
+      "y": 704,
+      "label": "5 vencerReservasExpiradas(ahora) → vencidasA(ahora)",
+      "variant": "default"
+    },
+    {
+      "from": "orq",
+      "to": "reserva",
+      "y": 732,
+      "label": "5.1 vencer()  idempotente · nunca con pago confirmado",
+      "variant": "default"
+    },
+    {
+      "from": "orq",
+      "to": "localidad",
+      "y": 760,
+      "label": "5.2 liberar(cantidad, sillaIds)  [COMMIT]",
+      "variant": "default"
+    }
+  ],
+  "activations": [
+    {
+      "participant": "orq",
+      "from": 196,
+      "to": 379,
+      "type": "frontend"
+    },
+    {
+      "participant": "orq",
+      "from": 413,
+      "to": 670,
+      "type": "frontend"
+    },
+    {
+      "participant": "orq",
+      "from": 702,
+      "to": 771,
+      "type": "frontend"
+    },
+    {
+      "participant": "pago",
+      "from": 237,
+      "to": 284,
+      "type": "backend"
+    },
+    {
+      "participant": "repos",
+      "from": 344,
+      "to": 358,
+      "type": "database"
+    },
+    {
+      "participant": "localidad",
+      "from": 440,
+      "to": 467,
+      "type": "backend"
+    },
+    {
+      "participant": "boleta",
+      "from": 481,
+      "to": 494,
+      "type": "backend"
+    },
+    {
+      "participant": "reserva",
+      "from": 508,
+      "to": 522,
+      "type": "backend"
+    },
+    {
+      "participant": "repos",
+      "from": 536,
+      "to": 550,
+      "type": "database"
+    },
+    {
+      "participant": "discrepancia",
+      "from": 605,
+      "to": 618,
+      "type": "backend"
+    },
+    {
+      "participant": "repos",
+      "from": 632,
+      "to": 646,
+      "type": "database"
+    },
+    {
+      "participant": "repos",
+      "from": 703,
+      "to": 714,
+      "type": "database"
+    },
+    {
+      "participant": "reserva",
+      "from": 728,
+      "to": 742,
+      "type": "backend"
+    },
+    {
+      "participant": "localidad",
+      "from": 756,
+      "to": 767,
+      "type": "backend"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Postcondiciones",
+      "items": [
+        "Éxito: pago confirmado, silla vendida, una boleta por ítem con titular activo",
+        "Aforo o reserva vencida: nada cobrado, inventario liberado",
+        "Emisión incompleta: Discrepancia abierta; nunca dinero sin boleta ni caso"
+      ]
+    },
+    {
+      "dot": "orange",
+      "title": "Notación",
+      "items": [
+        "Continua: síncrono · punteada: asíncrono · ✗ roja: excepción · gris: retorno",
+        "Marcos alt / loop / par con guarda · bandas: pasos de la SAGA",
+        "Cada mensaje es un método del diagrama de clases"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Del negocio al estilo — Quiz de decisión arquitectónica</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#E6EBEE;
+  --surface:#FBFCFD;
+  --ink:#0E1922;
+  --muted:#55697A;
+  --line:#C2CDD5;
+  --line-soft:#DBE2E7;
+  --accent:#2B3A8F;
+  --accent-soft:#E6E8F5;
+  --ok:#1C6B52;
+  --ok-soft:#E1EFE9;
+  --no:#9B2335;
+  --no-soft:#F6E4E6;
+  --radius:3px;
+}
+
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--paper);
+  color:var(--ink);
+  font-family:"Archivo","Helvetica Neue",Arial,sans-serif;
+  font-size:17px;
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+  padding:0 20px 80px;
+}
+
+.shell{max-width:760px;margin:0 auto}
+
+/* ---------- regla de progreso ---------- */
+.ruler{
+  position:sticky;top:0;z-index:10;
+  background:var(--paper);
+  padding:22px 0 14px;
+  display:flex;align-items:flex-end;gap:10px;
+}
+.ruler-track{display:flex;gap:4px;flex:1}
+.seg{
+  height:8px;flex:1;
+  border:1px solid var(--line);
+  border-bottom-width:2px;
+  background:transparent;
+  transform-origin:bottom;
+}
+.seg.is-ok{background:var(--ok);border-color:var(--ok)}
+.seg.is-no{background:var(--no);border-color:var(--no)}
+.seg.is-now{border-color:var(--accent);border-bottom-width:4px}
+.ruler-count{
+  font-size:12px;letter-spacing:.06em;color:var(--muted);
+  font-variant-numeric:tabular-nums;white-space:nowrap;
+  padding-bottom:1px;
+}
+
+/* ---------- pantallas ---------- */
+.screen{display:none}
+.screen.is-live{display:block}
+
+/* ---------- portada ---------- */
+.cover{padding:24px 0 0}
+.cover h1{
+  font-size:clamp(34px,7vw,58px);
+  font-weight:700;letter-spacing:-.028em;line-height:1.02;
+  margin:0 0 18px;max-width:14ch;
+}
+.cover .lede{
+  font-family:"Source Serif 4",Georgia,serif;
+  font-size:19px;line-height:1.62;color:var(--muted);
+  max-width:58ch;margin:0 0 26px;
+}
+.cover-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));
+  gap:1px;background:var(--line-soft);
+  border:1px solid var(--line-soft);margin:0 0 30px;
+}
+.chip{
+  background:var(--surface);padding:14px 12px 12px;
+  display:flex;flex-direction:column;gap:10px;
+}
+.chip svg{width:100%;height:38px;color:var(--accent);opacity:.85}
+.chip span{font-size:12.5px;color:var(--muted);line-height:1.25}
+.cover .meta{
+  font-size:13.5px;color:var(--muted);margin:0 0 30px;
+  border-left:2px solid var(--line);padding-left:14px;max-width:56ch;
+}
+
+/* ---------- pregunta ---------- */
+.tag{
+  font-size:12px;letter-spacing:.1em;color:var(--muted);
+  font-variant-numeric:tabular-nums;margin:14px 0 12px;
+}
+.scenario{
+  font-family:"Source Serif 4",Georgia,serif;
+  font-size:19.5px;line-height:1.62;
+  max-width:64ch;margin:0 0 10px;
+}
+.ask{
+  font-size:18px;font-weight:600;letter-spacing:-.01em;
+  max-width:60ch;margin:18px 0 20px;
+}
+.options{list-style:none;margin:0 0 26px;padding:0;display:grid;gap:8px}
+.opt{
+  display:grid;grid-template-columns:30px 1fr;align-items:start;gap:12px;
+  width:100%;text-align:left;
+  background:var(--surface);color:var(--ink);
+  border:1px solid var(--line);border-radius:var(--radius);
+  padding:14px 16px;font:inherit;font-size:16.5px;line-height:1.42;
+  cursor:pointer;transition:border-color .12s,background .12s;
+}
+.opt:hover{border-color:var(--accent)}
+.opt:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.opt .key{
+  font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums;
+  border:1px solid var(--line);border-radius:2px;
+  width:24px;height:24px;display:grid;place-items:center;margin-top:-1px;
+}
+.opt[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.opt[aria-pressed="true"] .key{border-color:var(--accent);background:var(--accent);color:#fff}
+
+/* ---------- respuesta ---------- */
+.verdict{
+  display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;
+  margin:16px 0 22px;padding-bottom:14px;border-bottom:1px solid var(--line);
+}
+.verdict h2{font-size:26px;font-weight:700;letter-spacing:-.02em;margin:0}
+.verdict.ok h2{color:var(--ok)}
+.verdict.no h2{color:var(--no)}
+.verdict p{margin:0;font-size:14.5px;color:var(--muted)}
+
+.solution{
+  display:grid;grid-template-columns:150px 1fr;gap:24px;align-items:start;
+  background:var(--surface);border:1px solid var(--line);
+  padding:20px;margin:0 0 22px;
+}
+.solution figure{margin:0}
+.solution svg{width:100%;height:auto;color:var(--accent)}
+.solution figcaption{
+  font-size:12px;color:var(--muted);margin-top:8px;line-height:1.35;
+}
+.solution h3{
+  margin:0 0 10px;font-size:21px;font-weight:700;letter-spacing:-.018em;
+}
+.solution .why{
+  font-family:"Source Serif 4",Georgia,serif;
+  font-size:17.5px;line-height:1.66;margin:0;max-width:56ch;
+}
+.solution .why + .why{margin-top:12px}
+
+.discards{margin:0 0 26px}
+.discards h4{
+  font-size:14px;font-weight:600;margin:0 0 10px;color:var(--ink);
+}
+.discards ul{list-style:none;margin:0;padding:0;display:grid;gap:9px}
+.discards li{
+  display:grid;grid-template-columns:auto 1fr;gap:12px;
+  font-size:15.5px;line-height:1.48;color:var(--muted);
+  border-left:2px solid var(--line);padding-left:12px;
+}
+.discards b{color:var(--ink);font-weight:600}
+.picked{
+  display:inline-block;font-size:12px;color:var(--no);
+  border:1px solid var(--no);border-radius:2px;padding:0 5px;margin-left:6px;
+  vertical-align:1px;
+}
+
+/* ---------- resultados ---------- */
+.score{display:flex;align-items:baseline;gap:16px;margin:18px 0 6px}
+.score strong{font-size:72px;font-weight:700;letter-spacing:-.045em;line-height:.9}
+.score span{font-size:16px;color:var(--muted);max-width:24ch}
+.band{
+  font-family:"Source Serif 4",Georgia,serif;font-size:18.5px;line-height:1.6;
+  max-width:58ch;margin:14px 0 28px;
+}
+.recap{list-style:none;margin:0 0 30px;padding:0;border-top:1px solid var(--line-soft)}
+.recap li{
+  display:grid;grid-template-columns:26px 1fr auto;gap:12px;align-items:baseline;
+  padding:11px 2px;border-bottom:1px solid var(--line-soft);font-size:15px;
+}
+.recap .n{font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.recap .st{font-size:12.5px}
+.recap .st.ok{color:var(--ok)}
+.recap .st.no{color:var(--no)}
+
+/* ---------- botones ---------- */
+.actions{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.btn{
+  font:inherit;font-size:16px;font-weight:600;
+  background:var(--ink);color:var(--surface);
+  border:1px solid var(--ink);border-radius:var(--radius);
+  padding:12px 22px;cursor:pointer;transition:background .12s;
+}
+.btn:hover{background:var(--accent);border-color:var(--accent)}
+.btn:disabled{background:var(--line);border-color:var(--line);color:#8798A5;cursor:not-allowed}
+.btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+.btn.ghost:hover{border-color:var(--ink);background:transparent}
+.btn:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.hint{font-size:13px;color:var(--muted)}
+
+footer{
+  margin-top:44px;padding-top:16px;border-top:1px solid var(--line-soft);
+  font-size:12.5px;color:var(--muted);
+}
+
+@media (max-width:620px){
+  body{font-size:16px;padding:0 16px 60px}
+  .solution{grid-template-columns:1fr;gap:16px}
+  .solution figure{max-width:190px}
+  .score strong{font-size:58px}
+}
+
+/* trazo de los glifos */
+.draw path,.draw line,.draw polyline,.draw rect,.draw circle,.draw polygon{
+  stroke-dasharray:260;stroke-dashoffset:260;
+  animation:trace .7s ease forwards;
+}
+@keyframes trace{to{stroke-dashoffset:0}}
+@media (prefers-reduced-motion:reduce){
+  .draw path,.draw line,.draw polyline,.draw rect,.draw circle,.draw polygon{
+    animation:none;stroke-dashoffset:0;
+  }
+  *{transition:none!important}
+}
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+  <div class="ruler" id="ruler" hidden>
+    <div class="ruler-track" id="rulerTrack"></div>
+    <div class="ruler-count" id="rulerCount">1 / 10</div>
+  </div>
+
+  <!-- PORTADA -->
+  <section class="screen is-live cover" id="scrStart">
+    <h1>Del negocio al estilo</h1>
+    <p class="lede">Diez situaciones reales de negocio. En cada una, el trabajo es el mismo que hace un arquitecto frente a un sponsor: leer los drivers, descartar lo que suena bien y elegir la topología que el problema realmente pide.</p>
+
+    <div class="cover-grid" id="coverGrid"></div>
+
+    <p class="meta">Dificultad media-alta. Los distractores son estilos que también funcionarían: lo que decide es cuál característica arquitectónica manda. Responde y pasa a la página de análisis antes de seguir.</p>
+
+    <div class="actions">
+      <button class="btn" id="btnStart">Empezar el quiz</button>
+      <span class="hint">Teclas 1–4 para responder, Enter para avanzar</span>
+    </div>
+  </section>
+
+  <!-- PREGUNTA -->
+  <section class="screen" id="scrQ">
+    <p class="tag" id="qTag">Pregunta 1 de 10</p>
+    <p class="scenario" id="qScenario"></p>
+    <p class="ask" id="qAsk"></p>
+    <div class="options" id="qOptions" role="group" aria-label="Opciones de respuesta"></div>
+    <div class="actions">
+      <button class="btn" id="btnCheck" disabled>Ver la respuesta</button>
+    </div>
+  </section>
+
+  <!-- RESPUESTA -->
+  <section class="screen" id="scrA">
+    <div class="verdict" id="aVerdict">
+      <h2 id="aVerdictTitle"></h2>
+      <p id="aVerdictSub"></p>
+    </div>
+
+    <div class="solution">
+      <figure>
+        <div id="aGlyph" class="draw"></div>
+        <figcaption id="aGlyphCap"></figcaption>
+      </figure>
+      <div>
+        <h3 id="aStyle"></h3>
+        <div id="aWhy"></div>
+      </div>
+    </div>
+
+    <div class="discards">
+      <h4>Por qué no las otras</h4>
+      <ul id="aDiscards"></ul>
+    </div>
+
+    <div class="actions">
+      <button class="btn" id="btnNext">Siguiente pregunta</button>
+    </div>
+  </section>
+
+  <!-- RESULTADOS -->
+  <section class="screen" id="scrEnd">
+    <div class="score">
+      <strong id="eScore">0</strong>
+      <span id="eScoreLabel">de 10 decisiones acertadas</span>
+    </div>
+    <p class="band" id="eBand"></p>
+    <ul class="recap" id="eRecap"></ul>
+    <div class="actions">
+      <button class="btn" id="btnAgain">Volver a intentarlo</button>
+      <button class="btn ghost" id="btnReview">Repasar los diez análisis</button>
+    </div>
+  </section>
+
+  <footer>Quiz de decisión arquitectónica · Universidad EAFIT</footer>
+</div>
+
+<script>
+/* ====================== GLIFOS DE TOPOLOGÍA ====================== */
+const S = 'fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square"';
+const G = {
+  capas: `<svg viewBox="0 0 120 100" ${S}><rect x="12" y="10" width="96" height="17"/><rect x="12" y="33" width="96" height="17"/><rect x="12" y="56" width="96" height="17"/><rect x="12" y="79" width="96" height="14"/></svg>`,
+  micro: `<svg viewBox="0 0 120 100" ${S}><rect x="10" y="8" width="100" height="14"/><line x1="26" y1="22" x2="26" y2="38"/><line x1="60" y1="22" x2="60" y2="38"/><line x1="94" y1="22" x2="94" y2="38"/><rect x="12" y="38" width="28" height="24"/><rect x="46" y="38" width="28" height="24"/><rect x="80" y="38" width="28" height="24"/><circle cx="26" cy="80" r="9"/><circle cx="60" cy="80" r="9"/><circle cx="94" cy="80" r="9"/><line x1="26" y1="62" x2="26" y2="71"/><line x1="60" y1="62" x2="60" y2="71"/><line x1="94" y1="62" x2="94" y2="71"/></svg>`,
+  broker: `<svg viewBox="0 0 120 100" ${S}><rect x="8" y="14" width="26" height="20"/><line x1="10" y1="52" x2="112" y2="52"/><line x1="21" y1="34" x2="21" y2="52"/><line x1="34" y1="52" x2="34" y2="70"/><line x1="60" y1="52" x2="60" y2="70"/><line x1="86" y1="52" x2="86" y2="70"/><rect x="22" y="70" width="24" height="20"/><rect x="48" y="70" width="24" height="20"/><rect x="74" y="70" width="24" height="20"/></svg>`,
+  mediator: `<svg viewBox="0 0 120 100" ${S}><polygon points="60,32 78,50 60,68 42,50"/><line x1="24" y1="20" x2="48" y2="38"/><line x1="96" y1="20" x2="72" y2="38"/><line x1="24" y1="80" x2="48" y2="62"/><line x1="96" y1="80" x2="72" y2="62"/><rect x="6" y="8" width="24" height="16"/><rect x="90" y="8" width="24" height="16"/><rect x="6" y="76" width="24" height="16"/><rect x="90" y="76" width="24" height="16"/></svg>`,
+  microkernel: `<svg viewBox="0 0 120 100" ${S}><circle cx="60" cy="50" r="21"/><line x1="60" y1="29" x2="60" y2="16"/><line x1="60" y1="71" x2="60" y2="84"/><line x1="39" y1="50" x2="24" y2="50"/><line x1="81" y1="50" x2="96" y2="50"/><rect x="48" y="2" width="24" height="14"/><rect x="48" y="84" width="24" height="14"/><rect x="2" y="43" width="22" height="14"/><rect x="96" y="43" width="22" height="14"/></svg>`,
+  space: `<svg viewBox="0 0 120 100" ${S}><rect x="6" y="8" width="30" height="30"/><rect x="45" y="8" width="30" height="30"/><rect x="84" y="8" width="30" height="30"/><rect x="14" y="16" width="14" height="14"/><rect x="53" y="16" width="14" height="14"/><rect x="92" y="16" width="14" height="14"/><line x1="36" y1="23" x2="45" y2="23"/><line x1="75" y1="23" x2="84" y2="23"/><line x1="60" y1="38" x2="60" y2="60" stroke-dasharray="4 5"/><ellipse cx="60" cy="68" rx="24" ry="8"/><path d="M36 68v14c0 4.4 10.7 8 24 8s24-3.6 24-8V68"/></svg>`,
+  pipeline: `<svg viewBox="0 0 120 100" ${S}><rect x="6" y="20" width="24" height="22"/><rect x="48" y="20" width="24" height="22"/><rect x="90" y="20" width="24" height="22"/><line x1="30" y1="31" x2="46" y2="31"/><line x1="72" y1="31" x2="88" y2="31"/><rect x="27" y="60" width="24" height="22"/><rect x="69" y="60" width="24" height="22"/><line x1="51" y1="71" x2="67" y2="71"/><line x1="18" y1="42" x2="18" y2="71"/><line x1="18" y1="71" x2="25" y2="71"/></svg>`,
+  serverless: `<svg viewBox="0 0 120 100" ${S}><rect x="4" y="12" width="112" height="76" stroke-dasharray="5 6"/><rect x="18" y="34" width="26" height="26"/><rect x="48" y="34" width="26" height="26"/><rect x="78" y="34" width="26" height="26"/><line x1="31" y1="60" x2="31" y2="74"/><line x1="61" y1="60" x2="61" y2="74"/><line x1="91" y1="60" x2="91" y2="74"/><line x1="31" y1="20" x2="31" y2="34"/></svg>`,
+  servicebased: `<svg viewBox="0 0 120 100" ${S}><rect x="6" y="10" width="24" height="24"/><rect x="36" y="10" width="24" height="24"/><rect x="66" y="10" width="24" height="24"/><rect x="96" y="10" width="18" height="24"/><line x1="18" y1="34" x2="18" y2="52"/><line x1="48" y1="34" x2="48" y2="52"/><line x1="78" y1="34" x2="78" y2="52"/><line x1="105" y1="34" x2="105" y2="52"/><ellipse cx="60" cy="60" rx="42" ry="9"/><path d="M18 60v20c0 5 18.8 9 42 9s42-4 42-9V60"/></svg>`,
+  soa: `<svg viewBox="0 0 120 100" ${S}><rect x="8" y="8" width="104" height="18"/><line x1="26" y1="26" x2="26" y2="44"/><line x1="60" y1="26" x2="60" y2="44"/><line x1="94" y1="26" x2="94" y2="44"/><rect x="10" y="44" width="32" height="16"/><rect x="46" y="44" width="28" height="16"/><rect x="80" y="44" width="30" height="16"/><line x1="26" y1="60" x2="26" y2="76"/><line x1="60" y1="60" x2="60" y2="76"/><line x1="94" y1="60" x2="94" y2="76"/><rect x="12" y="76" width="28" height="16"/><rect x="46" y="76" width="28" height="16"/><rect x="80" y="76" width="28" height="16"/></svg>`
+};
+
+/* ====================== BANCO DE PREGUNTAS ====================== */
+const Q = [
+{
+  scenario:"Una boletera vende entradas para giras internacionales. El 95% del tiempo atiende 2.000 usuarios concurrentes, pero cuando abre la venta de una gira pasa a 400.000 en menos de un minuto, sin aviso confiable. Las pruebas muestran que la base de datos relacional colapsa por contención sobre el inventario de sillas. El negocio exige respuesta por debajo de 100 ms y acepta consistencia eventual en el conteo de disponibles.",
+  ask:"¿Qué estilo arquitectónico ataca la raíz del problema?",
+  options:[
+    "Microservicios con base de datos por servicio y autoescalado de contenedores",
+    "Arquitectura basada en espacios (space-based)",
+    "Arquitectura en capas con caché distribuida delante de la base de datos",
+    "Arquitectura orientada a eventos con topología de broker"
+  ],
+  correct:1,
+  glyph:"space", cap:"Unidades de procesamiento con caché replicada; la base de datos sale del camino crítico.",
+  style:"Arquitectura basada en espacios",
+  why:[
+    "Los drivers dominantes son elasticidad extrema, picos impredecibles y una base de datos que es el cuello de botella estructural. El estilo basado en espacios elimina la base de datos del camino de la transacción: las unidades de procesamiento trabajan contra una grilla de datos en memoria replicada entre ellas, y un motor de datos sincroniza de forma asíncrona contra la persistencia.",
+    "Es el único estilo del catálogo que califica alto simultáneamente en elasticidad, escalabilidad y desempeño. El precio es alto: complejidad operativa, costo de licenciamiento o de memoria, y una testabilidad muy pobre ante cargas reales."
+  ],
+  discards:[
+    [0,"Microservicios","escalan las unidades de cómputo, pero cada instancia sigue golpeando la misma base de datos de inventario. Mueves el cuello de botella, no lo eliminas."],
+    [2,"Capas con caché","alivia lecturas, no la contención de escrituras concurrentes sobre las mismas sillas, que es donde está el problema."],
+    [3,"Broker de eventos","desacopla y absorbe picos con colas, pero introduce latencia y no garantiza el umbral de 100 ms en la confirmación."]
+  ]
+},
+{
+  scenario:"Una empresa manufacturera de 40 empleados necesita reemplazar sus hojas de cálculo por un aplicativo de inventario y facturación. Hay cuatro desarrolladores, ningún ingeniero de plataforma, los requisitos del negocio llevan años estables y un despliegue mensual es perfectamente aceptable. El gerente insiste en microservicios porque 'es lo moderno'. El driver real es costo total y simplicidad.",
+  ask:"¿Qué estilo deberías recomendar y defender ante el gerente?",
+  options:[
+    "Microservicios, para no quedar atrapados en un monolito",
+    "Arquitectura en capas",
+    "Arquitectura sin servidor (FaaS) para no operar infraestructura",
+    "Arquitectura basada en espacios, por si el negocio crece"
+  ],
+  correct:1,
+  glyph:"capas", cap:"Presentación, negocio, persistencia, datos: separación técnica, un solo despliegue.",
+  style:"Arquitectura en capas",
+  why:[
+    "Cuando los drivers son simplicidad y costo total de propiedad, la arquitectura en capas gana por amplio margen: es el único estilo que califica alto en ambas. Su debilidad conocida —escalabilidad, elasticidad y despliegue mediocres— no importa aquí porque ninguna de esas características es un driver del negocio.",
+    "Con un monolito modular bien separado por dominios conservas la opción de migrar después a servicios de grano grueso si el negocio cambia. Elegir distribución sin necesitarla es el caso clásico de arquitectura dirigida por la hoja de vida, no por el problema."
+  ],
+  discards:[
+    [0,"Microservicios","imponen complejidad distribuida, observabilidad, CI/CD y consistencia eventual a un equipo de cuatro personas sin capacidad operativa. El costo supera cualquier beneficio."],
+    [2,"Serverless","es razonable en costo, pero fragmenta la lógica transaccional de facturación y exige madurez en nube que el equipo no tiene."],
+    [3,"Space-based","resuelve un problema de escala que esta empresa no tiene ni tendrá; es el estilo más caro y complejo del catálogo."]
+  ]
+},
+{
+  scenario:"En un marketplace, cada pedido confirmado debe disparar notificación al cliente, acumulación de puntos de fidelidad, ingesta analítica, facturación electrónica y reserva de inventario. Negocio agrega un consumidor nuevo casi cada mes y exige que eso no obligue a tocar, probar ni desplegar el servicio de pedidos. El flujo no tiene pasos condicionales, no requiere compensación coordinada y cada consumidor puede fallar de forma aislada.",
+  ask:"¿Qué estilo y topología encajan mejor?",
+  options:[
+    "Orientada a eventos, topología de mediador",
+    "Orientada a eventos, topología de broker",
+    "SOA orientada a orquestación con un bus empresarial",
+    "Capas, invocando cada función de forma síncrona desde el servicio de pedidos"
+  ],
+  correct:1,
+  glyph:"broker", cap:"Sin componente central: el evento se publica y los interesados se suscriben.",
+  style:"Orientada a eventos con topología de broker",
+  why:[
+    "La pista decisiva es que se deben agregar consumidores sin modificar al emisor, y que no existe flujo condicional ni compensación. Eso es exactamente lo que resuelve la topología de broker: el servicio de pedidos publica un hecho y pierde interés en quién lo consume; los suscriptores se agregan o quitan sin coordinación.",
+    "Se gana escalabilidad, responsividad y una extensibilidad casi gratuita. Se pierde control del flujo: nadie sabe si el proceso completo terminó bien, y recuperar errores es responsabilidad de cada consumidor."
+  ],
+  discards:[
+    [0,"Mediador","aporta control del flujo y compensación, pero aquí ese control no se necesita y el mediador se vuelve un punto que hay que tocar cada vez que entra un consumidor nuevo: justo lo que se quiere evitar."],
+    [2,"SOA orquestada","resuelve reutilización e integración heterogénea, no extensibilidad ágil; el bus se convierte en cuello de botella organizacional."],
+    [3,"Llamadas síncronas","acoplan el pedido a la disponibilidad de cinco sistemas: la latencia se suma y cualquier caída tumba la confirmación."]
+  ]
+},
+{
+  scenario:"Un producto de nómina se vende en nueve países. El motor de cálculo, la liquidación y la interfaz son idénticos en todos. Lo que cambia es la normativa tributaria y de seguridad social de cada país, que se actualiza dos o tres veces al año. El área de calidad exige poder certificar y liberar el cambio normativo de un país sin volver a probar los otros ocho. No hay diferencias de escalamiento entre países.",
+  ask:"¿Qué estilo resuelve esto con el menor costo estructural?",
+  options:[
+    "Microkernel",
+    "Un microservicio por país",
+    "Capas, con las reglas de cada país en tablas de parametrización",
+    "Pipeline, con un filtro normativo por país"
+  ],
+  correct:0,
+  glyph:"microkernel", cap:"Núcleo estable y complementos que se registran y despliegan por separado.",
+  style:"Microkernel (núcleo y complementos)",
+  why:[
+    "El patrón es inconfundible: una funcionalidad común estable más variabilidad encapsulada por dimensión conocida. El sistema central contiene el motor de nómina; cada país es un complemento independiente que se registra contra un contrato y se puede versionar, certificar y liberar solo.",
+    "El aislamiento del cambio es la característica que importa, y este estilo la entrega sin pagar un solo peso de complejidad distribuida. Ojo con el contrato del complemento: si no está bien diseñado desde el inicio, cada normativa nueva termina forzando cambios en el núcleo y se pierde todo el beneficio."
+  ],
+  discards:[
+    [1,"Un microservicio por país","da despliegue independiente, pero paga red, observabilidad y operación distribuida para resolver un problema que es de modularidad, no de escala."],
+    [2,"Tablas de parametrización","funciona hasta que la primera norma exige lógica nueva; termina en condicionales por país dentro del núcleo, que es justo lo que calidad quiere evitar."],
+    [3,"Pipeline","modela transformaciones secuenciales, no variabilidad por cliente sobre un flujo común."]
+  ]
+},
+{
+  scenario:"El área de datos recibe archivos planos de catorce fuentes distintas. Cada archivo debe validarse, normalizarse, deduplicarse, enriquecerse con datos maestros y cargarse al repositorio analítico. El equipo quiere componer rutas nuevas reutilizando las mismas transformaciones en distinto orden, y necesita poder insertar un paso de anonimización en algunas rutas sin tocar las demás. El flujo es determinista y secuencial; no hay reacción a hechos del negocio.",
+  ask:"¿Qué estilo describe mejor esta solución?",
+  options:[
+    "Orientada a eventos con broker",
+    "Microservicios",
+    "Pipeline (tuberías y filtros)",
+    "Capas"
+  ],
+  correct:2,
+  glyph:"pipeline", cap:"Filtros independientes y sin estado, conectados por tuberías unidireccionales.",
+  style:"Arquitectura de pipeline",
+  why:[
+    "Transformaciones componibles, sin estado, con un orden explícito y unidireccional: es la definición del estilo de tuberías y filtros. Cada filtro hace una sola cosa —validar, transformar, enriquecer— y la reutilización surge de recombinarlos, no de parametrizarlos.",
+    "Es simple, barato y muy testeable filtro por filtro. Su límite conocido es la elasticidad y la tolerancia a fallos: si el pipeline se rompe a mitad de camino, hay que diseñar explícitamente la reanudación."
+  ],
+  discards:[
+    [0,"Broker de eventos","encaja cuando la reacción es a hechos del negocio y el orden no está predeterminado. Aquí el orden sí importa y forzar eventos hace el flujo más difícil de razonar."],
+    [1,"Microservicios","impone límites de despliegue y red entre pasos que pertenecen al mismo flujo de datos."],
+    [3,"Capas","separa responsabilidades técnicas verticales, no encadena transformaciones sucesivas sobre un mismo dato."]
+  ]
+},
+{
+  scenario:"Un SaaS de salud tiene seis dominios muy distintos: agendamiento, historia clínica, autorizaciones, facturación, portal de pacientes y analítica. Nueve equipos trabajan con cadencias diferentes; facturación libera cada trimestre por regulación y el portal quiere liberar a diario. Un incidente en facturación no puede impedir que un paciente agende. Los perfiles de carga son radicalmente distintos entre dominios. La organización ya tiene CI/CD maduro, observabilidad distribuida y práctica de SRE.",
+  ask:"¿Qué estilo es el adecuado?",
+  options:[
+    "Arquitectura basada en servicios, con base de datos compartida",
+    "Microservicios",
+    "Monolito modular en capas, con módulos por dominio",
+    "Arquitectura basada en espacios"
+  ],
+  correct:1,
+  glyph:"micro", cap:"Servicios de grano fino con contexto delimitado y datos propios.",
+  style:"Microservicios",
+  why:[
+    "Aquí coinciden los cuatro drivers que justifican microservicios: despliegue independiente con cadencias distintas, aislamiento de fallos entre dominios, escalabilidad diferenciada y alineación con la estructura de equipos. Cada contexto delimitado tiene sus datos, lo que permite que facturación libere trimestralmente sin frenar al portal.",
+    "El factor que suele faltar y aquí sí está es la capacidad organizacional: sin CI/CD, observabilidad y respuesta a incidentes, este estilo degrada en un monolito distribuido. La factura a pagar es consistencia eventual, sagas y un costo de operación considerablemente mayor."
+  ],
+  discards:[
+    [0,"Basada en servicios","es la opción correcta cuando no se puede partir la base de datos; aquí sí se puede y se necesita el aislamiento total de fallos, que una base compartida rompe."],
+    [2,"Monolito modular","da modularidad lógica pero un único artefacto de despliegue: facturación seguiría bloqueando al portal."],
+    [3,"Space-based","resuelve elasticidad extrema, que no es el driver; ninguno de los dominios descritos tiene picos impredecibles masivos."]
+  ]
+},
+{
+  scenario:"Una aseguradora tiene un monolito de doce años. Quiere agilidad y despliegues parciales, pero dos restricciones son innegociables: la integridad referencial entre pólizas, siniestros y clientes debe mantenerse con transacciones ACID, y los reportes regulatorios cruzan todas las entidades en una sola consulta. Además, el equipo de plataforma es de tres personas y no puede operar decenas de servicios ni sagas de compensación.",
+  ask:"¿Cuál es la recomendación más defendible?",
+  options:[
+    "Microservicios con base de datos por servicio y sagas",
+    "Arquitectura basada en servicios",
+    "Orientada a eventos con broker",
+    "Microkernel"
+  ],
+  correct:1,
+  glyph:"servicebased", cap:"Pocos servicios de dominio de grano grueso sobre una base de datos compartida.",
+  style:"Arquitectura basada en servicios",
+  why:[
+    "Este estilo es el punto dulce entre el monolito y los microservicios: de cuatro a doce servicios de dominio de grano grueso, desplegables por separado, pero compartiendo la base de datos monolítica. Conservas transacciones ACID y reportes transversales, y ganas la mayor parte de la agilidad sin pagar consistencia eventual ni orquestación distribuida.",
+    "Es también la mejor estación intermedia: si más adelante un dominio necesita datos propios y escala independiente, se extrae solo ese. La contrapartida es que un cambio de esquema sigue afectando a varios servicios, así que la gobernanza de la base compartida se vuelve crítica."
+  ],
+  discards:[
+    [0,"Microservicios","obligan a romper la base de datos y a implementar sagas: choca de frente con las dos restricciones innegociables y con la capacidad del equipo."],
+    [2,"Broker de eventos","es un estilo de integración y reacción; no resuelve por sí solo cómo particionar un monolito ni cómo desplegarlo por partes."],
+    [3,"Microkernel","sirve cuando hay un núcleo estable con variabilidad por complemento, que no es la situación de un monolito con dominios de igual peso."]
+  ]
+},
+{
+  scenario:"Una entidad pública necesita un trámite en línea que solo se usa en dos ventanas del año: en febrero y en agosto concentra casi todo el tráfico, y el resto del año recibe unas pocas solicitudes diarias. No hay equipo de operación ni ganas de administrar servidores. El presupuesto se aprueba como gasto variable y se exige pagar solo por lo consumido. El área de negocio confirma que unos segundos de espera en la primera solicitud del día son tolerables.",
+  ask:"¿Qué modelo arquitectónico se ajusta mejor?",
+  options:[
+    "Arquitectura sin servidor (funciones como servicio)",
+    "Arquitectura basada en espacios",
+    "Microservicios sobre Kubernetes con autoescalado",
+    "Arquitectura en capas desplegada en máquinas virtuales"
+  ],
+  correct:0,
+  glyph:"serverless", cap:"Funciones que existen solo mientras se ejecutan; sin infraestructura a cargo.",
+  style:"Arquitectura sin servidor (FaaS)",
+  why:[
+    "Carga intermitente y muy concentrada, cero apetito por operación y presupuesto atado al consumo real: los tres apuntan al mismo lado. Con funciones, el costo cuando no hay tráfico tiende a cero y la escala en la ventana pico la resuelve el proveedor.",
+    "La condición que lo habilita es explícita en el enunciado: se tolera el arranque en frío. Si el negocio hubiera exigido latencia baja y constante, este estilo quedaba descartado de entrada. Hay que vigilar el bloqueo con el proveedor y los límites de tiempo de ejecución."
+  ],
+  discards:[
+    [1,"Space-based","también absorbe picos, pero exige mantener la grilla en memoria encendida todo el año: es el extremo opuesto del pago por uso."],
+    [2,"Kubernetes","supone una plataforma y un equipo de operación que la entidad declaró no tener; además paga nodos durante los diez meses ociosos."],
+    [3,"Capas en máquinas virtuales","obliga a dimensionar para el pico y pagarlo todo el año, o a quedarse corto en febrero."]
+  ]
+},
+{
+  scenario:"Un grupo empresarial con seis filiales tiene treinta sistemas heredados: mainframe, AS/400, tres ERP distintos y aplicaciones propias. La meta corporativa es reutilizar capacidades de negocio a escala del grupo —un solo 'validar cliente', un solo 'consultar saldo'— con mediación y transformación de protocolos, y aplicar reglas corporativas transversales en un punto único. El comité acepta explícitamente baja agilidad y liberaciones semestrales a cambio de reutilización y control.",
+  ask:"¿Qué estilo corresponde a este mandato?",
+  options:[
+    "Microservicios",
+    "SOA orientada a orquestación, con mediación empresarial",
+    "Orientada a eventos con broker",
+    "Microkernel"
+  ],
+  correct:1,
+  glyph:"soa", cap:"Motor de orquestación sobre servicios empresariales, de dominio y de infraestructura.",
+  style:"SOA orientada a orquestación",
+  why:[
+    "Este estilo existe precisamente para el escenario que describe el enunciado: integración de un parque heterogéneo con reutilización a escala empresarial como objetivo dominante. Es el único del catálogo que califica alto en reutilización, y lo logra con una taxonomía de servicios y un motor de mediación que transforma protocolos y aplica reglas corporativas.",
+    "Lo interesante del caso es que el comité acepta el precio por escrito. Este estilo califica muy bajo en agilidad, testabilidad, despliegue y tolerancia a fallos, y concentra riesgo en el bus. Recomendarlo solo es defendible cuando la organización asume ese intercambio de forma consciente."
+  ],
+  discards:[
+    [0,"Microservicios","optimizan agilidad y despliegue independiente, y desaconsejan el acoplamiento y la lógica compartida que aquí son el objetivo declarado."],
+    [2,"Broker de eventos","desacopla notificaciones, pero no resuelve mediación síncrona ni transformación de protocolos contra un mainframe."],
+    [3,"Microkernel","es un estilo de producto con variabilidad por complemento, no de integración de un portafolio heterogéneo."]
+  ]
+},
+{
+  scenario:"La emisión de una póliza tiene nueve pasos con bifurcaciones: si el riesgo supera cierto umbral va a suscripción manual; si el cliente ya existe se omite la validación de identidad. Operaciones necesita saber en qué paso va cada solicitud y por qué se detuvo. Y hay un requisito crítico: si el cobro falla después de haber reservado el número de póliza y apartado el cupo de reaseguro, esos dos pasos deben revertirse. Se quiere procesamiento asíncrono y escalable.",
+  ask:"¿Qué estilo y topología recomiendas?",
+  options:[
+    "Orientada a eventos, topología de broker",
+    "Orientada a eventos, topología de mediador",
+    "Pipeline de filtros secuenciales",
+    "Microkernel con un complemento por paso"
+  ],
+  correct:1,
+  glyph:"mediator", cap:"Un mediador conoce los pasos, decide las bifurcaciones y coordina la reversión.",
+  style:"Orientada a eventos con topología de mediador",
+  why:[
+    "Tres señales apuntan al mediador y las tres aparecen juntas: pasos condicionales, visibilidad del estado del proceso y necesidad de compensación coordinada. El mediador conoce el flujo completo, decide las bifurcaciones, mantiene el estado de cada solicitud y es quien puede emitir los eventos de reversión cuando el cobro falla.",
+    "Se conserva la asincronía y la escalabilidad de los eventos, y se sacrifica parte del desacople: el mediador es un punto de conocimiento centralizado que hay que modificar cuando cambia el flujo, y un posible cuello de botella que debe diseñarse para escalar por dominio, no como un mediador único para toda la compañía."
+  ],
+  discards:[
+    [0,"Broker","no tiene dónde vivir la lógica condicional ni quién coordine la compensación; operaciones además perdería la trazabilidad del estado."],
+    [2,"Pipeline","asume un flujo lineal y determinista, y no modela bifurcaciones ni reversión de pasos ya ejecutados."],
+    [3,"Microkernel","organiza variabilidad alrededor de un núcleo; no coordina un proceso de negocio distribuido en el tiempo."]
+  ]
+}
+];
+
+/* ====================== ESTADO ====================== */
+let i = 0, picked = null, answers = [], reviewing = false;
+
+const $ = id => document.getElementById(id);
+const screens = {start:$('scrStart'), q:$('scrQ'), a:$('scrA'), end:$('scrEnd')};
+
+function show(name){
+  Object.values(screens).forEach(s => s.classList.remove('is-live'));
+  screens[name].classList.add('is-live');
+  $('ruler').hidden = (name === 'start');
+  window.scrollTo({top:0, behavior:'instant'});
+}
+
+/* portada: muestra seis topologías */
+(function coverGlyphs(){
+  const set = [['capas','Capas'],['micro','Microservicios'],['broker','Eventos'],
+               ['microkernel','Microkernel'],['space','Basada en espacios'],['pipeline','Pipeline']];
+  $('coverGrid').innerHTML = set.map(([k,label]) =>
+    `<div class="chip">${G[k]}<span>${label}</span></div>`).join('');
+})();
+
+/* regla */
+function buildRuler(){
+  $('rulerTrack').innerHTML = Q.map((_,n)=>`<div class="seg" data-n="${n}"></div>`).join('');
+}
+function paintRuler(){
+  document.querySelectorAll('.seg').forEach(s=>{
+    const n = +s.dataset.n;
+    s.className = 'seg';
+    if(answers[n] !== undefined) s.classList.add(answers[n] ? 'is-ok' : 'is-no');
+    if(n === i) s.classList.add('is-now');
+  });
+  $('rulerCount').textContent = `${i+1} / ${Q.length}`;
+}
+
+/* pregunta */
+function renderQ(){
+  const q = Q[i];
+  picked = null;
+  $('qTag').textContent = `Pregunta ${i+1} de ${Q.length}`;
+  $('qScenario').textContent = q.scenario;
+  $('qAsk').textContent = q.ask;
+  $('qOptions').innerHTML = q.options.map((o,n)=>
+    `<button class="opt" type="button" aria-pressed="false" data-n="${n}">
+       <span class="key">${n+1}</span><span>${o}</span>
+     </button>`).join('');
+  $('qOptions').querySelectorAll('.opt').forEach(b=>{
+    b.addEventListener('click', ()=> pick(+b.dataset.n));
+  });
+  $('btnCheck').disabled = true;
+  paintRuler();
+  show('q');
+}
+
+function pick(n){
+  picked = n;
+  $('qOptions').querySelectorAll('.opt').forEach(b=>
+    b.setAttribute('aria-pressed', (+b.dataset.n === n).toString()));
+  $('btnCheck').disabled = false;
+}
+
+/* respuesta */
+function renderA(){
+  const q = Q[i];
+  const ok = picked === q.correct;
+  if(!reviewing) answers[i] = ok;
+
+  const v = $('aVerdict');
+  v.className = 'verdict ' + (ok ? 'ok' : 'no');
+  $('aVerdictTitle').textContent = ok ? 'Decisión correcta' : 'Decisión discutible';
+  $('aVerdictSub').textContent = ok
+    ? 'Leíste bien cuál característica arquitectónica manda en este caso.'
+    : `Elegiste “${q.options[picked]}”.`;
+
+  $('aGlyph').innerHTML = G[q.glyph];
+  $('aGlyph').classList.remove('draw'); void $('aGlyph').offsetWidth; $('aGlyph').classList.add('draw');
+  $('aGlyphCap').textContent = q.cap;
+  $('aStyle').textContent = q.style;
+  $('aWhy').innerHTML = q.why.map(p=>`<p class="why">${p}</p>`).join('');
+
+  $('aDiscards').innerHTML = q.discards.map(([n,name,text])=>
+    `<li><span><b>${name}</b>${n===picked?'<span class="picked">tu elección</span>':''}: ${text}</span></li>`
+  ).join('');
+
+  $('btnNext').textContent = (i === Q.length-1) ? 'Ver resultados' : 'Siguiente pregunta';
+  paintRuler();
+  show('a');
+}
+
+/* resultados */
+function renderEnd(){
+  const hits = answers.filter(Boolean).length;
+  $('eScore').textContent = hits;
+  const bands = [
+    [9,'Criterio de arquitecto senior. Estás separando la característica arquitectónica dominante del ruido del enunciado, que es exactamente lo que distingue una decisión de una preferencia.'],
+    [7,'Buen criterio. Los errores suelen estar en los pares difíciles: broker contra mediador, y microservicios contra basada en servicios. Ahí se define la diferencia entre un diseño elegante y uno costoso.'],
+    [5,'Vas por buen camino. El siguiente paso es dejar de preguntarte cuál estilo es mejor y empezar por cuál característica arquitectónica manda: la respuesta casi siempre se desprende sola.'],
+    [0,'Vale la pena repasar las fichas de cada estilo y, sobre todo, sus calificaciones en elasticidad, despliegue, simplicidad, costo y tolerancia a fallos. Ningún estilo es bueno; cada uno es bueno para algo.']
+  ];
+  $('eBand').textContent = bands.find(([min])=> hits >= min)[1];
+
+  $('eRecap').innerHTML = Q.map((q,n)=>
+    `<li><span class="n">${String(n+1).padStart(2,'0')}</span>
+       <span>${q.style}</span>
+       <span class="st ${answers[n]?'ok':'no'}">${answers[n]?'acertada':'fallada'}</span></li>`).join('');
+
+  $('ruler').hidden = true;
+  show('end');
+}
+
+/* ====================== EVENTOS ====================== */
+$('btnStart').addEventListener('click', ()=>{
+  buildRuler(); i = 0; answers = []; reviewing = false; renderQ();
+});
+$('btnCheck').addEventListener('click', ()=>{ if(picked !== null) renderA(); });
+$('btnNext').addEventListener('click', ()=>{
+  if(i === Q.length-1){ reviewing ? show('end') : renderEnd(); }
+  else { i++; reviewing ? (picked = Q[i].correct, renderA()) : renderQ(); }
+});
+$('btnAgain').addEventListener('click', ()=>{
+  i = 0; answers = []; reviewing = false; buildRuler(); renderQ();
+});
+$('btnReview').addEventListener('click', ()=>{
+  reviewing = true; i = 0; picked = Q[0].correct; $('ruler').hidden = false; renderA();
+});
+
+document.addEventListener('keydown', e=>{
+  if(screens.q.classList.contains('is-live')){
+    if(['1','2','3','4'].includes(e.key)) pick(+e.key - 1);
+    if(e.key === 'Enter' && picked !== null){ e.preventDefault(); renderA(); }
+  } else if(screens.a.classList.contains('is-live') && e.key === 'Enter'){
+    e.preventDefault(); $('btnNext').click();
+  } else if(screens.start.classList.contains('is-live') && e.key === 'Enter'){
+    e.preventDefault(); $('btnStart').click();
+  }
+});
+</script>
+</body>
+</html>

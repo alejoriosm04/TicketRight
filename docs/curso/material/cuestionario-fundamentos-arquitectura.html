@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fundamentos de arquitectura · Cuestionario</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Archivo:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#EFF1EE;
+  --surface:#FFFFFF;
+  --ink:#18232E;
+  --ink-soft:#5A6772;
+  --hair:#D8DCD8;
+  --brass:#96691C;
+  --ok:#1E6B52;
+  --ok-bg:#EDF5F1;
+  --no:#A23F2E;
+  --no-bg:#FAEFEC;
+  --lvl-1:#5E7F63;
+  --lvl-2:#B0821F;
+  --lvl-3:#8B3A49;
+  --serif:"Newsreader",Georgia,"Times New Roman",serif;
+  --sans:"Archivo","Helvetica Neue",Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--paper);
+  color:var(--ink);
+  font-family:var(--sans);
+  font-size:16px;
+  line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:760px;margin:0 auto;padding:32px 20px 72px}
+
+/* ---------- Cabecera ---------- */
+header{border-bottom:1px solid var(--hair);padding-bottom:20px;margin-bottom:28px}
+h1{
+  font-family:var(--serif);
+  font-weight:500;
+  font-size:clamp(28px,5vw,40px);
+  line-height:1.1;
+  letter-spacing:-.015em;
+  margin:0 0 6px;
+}
+.sub{color:var(--ink-soft);font-size:15px;margin:0;max-width:56ch}
+.brand{font-size:13px;color:var(--brass);margin:0 0 10px;letter-spacing:.02em}
+
+/* ---------- Barra de avance ---------- */
+.status{display:flex;align-items:baseline;gap:18px;flex-wrap:wrap;margin:22px 0 10px}
+.status b{font-family:var(--serif);font-size:19px;font-weight:500}
+.status span{font-size:13px;color:var(--ink-soft)}
+.track{height:3px;background:var(--hair);border-radius:2px;overflow:hidden}
+.track i{display:block;height:100%;width:0;background:var(--brass);transition:width .35s ease}
+
+/* ---------- Tarjeta ---------- */
+.card{
+  background:var(--surface);
+  border:1px solid var(--hair);
+  border-left:6px solid var(--lvl-1);
+  border-radius:2px;
+  padding:26px 28px 28px;
+  margin-top:26px;
+}
+.card.l2{border-left-color:var(--lvl-2)}
+.card.l3{border-left-color:var(--lvl-3)}
+
+.card-top{display:flex;align-items:baseline;gap:14px;margin-bottom:16px}
+.num{font-family:var(--serif);font-size:30px;line-height:1;color:var(--brass);font-weight:400}
+.lvl{font-size:12.5px;color:var(--lvl-1);border:1px solid currentColor;border-radius:999px;padding:2px 10px}
+.card.l2 .lvl{color:var(--lvl-2)}
+.card.l3 .lvl{color:var(--lvl-3)}
+.tema{font-size:12.5px;color:var(--ink-soft);margin-left:auto;text-align:right}
+
+.escena{
+  font-family:var(--serif);
+  font-size:16.5px;
+  font-style:italic;
+  color:var(--ink-soft);
+  border-left:2px solid var(--hair);
+  padding-left:14px;
+  margin:0 0 18px;
+}
+.pregunta{
+  font-family:var(--serif);
+  font-size:clamp(19px,2.6vw,23px);
+  line-height:1.35;
+  font-weight:500;
+  margin:0 0 20px;
+}
+
+/* ---------- Opciones ---------- */
+.opts{display:flex;flex-direction:column;gap:8px;margin-bottom:22px}
+.opt{
+  display:flex;gap:12px;align-items:flex-start;
+  width:100%;text-align:left;
+  font:inherit;font-size:15.5px;
+  background:transparent;
+  border:1px solid var(--hair);
+  border-radius:2px;
+  padding:12px 14px;
+  cursor:pointer;
+  color:var(--ink);
+  transition:border-color .15s,background .15s;
+}
+.opt:hover{border-color:var(--ink-soft)}
+.opt:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
+.opt .k{font-family:var(--serif);color:var(--brass);min-width:16px;font-size:16px}
+.opt[aria-pressed="true"]{border-color:var(--ink);background:#F6F7F5}
+.opt[disabled]{cursor:default}
+.opt.mark-ok{border-color:var(--ok);background:var(--ok-bg)}
+.opt.mark-ok .k{color:var(--ok)}
+.opt.mark-no{border-color:var(--no);background:var(--no-bg)}
+.opt.mark-no .k{color:var(--no)}
+
+/* ---------- Veredicto y explicación ---------- */
+.veredicto{
+  font-family:var(--serif);
+  font-size:20px;
+  margin:0 0 4px;
+}
+.veredicto.ok{color:var(--ok)}
+.veredicto.no{color:var(--no)}
+.clave{font-size:14px;color:var(--ink-soft);margin:0 0 18px}
+.exp-title{font-size:13px;color:var(--brass);margin:0 0 6px}
+.exp{font-size:15.5px;margin:0;max-width:70ch}
+.exp em{font-style:italic}
+.exp strong{font-weight:600}
+.nota{
+  margin-top:16px;padding-top:14px;border-top:1px solid var(--hair);
+  font-size:14.5px;color:var(--ink-soft);max-width:70ch;
+}
+.nota b{color:var(--ink);font-weight:600}
+
+/* ---------- Acciones ---------- */
+.acciones{display:flex;gap:10px;flex-wrap:wrap;margin-top:24px}
+button.act{
+  font:inherit;font-size:15px;
+  padding:10px 20px;border-radius:2px;cursor:pointer;
+  border:1px solid var(--ink);background:var(--ink);color:#fff;
+}
+button.act.ghost{background:transparent;color:var(--ink)}
+button.act[disabled]{opacity:.35;cursor:not-allowed}
+button.act:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
+
+/* ---------- Cierre ---------- */
+.final{background:var(--surface);border:1px solid var(--hair);padding:32px 28px;margin-top:26px}
+.final h2{font-family:var(--serif);font-weight:500;font-size:28px;margin:0 0 4px}
+.puntaje{font-family:var(--serif);font-size:56px;line-height:1;color:var(--brass);margin:14px 0 2px}
+.desglose{margin:22px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px}
+.desglose li{display:grid;grid-template-columns:88px 1fr 44px;gap:12px;align-items:center;font-size:14px}
+.bar{height:5px;background:var(--hair)}
+.bar i{display:block;height:100%;background:var(--ink)}
+.hidden{display:none}
+@media (max-width:520px){
+  .card{padding:20px 18px 22px;border-left-width:5px}
+  .tema{width:100%;text-align:left;margin-left:0}
+  .card-top{flex-wrap:wrap;gap:10px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <p class="brand">Midas Consultora Empresarial · Mentoría técnica</p>
+  <h1>Fundamentos de arquitectura</h1>
+  <p class="sub">Quince preguntas sobre qué es arquitectura, dónde termina y empieza el diseño, y cómo se distinguen principios, políticas y trade-offs. Responde, revisa la explicación y avanza.</p>
+
+  <div class="status">
+    <b><span id="n-actual">1</span> de 15</b>
+    <span>Aciertos: <span id="n-ok">0</span></span>
+    <span id="et-nivel">Nivel fácil</span>
+  </div>
+  <div class="track"><i id="barra"></i></div>
+</header>
+
+<main id="escenario" aria-live="polite"></main>
+
+<div class="acciones" id="acciones"></div>
+
+</div>
+
+<script>
+const BANCO = [
+/* ================= FÁCIL ================= */
+{
+ nivel:1, tema:"Definición de arquitectura",
+ pregunta:"¿Cuál de estas afirmaciones describe mejor qué es la arquitectura de un sistema?",
+ opciones:[
+  "El conjunto de tecnologías, lenguajes y frameworks que el sistema utiliza.",
+  "El conjunto de decisiones estructurales significativas —componentes, relaciones y atributos de calidad— cuyo costo de reversión es alto.",
+  "El diagrama de despliegue de la infraestructura sobre la que corre el sistema.",
+  "La documentación técnica que se entrega al cierre del proyecto."
+ ],
+ correcta:1,
+ exp:"La arquitectura es un conjunto de <strong>decisiones</strong>, no de artefactos ni de herramientas. La formulación clásica de Fowler —«aquello que es difícil de cambiar»— apunta al criterio central: significancia estructural y costo de reversión. Las tecnologías son <em>consecuencia</em> de decisiones arquitectónicas, no la arquitectura misma; el diagrama es una <em>representación</em> parcial de ella; y el documento es un <em>registro</em>. Un sistema tiene arquitectura aunque nadie la haya escrito: la diferencia es si fue elegida o si ocurrió por accidente.",
+ nota:"Uso en mentoría: si alguien responde el sistema tiene tal arquitectura y nombra un stack, la conversación siguiente es qué atributo de calidad justificó ese stack."
+},
+{
+ nivel:1, tema:"Arquitectura vs. diseño",
+ pregunta:"¿Cuál es el criterio principal para afirmar que una decisión es arquitectónica y no de diseño?",
+ opciones:[
+  "Que la tome una persona con el cargo de arquitecto.",
+  "El costo, el alcance y el impacto de revertirla.",
+  "Que aparezca representada en un diagrama formal.",
+  "Que involucre a más de un equipo en su implementación."
+ ],
+ correcta:1,
+ exp:"La frontera no la define el cargo ni el formato: la define el <strong>radio de impacto</strong> y el <strong>costo de reversión</strong>. Una decisión arquitectónica es cara de deshacer, afecta a varios componentes o equipos y condiciona decisiones posteriores. Una decisión de diseño es local a un componente, reversible por su propio equipo y sin efecto en los contratos externos. La opción sobre múltiples equipos es un buen <em>síntoma</em>, pero no el criterio: hay decisiones de un solo equipo que son claramente arquitectónicas —como el modelo de consistencia de su almacén de datos.",
+ nota:""
+},
+{
+ nivel:1, tema:"Trade-off",
+ pregunta:"¿Qué es un trade-off arquitectónico?",
+ opciones:[
+  "Un error de diseño que debe corregirse antes de pasar a producción.",
+  "El reconocimiento explícito de que mejorar un atributo de calidad implica ceder en otro.",
+  "Un retraso del cronograma causado por deuda técnica acumulada.",
+  "La negociación económica del contrato con un proveedor de tecnología."
+ ],
+ correcta:1,
+ exp:"En arquitectura no existen soluciones buenas en abstracto: existen soluciones <strong>adecuadas a un contexto</strong>. Todo lo que se gana en un eje —latencia, disponibilidad, costo, simplicidad operativa, autonomía de equipos— se paga en otro. El trade-off no es un defecto del diseño sino su naturaleza; el defecto es no verlo. Un equipo que no puede enunciar qué está cediendo probablemente no eligió: heredó una decisión ajena.",
+ nota:""
+},
+{
+ nivel:1, tema:"Principios",
+ pregunta:"¿Cuál de estos enunciados es un principio arquitectónico?",
+ opciones:[
+  "Usaremos PostgreSQL 16 como motor del módulo de facturación.",
+  "Toda integración entre dominios ocurre por contratos explícitos, nunca por base de datos compartida.",
+  "El release del módulo de cobros se posterga dos semanas.",
+  "El P99 de la API de saldos es actualmente de 120 ms."
+ ],
+ correcta:1,
+ exp:"Un principio es una <strong>regla general y duradera</strong>, independiente de una tecnología concreta y de un momento en el tiempo, que orienta decisiones futuras. El enunciado sobre PostgreSQL es una decisión de arquitectura: concreta, fechada y con alternativas descartadas. El aplazamiento del release es un acuerdo de plan. Y el dato de P99 es una medición, un hecho observado sobre el sistema. Nótese que el principio correcto se enuncia como norma de comportamiento del sistema y sobrevive a cualquier cambio de motor de base de datos.",
+ nota:""
+},
+{
+ nivel:1, tema:"Políticas",
+ pregunta:"¿Cuál es el papel de una política de arquitectura dentro del gobierno técnico?",
+ opciones:[
+  "Es una recomendación deseable que cada equipo adopta según su criterio.",
+  "Es una regla de cumplimiento obligatorio, verificable y con dueño, que acota el espacio de decisión de los equipos.",
+  "Es un sinónimo de principio, con otro nombre según la organización.",
+  "Es un instrumento exclusivo del área de seguridad de la información."
+ ],
+ correcta:1,
+ exp:"La cadena es: el <strong>principio orienta</strong> (por qué y hacia dónde), la <strong>política obliga</strong> (qué es aceptable y qué no) y el <strong>estándar especifica</strong> (cómo se hace exactamente). Una política bien formada tiene cinco elementos: alcance, enunciado obligatorio, mecanismo de verificación, ruta formal de excepción y un dueño responsable. Si falta la verificación, es un deseo; si falta la excepción, se incumple en silencio; si falta el dueño, nadie la mantiene y envejece.",
+ nota:""
+},
+
+/* ================= MEDIO ================= */
+{
+ nivel:2, tema:"Arquitectura vs. diseño",
+ escena:"Dentro de un microservicio de tarifación, el equipo debate durante dos días si modelar los tipos de póliza con herencia o con composición. La discusión es intensa y la decisión afecta la mantenibilidad del módulo por años.",
+ pregunta:"¿Se trata de una decisión de arquitectura o de diseño?",
+ opciones:[
+  "De arquitectura, porque afecta un atributo de calidad como la mantenibilidad.",
+  "De diseño: es local al interior de un componente y reversible sin coordinar con otros equipos ni cambiar contratos externos.",
+  "De arquitectura, porque el equipo la va a documentar formalmente.",
+  "De ninguna de las dos: es una preferencia de estilo de programación."
+ ],
+ correcta:1,
+ exp:"El criterio no es <em>cuánto importa</em> ni <em>cuánto se discutió</em>, sino el <strong>alcance y el costo de reversión</strong>. Herencia o composición se puede refactorizar dentro del servicio sin renegociar contratos ni coordinar despliegues ajenos: es diseño. Que afecte la mantenibilidad no lo convierte en arquitectura —casi toda decisión de diseño afecta algún atributo de calidad. Y no es mera preferencia: es una decisión de diseño legítima, con consecuencias reales, que simplemente vive en otro nivel.",
+ nota:"Matiz importante: la frontera es contextual, no absoluta. En un monolito de un solo módulo esa misma decisión puede ser arquitectónica, porque no hay otro lugar donde vivan las decisiones estructurales."
+},
+{
+ nivel:2, tema:"Principios, políticas y estándares",
+ escena:"En el marco de gobierno de una aseguradora se lee: «Toda información personal de clientes debe cifrarse en reposo con llaves gestionadas por la organización. Ningún ambiente no productivo puede contener datos reales sin enmascaramiento previo.»",
+ pregunta:"¿Este enunciado es un principio, una política o un estándar?",
+ opciones:[
+  "Un principio.",
+  "Una política.",
+  "Un estándar.",
+  "Un trade-off documentado."
+ ],
+ correcta:1,
+ exp:"Es una <strong>política</strong>: obligatoria, con alcance delimitado, verificable de forma binaria y susceptible de excepción formal. El <em>principio</em> detrás sería algo como «la privacidad del cliente prevalece sobre la conveniencia del equipo de desarrollo». El <em>estándar</em> correspondiente sería la especificación técnica: AES-256 con el servicio de llaves corporativo y rotación cada 90 días. Distinguir los tres niveles importa porque cada uno se cambia con una cadencia y una autoridad distintas: los principios rara vez, las políticas con revisión periódica, los estándares con la evolución tecnológica.",
+ nota:""
+},
+{
+ nivel:2, tema:"Trade-off",
+ escena:"Un equipo migra a microservicios porque «es el estándar de la industria». Ocho meses después enfrenta transacciones distribuidas, latencia entre servicios y una carga operativa que antes no existía. Nadie registró alternativas ni consecuencias esperadas.",
+ pregunta:"¿Cuál es el problema arquitectónico de fondo?",
+ opciones:[
+  "Que los microservicios son una mala opción arquitectónica para ese tipo de sistema.",
+  "Que se pagó el costo del trade-off sin haberlo elegido conscientemente ni obtener a cambio el beneficio que lo justificaría.",
+  "Que faltó producir el diagrama de arquitectura antes de empezar la migración.",
+  "Que la migración debió hacerse sobre infraestructura de nube en lugar de local."
+ ],
+ correcta:1,
+ exp:"El trade-off <strong>existe se documente o no</strong>: la complejidad distribuida se cobra igual. Lo que distingue el trabajo arquitectónico es hacerlo explícito <em>antes</em>, y verificar que el beneficio buscado —autonomía de despliegue, escalado independiente, aislamiento de fallos— es realmente el que la organización necesita y puede sostener. Adoptar una práctica por imitación, sin el contexto que la hizo válida en otra parte, es una decisión por defecto disfrazada de buena práctica. La pregunta correcta nunca es «¿es esto un buen patrón?» sino «¿qué estoy comprando y con qué lo estoy pagando?».",
+ nota:""
+},
+{
+ nivel:2, tema:"Principios",
+ escena:"Un principio de la organización dice: «Preferimos soluciones simples sobre soluciones sofisticadas». Un equipo lo invoca para rechazar la incorporación de un circuit breaker en una integración crítica con un tercero notoriamente inestable.",
+ pregunta:"¿Cuál es la lectura correcta de la situación?",
+ opciones:[
+  "El equipo aplica correctamente el principio: la simplicidad debe prevalecer.",
+  "El principio está mal formulado: sin criterio de aplicación ni orden de prelación frente a otros principios, se convierte en un comodín retórico.",
+  "Los principios de arquitectura no aplican a decisiones de integración con terceros.",
+  "El principio debe eliminarse del marco porque genera confusión."
+ ],
+ correcta:1,
+ exp:"Un principio útil no es una consigna: incluye <strong>enunciado, razón, implicaciones y relación con los demás principios</strong>. Sin orden de prelación explícito, cualquier principio puede citarse para justificar cualquier cosa —y en la práctica se usa para cerrar discusiones, no para orientarlas. Aquí además hay un error conceptual: la simplicidad se está midiendo sobre el código en lugar de sobre el sistema en operación. Un fallo en cascada por ausencia de aislamiento es incomparablemente más complejo de diagnosticar y operar que un circuit breaker. Derogar el principio tampoco resuelve nada: el problema no es el principio, es su formulación incompleta.",
+ nota:""
+},
+{
+ nivel:2, tema:"Atributos de calidad y tácticas",
+ pregunta:"¿Cuál de los siguientes NO es un atributo de calidad sino una decisión de solución?",
+ opciones:[
+  "Disponibilidad del 99,95 % mensual medida sobre la transacción de consulta.",
+  "Recuperación ante desastre con un RTO de 4 horas y un RPO de 15 minutos.",
+  "Réplica activa-pasiva del clúster de datos en una segunda región de nube.",
+  "Tiempo de respuesta P95 inferior a 300 ms bajo carga pico."
+ ],
+ correcta:2,
+ exp:"La réplica activa-pasiva es una <strong>táctica</strong>: un medio para alcanzar el objetivo de recuperación expresado como RTO y RPO. Las otras tres son atributos de calidad porque expresan un <em>requisito medible</em> sin prescribir cómo se logra. Confundir el atributo con la táctica cierra el análisis de alternativas antes de abrirlo: el mismo RTO de 4 horas puede alcanzarse con backup y restauración, con <em>pilot light</em>, con <em>warm standby</em> o con activo-activo, y el rango de costo entre esas opciones puede ser de diez a uno. Cuando el requisito llega ya escrito como solución, el primer trabajo del arquitecto es traducirlo de vuelta a atributo.",
+ nota:""
+},
+
+/* ================= DIFÍCIL ================= */
+{
+ nivel:3, tema:"Trade-off · ATAM",
+ escena:"En un análisis de arquitectura se identifican dos parámetros ajustables. Aumentar el factor de replicación mejora la disponibilidad y degrada la latencia de escritura. Aumentar el tamaño de la caché mejora la latencia de lectura y no afecta de forma relevante a ningún otro atributo.",
+ pregunta:"Según la terminología de ATAM, ¿cómo se clasifica cada uno?",
+ opciones:[
+  "Ambos son puntos de trade-off, porque ambos son parámetros de decisión.",
+  "El factor de replicación es un punto de trade-off; el tamaño de caché es un punto de sensibilidad.",
+  "Ambos son puntos de sensibilidad, porque ambos afectan atributos de calidad.",
+  "El tamaño de caché es el trade-off y la replicación es el punto de sensibilidad."
+ ],
+ correcta:1,
+ exp:"Un <strong>punto de sensibilidad</strong> es una decisión cuyo ajuste mueve significativamente <em>un</em> atributo de calidad. Un <strong>punto de trade-off</strong> es una decisión que es punto de sensibilidad para <em>dos o más</em> atributos que se mueven en direcciones opuestas. De ahí que todo punto de trade-off sea también un punto de sensibilidad, pero no al revés. La distinción tiene valor práctico directo: los puntos de sensibilidad se optimizan; los puntos de trade-off se <em>negocian</em> con los interesados, porque implican decidir qué se sacrifica y a nombre de quién. Llevar a un comité un punto de sensibilidad es hacerle perder el tiempo; resolver en solitario un punto de trade-off es tomar por cuenta propia una decisión de negocio.",
+ nota:""
+},
+{
+ nivel:3, tema:"Políticas y gobierno",
+ escena:"Una política establece que toda API expuesta a terceros debe atravesar el API Gateway corporativo. Un equipo solicita excepción para un canal de alta frecuencia donde el salto adicional consume el 40 % de su presupuesto de latencia.",
+ pregunta:"¿Cuál es la respuesta arquitectónicamente correcta?",
+ opciones:[
+  "Negar la solicitud: una política que admite excepciones deja de ser una política.",
+  "Aprobarla de manera informal para no frenar al equipo, y regularizarla más adelante.",
+  "Tramitarla por el mecanismo formal de excepción: evidencia del impacto, controles compensatorios, dueño del riesgo, vigencia y condición de retorno.",
+  "Derogar la política, porque un caso que no cubre demuestra que está mal concebida."
+ ],
+ correcta:2,
+ exp:"Una política sin <strong>ruta formal de excepción</strong> tiene solo dos destinos: se vuelve letra muerta o se incumple en silencio, que es peor porque destruye la trazabilidad. La excepción bien gobernada conserva el control y además genera información: si el mismo tipo de excepción se solicita repetidamente, la señal es que la política está mal calibrada y debe revisarse —esa es la retroalimentación que mantiene vivo el marco de gobierno. Dos detalles suelen olvidarse y son los que marcan la diferencia: la <em>vigencia temporal</em> y la <em>condición de retorno</em>. Sin ellas, toda excepción se vuelve permanente y el marco se erosiona excepción por excepción, hasta que la política solo se aplica a quienes no saben pedir excepciones.",
+ nota:"En el rol de arquitecto de gobierno, la tasa de excepciones por política es uno de los indicadores más útiles que se pueden instrumentar: mide la calidad del marco, no la disciplina de los equipos."
+},
+{
+ nivel:3, tema:"Arquitectura como decisión sociotécnica",
+ escena:"Una organización tiene cuatro equipos especializados por capa —frontend, backend, base de datos e integración— y decide migrar a una arquitectura orientada a dominios de negocio, con equipos responsables de extremo a extremo.",
+ pregunta:"¿Cuál afirmación es la más precisa?",
+ opciones:[
+  "Basta con rediseñar los servicios por dominio; la estructura de equipos es un asunto de gestión de personas, no de arquitectura.",
+  "La arquitectura objetivo entra en conflicto con la estructura de comunicación existente; sin una maniobra inversa de Conway, el diseño resultante replicará las fronteras actuales.",
+  "La ley de Conway solo se manifiesta en organizaciones grandes, por encima de varios centenares de personas.",
+  "La estructura por capas es la que mejor garantiza el aislamiento entre dominios de negocio."
+ ],
+ correcta:1,
+ exp:"La ley de Conway sostiene que el diseño de un sistema tiende a reproducir la estructura de comunicación de la organización que lo construye. La <strong>maniobra inversa de Conway</strong> invierte la relación: se reorganizan los equipos para que sus fronteras coincidan con las fronteras arquitectónicas deseadas. Si no se hace, los límites entre dominios se erosionan por una razón económica simple: coordinar dentro del equipo siempre es más barato que coordinar entre equipos, así que el diseño migra hacia donde la comunicación fluye. Con equipos por capa, cada cambio de dominio requiere coordinar cuatro agendas, y el resultado predecible es un conjunto de servicios que en el diagrama parecen dominios y en la práctica se comportan como capas. Aquí está una de las tesis centrales del pensamiento arquitectónico: la arquitectura es una decisión <em>sociotécnica</em>, y la estructura organizacional es material de diseño, no contexto dado.",
+ nota:""
+},
+{
+ nivel:3, tema:"Principios y contexto",
+ escena:"Un principio de la organización establece: «Ante conflicto entre disponibilidad y consistencia, priorizamos disponibilidad». El equipo del módulo de débito de cuentas lo aplica y acepta consistencia eventual en los saldos.",
+ pregunta:"¿La aplicación del principio es correcta?",
+ opciones:[
+  "Sí: los principios rigen de manera uniforme sobre todo el sistema, esa es su función.",
+  "No: los principios declaran un comportamiento por defecto, no una ley universal, y ceden ante restricciones regulatorias o de dominio como el movimiento de dinero.",
+  "Sí, siempre que la decisión quede documentada en un registro de decisión arquitectónica.",
+  "No, porque los principios de arquitectura no aplican a decisiones sobre datos."
+ ],
+ correcta:1,
+ exp:"Un principio fija el <strong>comportamiento por defecto</strong> y reduce el costo de deliberar cada vez, pero no sustituye el análisis en los contextos donde la consecuencia cambia de naturaleza. En el movimiento de dinero, un sobregiro producido por consistencia eventual no es una molestia de experiencia de usuario: es un impacto contable, regulatorio y de confianza. Aquí caben dos lecturas complementarias. La primera: el principio necesita declarar explícitamente su <em>alcance</em> y sus dominios de excepción —de lo contrario induce errores donde más caros son. La segunda: si el requisito de disponibilidad sobre el débito es real, la salida no es escoger uno de los dos extremos sino diseñar el mecanismo —reserva de fondos, transacción compensatoria, saga con límite de exposición— que preserve ambos atributos dentro de un margen conocido. Dejar registro de la decisión es necesario, pero no vuelve correcta una decisión equivocada.",
+ nota:""
+},
+{
+ nivel:3, tema:"Definición de arquitectura",
+ pregunta:"«La arquitectura son las decisiones difíciles de cambiar.» ¿En qué sentido esta definición resulta insuficiente?",
+ opciones:[
+  "No es insuficiente: describe de forma completa el alcance del trabajo arquitectónico.",
+  "Es útil como heurística, pero describe un estado y omite que parte del trabajo arquitectónico consiste precisamente en reducir el costo de cambio futuro.",
+  "Es incorrecta: la arquitectura es el conjunto de diagramas de componentes y despliegue del sistema.",
+  "Es incorrecta porque en software moderno ninguna decisión es realmente difícil de cambiar."
+ ],
+ correcta:1,
+ exp:"La formulación de Fowler es una excelente herramienta de <em>diagnóstico</em>: permite reconocer, en un sistema dado, cuáles decisiones son estructurales. Pero describe el sistema tal como está y puede leerse como una invitación al fatalismo —«esto es caro de cambiar, por lo tanto hay que acertar a la primera»—, que es exactamente el razonamiento que produce el diseño anticipado exhaustivo. La arquitectura evolutiva reencuadra la responsabilidad: además de tomar bien las decisiones costosas, el trabajo consiste en <strong>hacer que menos decisiones sean costosas</strong>. Modularidad con fronteras bien puestas, contratos versionados, aislamiento de dependencias, funciones de aptitud que protegen las características deseadas y el hábito de tomar cada decisión en el último momento responsable. Las dos visiones no compiten: la primera dice dónde mirar, la segunda dice qué hacer con lo que se encuentra.",
+ nota:"Pregunta útil para abrir una sesión de mentoría: pídele a la persona que nombre una decisión cara de su sistema y luego que diseñe cómo la volvería barata. Ahí se ve el nivel."
+}
+];
+
+// La opción correcta no debe caer siempre en la misma posición: se rota
+// cada bloque de opciones con un desplazamiento fijo y estable.
+const ROT = [0,2,3,1,2,3,1,0,3,2,1,3,0,2,1];
+BANCO.forEach((q,idx)=>{
+  const n = q.opciones.length, off = ROT[idx] % n;
+  if(!off) return;
+  q.opciones = q.opciones.map((_,k)=> q.opciones[(k+off)%n]);
+  q.correcta = (q.correcta - off + n) % n;
+});
+
+const NIV = {1:"Fácil", 2:"Medio", 3:"Difícil"};
+const LETRAS = ["A","B","C","D"];
+
+let i = 0;              // índice de pregunta
+let fase = "pregunta";  // "pregunta" | "respuesta"
+let elegida = null;
+const respuestas = new Array(BANCO.length).fill(null);
+
+const $esc = document.getElementById("escenario");
+const $act = document.getElementById("acciones");
+
+function aciertos(){
+  return respuestas.reduce((a,r,k)=> a + (r!==null && r===BANCO[k].correcta ? 1:0), 0);
+}
+
+function pintarEstado(){
+  document.getElementById("n-actual").textContent = Math.min(i+1, BANCO.length);
+  document.getElementById("n-ok").textContent = aciertos();
+  document.getElementById("et-nivel").textContent = i < BANCO.length ? "Nivel " + NIV[BANCO[i].nivel].toLowerCase() : "Cuestionario terminado";
+  const pct = (fase==="respuesta" ? i+1 : i) / BANCO.length * 100;
+  document.getElementById("barra").style.width = pct + "%";
+}
+
+function esc(s){ return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+function render(){
+  if(i >= BANCO.length){ renderFinal(); return; }
+  const q = BANCO[i];
+  const cls = "card l" + q.nivel;
+
+  let html = '<article class="'+cls+'">';
+  html += '<div class="card-top"><span class="num">'+(i+1)+'</span>';
+  html += '<span class="lvl">'+NIV[q.nivel]+'</span>';
+  html += '<span class="tema">'+esc(q.tema)+'</span></div>';
+  if(q.escena) html += '<p class="escena">'+esc(q.escena)+'</p>';
+  html += '<h2 class="pregunta">'+esc(q.pregunta)+'</h2>';
+
+  html += '<div class="opts" role="group" aria-label="Opciones de respuesta">';
+  q.opciones.forEach((o,k)=>{
+    let extra = "", dis = "", press = "false";
+    if(fase === "respuesta"){
+      dis = " disabled";
+      if(k === q.correcta) extra = " mark-ok";
+      else if(k === elegida) extra = " mark-no";
+    } else if(k === elegida){ press = "true"; }
+    html += '<button class="opt'+extra+'" data-k="'+k+'" aria-pressed="'+press+'"'+dis+'>'
+          + '<span class="k">'+LETRAS[k]+'</span><span>'+esc(o)+'</span></button>';
+  });
+  html += '</div>';
+
+  if(fase === "respuesta"){
+    const ok = elegida === q.correcta;
+    const veredicto = elegida === null ? "Respuesta" : (ok ? "Correcto" : "No es la respuesta");
+    const clase = elegida === null ? "" : (ok ? " ok" : " no");
+    html += '<p class="veredicto'+clase+'">'+veredicto+'</p>';
+    html += '<p class="clave">La opción correcta es la '+LETRAS[q.correcta]+'.</p>';
+    html += '<p class="exp-title">Por qué</p>';
+    html += '<p class="exp">'+q.exp+'</p>';
+    if(q.nota) html += '<p class="nota">'+q.nota+'</p>';
+  }
+
+  html += '</article>';
+  $esc.innerHTML = html;
+
+  if(fase === "pregunta"){
+    $esc.querySelectorAll(".opt").forEach(b=>{
+      b.addEventListener("click", ()=>{ elegida = Number(b.dataset.k); render(); });
+    });
+  }
+
+  // Acciones
+  if(fase === "pregunta"){
+    $act.innerHTML = '<button class="act" id="ver"'+(elegida===null?' disabled':'')+'>Ver respuesta</button>'
+                   + '<button class="act ghost" id="saltar">No sé, muéstrame la explicación</button>';
+    const ver = document.getElementById("ver");
+    if(elegida!==null) ver.addEventListener("click", revelar);
+    document.getElementById("saltar").addEventListener("click", ()=>{ elegida=null; revelar(); });
+  } else {
+    const ultimo = i === BANCO.length-1;
+    $act.innerHTML = '<button class="act" id="sig">'+(ultimo?"Ver resultado":"Siguiente pregunta")+'</button>';
+    document.getElementById("sig").addEventListener("click", ()=>{
+      i++; fase="pregunta"; elegida=null; render();
+      window.scrollTo({top:0, behavior:"smooth"});
+    });
+  }
+  pintarEstado();
+}
+
+function revelar(){
+  respuestas[i] = elegida;
+  fase = "respuesta";
+  render();
+}
+
+function renderFinal(){
+  const total = BANCO.length, ok = aciertos();
+  const porNivel = {1:[0,0],2:[0,0],3:[0,0]};
+  BANCO.forEach((q,k)=>{
+    porNivel[q.nivel][1]++;
+    if(respuestas[k] === q.correcta) porNivel[q.nivel][0]++;
+  });
+
+  let cierre;
+  const r = ok/total;
+  if(r >= 0.87) cierre = "Dominas las distinciones conceptuales. El siguiente paso no es más teoría: es aplicar el marco a un sistema real con datos de operación.";
+  else if(r >= 0.6) cierre = "Base sólida. Las diferencias finas —sensibilidad frente a trade-off, política frente a estándar— son las que conviene repasar antes de facilitar una sesión con un equipo.";
+  else cierre = "Vale la pena volver sobre las definiciones. La confusión más común y más costosa es tratar principios, políticas y decisiones como si fueran el mismo tipo de artefacto.";
+
+  let html = '<section class="final">';
+  html += '<h2>Resultado</h2>';
+  html += '<p class="puntaje">'+ok+' / '+total+'</p>';
+  html += '<p class="sub">'+cierre+'</p>';
+  html += '<ul class="desglose">';
+  [1,2,3].forEach(n=>{
+    const [a,t] = porNivel[n];
+    html += '<li><span>'+NIV[n]+'</span><span class="bar"><i style="width:'+(t?a/t*100:0)+'%"></i></span><span>'+a+'/'+t+'</span></li>';
+  });
+  html += '</ul></section>';
+  $esc.innerHTML = html;
+
+  $act.innerHTML = '<button class="act" id="rev">Repasar desde la primera</button>';
+  document.getElementById("rev").addEventListener("click", ()=>{
+    i=0; fase="pregunta"; elegida=null;
+    respuestas.fill(null);
+    render(); window.scrollTo({top:0,behavior:"smooth"});
+  });
+  pintarEstado();
+}
+
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TicketRight — Selección de localidad</title>
+<link rel="stylesheet" href="estilos.css">
+<script>(function(){try{document.documentElement.setAttribute('data-tema', localStorage.getItem('tr-tema')||'dark');}catch(e){}})();</script>
+<script>
+  window.ESTADOS_SIMULADOS = {
+    grupo: "seleccion",
+    inicial: "normal",
+    opciones: [
+      { valor: "normal", etiqueta: "Con disponibilidad" },
+      { valor: "agotado", etiqueta: "Error — aforo agotado" }
+    ]
+  };
+  window.alCambiarEstadoSimulado = function () {
+    document.querySelectorAll('[data-grupo-panel="seleccion"].visible .relleno').forEach(function (r) {
+      r.style.width = '0%';
+      requestAnimationFrame(function () { setTimeout(function () { r.style.width = r.getAttribute('data-ancho') + '%'; }, 30); });
+    });
+  };
+</script>
+</head>
+<body>
+<div class="app-layout">
+  <aside class="barra-lateral" id="barra-lateral"></aside>
+  <main class="contenido-principal">
+    <div class="contenedor">
+
+      <div class="encabezado-pagina">
+        <span class="etiqueta">Turno admitido · vence en 04:12</span>
+        <h1>Elige tu localidad</h1>
+      </div>
+
+      <div data-estado-panel="normal" data-grupo-panel="seleccion" class="visible">
+        <div class="barra-evento">
+          <div class="miniatura">🎪</div>
+          <div>
+            <h2>Cardio Fest — Estéreo Picnic</h2>
+            <p>Parque O2, Bogotá · sáb. 21 de marzo, 4:00 p.m.</p>
+          </div>
+        </div>
+
+        <div class="mapa-layout">
+          <div class="mapa-recinto">
+            <svg viewBox="0 0 600 340" width="100%">
+              <rect x="220" y="16" width="160" height="46" rx="4" fill="var(--color-bg)" stroke="var(--color-text-muted)" stroke-width="1.5"></rect>
+              <text x="300" y="43" text-anchor="middle" fill="var(--color-text-muted)" style="font:700 12px var(--font-heading);letter-spacing:.05em">ESCENARIO</text>
+
+              <!-- General: el anillo grande — 5.000 cupos, la mayoría del recinto -->
+              <g class="zona seleccionada" data-zona="general" onclick="seleccionarZona('general')"
+                role="button" tabindex="0" aria-pressed="true" aria-label="Zona General, 120 disponibles"
+                onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();seleccionarZona('general')}">
+                <path d="M70,74 A230,230 0 1,0 530,74 L360,74 A60,60 0 1,1 240,74 Z"
+                  fill="var(--color-primary-soft)" stroke="var(--color-primary)" stroke-width="1.5"></path>
+                <!-- filas decorativas concéntricas, sugieren el graderío -->
+                <path d="M155,74 A145,145 0 1,0 445,74" fill="none" stroke="var(--color-border)" stroke-width="1"></path>
+                <!-- secciones decorativas: divide el anillo en gradas, como en un estadio real -->
+                <g stroke="var(--color-border)" stroke-width="1">
+                  <line x1="245" y1="97" x2="88" y2="162"></line>
+                  <line x1="258" y1="116" x2="137" y2="237"></line>
+                  <line x1="277" y1="129" x2="212" y2="287"></line>
+                  <line x1="300" y1="134" x2="300" y2="304"></line>
+                  <line x1="323" y1="129" x2="388" y2="287"></line>
+                  <line x1="342" y1="116" x2="463" y2="237"></line>
+                  <line x1="355" y1="97" x2="513" y2="162"></line>
+                </g>
+                <text class="zona-etiqueta" x="300" y="225" text-anchor="middle" fill="var(--color-accent-text)">General</text>
+                <text class="zona-subetiqueta" x="300" y="244" text-anchor="middle" fill="var(--color-accent-text)">120 disponibles</text>
+              </g>
+
+              <!-- Platino: el anillo interno, pequeño — 800 cupos, pegado al escenario -->
+              <g class="zona" data-zona="platino" onclick="seleccionarZona('platino')"
+                role="button" tabindex="0" aria-pressed="false" aria-label="Zona Platino, agotada"
+                onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();seleccionarZona('platino')}">
+                <path d="M240,74 A60,60 0 1,0 360,74 Z"
+                  fill="var(--color-warning-soft)" stroke="var(--color-warning)" stroke-width="1.5"></path>
+                <text class="zona-etiqueta" x="300" y="98" text-anchor="middle" fill="var(--color-warning)" style="font-size:12px">Platino</text>
+                <text class="zona-subetiqueta" x="300" y="113" text-anchor="middle" fill="var(--color-warning)" style="font-size:9px">🔥 Agotado</text>
+              </g>
+            </svg>
+
+            <div class="leyenda-mapa">
+              <span><span class="muestra" style="background:var(--color-primary)"></span>Disponible</span>
+              <span><span class="muestra" style="background:var(--color-warning)"></span>Pocas / agotado</span>
+            </div>
+          </div>
+
+          <div class="panel-detalle">
+            <div class="tarjeta" id="panel-general">
+              <h3>General</h3>
+              <div class="fila-datos"><span class="k">Precio nominal</span><span class="v">$200.000</span></div>
+              <div class="barra-disponibilidad">
+                <div class="rotulo"><span class="k">Vendido</span><span>4.700 / 5.000</span></div>
+                <div class="pista"><div class="relleno" data-ancho="94"></div></div>
+                <div class="detalle"><span>180 reservadas ahora mismo</span><span>120 disponibles</span></div>
+              </div>
+              <div style="margin-top:16px">
+                <label style="display:block;font-size:13px;font-weight:600;color:var(--color-text-muted);margin-bottom:6px">Cantidad (máx. 4 por fan)</label>
+                <div class="contador">
+                  <button type="button" id="btn-menos" onclick="cambiarCantidad(-1)" aria-label="Quitar una entrada">−</button>
+                  <span class="cifra" id="cifra-cantidad">1</span>
+                  <button type="button" id="btn-mas" onclick="cambiarCantidad(1)" aria-label="Agregar una entrada">+</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="tarjeta" id="panel-platino" style="display:none">
+              <h3>Platino (numerada)</h3>
+              <div class="fila-datos"><span class="k">Precio nominal</span><span class="v">$450.000</span></div>
+              <div class="barra-disponibilidad">
+                <div class="rotulo"><span class="k">Vendido</span><span>800 / 800</span></div>
+                <div class="pista"><div class="relleno peligro" data-ancho="100"></div></div>
+              </div>
+              <p style="margin-top:16px;font-size:13px;color:var(--color-text-muted)">Sin sillas disponibles en esta localidad.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="barra-total" id="barra-total">
+          <div class="info">
+            <span class="k" id="total-detalle">1 entrada · General</span>
+            <span class="v" id="total-cifra">$244.000</span>
+          </div>
+          <a href="fan-reserva.html" class="btn btn-primario" id="btn-reservar">Reservar</a>
+        </div>
+      </div>
+
+      <div data-estado-panel="agotado" data-grupo-panel="seleccion">
+        <div class="tarjeta">
+          <div class="alerta alerta-peligro">
+            <strong>Ya no hay unidades disponibles en General</strong>
+            Entre que confirmabas y se procesaba tu solicitud, otros fans agotaron esta
+            localidad. No se te cobró nada.
+          </div>
+          <div class="barra-disponibilidad">
+            <div class="rotulo"><span class="k">Aforo autorizado</span><span>5.000</span></div>
+            <div class="pista"><div class="relleno peligro" data-ancho="100"></div></div>
+          </div>
+          <a href="fan-eventos.html" class="btn btn-secundario btn-ancho" style="margin-top:16px">Ver otros eventos</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+<script src="nav.js"></script>
+<script>
+  var ZONAS = {
+    general: { nombre: 'General', precioNominal: 200000, limite: 4, disponible: true },
+    platino: { nombre: 'Platino', precioNominal: 450000, limite: 4, disponible: false }
+  };
+  var zonaActual = 'general';
+  var cantidad = 1;
+
+  function formatoCOP(valor) {
+    return '$' + Math.round(valor).toLocaleString('es-CO');
+  }
+
+  function pintarTotal() {
+    var zona = ZONAS[zonaActual];
+    var barra = document.getElementById('barra-total');
+    if (!zona.disponible) { barra.style.display = 'none'; return; }
+    barra.style.display = 'flex';
+
+    var nominal = zona.precioNominal * cantidad;
+    var cargoServicio = nominal * 0.12;
+    var parafiscal = nominal * 0.10;
+    var total = nominal + cargoServicio + parafiscal;
+
+    document.getElementById('total-detalle').textContent =
+      cantidad + (cantidad === 1 ? ' entrada · ' : ' entradas · ') + zona.nombre;
+    document.getElementById('total-cifra').textContent = formatoCOP(total);
+    document.getElementById('btn-reservar').textContent = 'Reservar ' + zona.nombre;
+
+    document.getElementById('cifra-cantidad').textContent = cantidad;
+    document.getElementById('btn-menos').disabled = cantidad <= 1;
+    document.getElementById('btn-mas').disabled = cantidad >= zona.limite;
+  }
+
+  function cambiarCantidad(delta) {
+    var zona = ZONAS[zonaActual];
+    var nueva = cantidad + delta;
+    if (nueva < 1 || nueva > zona.limite) return;
+    cantidad = nueva;
+    pintarTotal();
+  }
+
+  function seleccionarZona(zona) {
+    zonaActual = zona;
+    cantidad = 1;
+    document.querySelectorAll('.zona').forEach(function (z) {
+      var esta = z.dataset.zona === zona;
+      z.classList.toggle('seleccionada', esta);
+      z.setAttribute('aria-pressed', esta ? 'true' : 'false');
+    });
+    document.getElementById('panel-general').style.display = zona === 'general' ? 'block' : 'none';
+    document.getElementById('panel-platino').style.display = zona === 'platino' ? 'block' : 'none';
+    pintarTotal();
+  }
+
+  pintarTotal();
+</script>
+</body>
+</html>

@@ -1,0 +1,829 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Modelo de dominio de TicketRight",
+    "quality_profile": "standard",
+    "viewBox": [
+      2780,
+      1262
+    ],
+    "legend": {
+      "mode": "hidden"
+    },
+    "views": [
+      {
+        "id": "admision",
+        "label": "1 · Admisión e identidad",
+        "focus": [
+          "identidad",
+          "fan",
+          "consentimiento",
+          "filaVenta",
+          "turno"
+        ],
+        "note": "Quién puede intentar comprar: identidad aislada, consentimiento y turno."
+      },
+      {
+        "id": "oferta",
+        "label": "2 · Oferta de eventos",
+        "focus": [
+          "promotor",
+          "recinto",
+          "evento",
+          "localidad",
+          "silla"
+        ],
+        "note": "Qué se vende: promotor, recinto, evento, localidad y silla."
+      },
+      {
+        "id": "venta",
+        "label": "3 · Venta y recaudo",
+        "focus": [
+          "reserva",
+          "itemReserva",
+          "pago",
+          "devolucion",
+          "discrepancia",
+          "liquidacion",
+          "movimiento"
+        ],
+        "note": "El camino del dinero: reserva, pago, discrepancia y liquidación."
+      },
+      {
+        "id": "derecho",
+        "label": "4 · Derecho de asistencia",
+        "focus": [
+          "boleta",
+          "reventa",
+          "titularidad",
+          "transferencia",
+          "titular"
+        ],
+        "note": "La boleta y su posesión: una sola titularidad vigente."
+      }
+    ]
+  },
+  "components": [
+    {
+      "id": "fan",
+      "type": "backend",
+      "label": "Fan",
+      "sublabel": "Participa en la venta",
+      "tag": "RAÍZ",
+      "pos": [
+        450,
+        130
+      ],
+      "size": [
+        280,
+        109
+      ]
+    },
+    {
+      "id": "consentimiento",
+      "type": "external",
+      "label": "Consentimiento",
+      "sublabel": "Finalidad autorizada",
+      "tag": "E · Fan",
+      "pos": [
+        850,
+        130
+      ],
+      "size": [
+        240,
+        109
+      ]
+    },
+    {
+      "id": "identidad",
+      "type": "backend",
+      "label": "Identidad",
+      "sublabel": "Datos personales aislados",
+      "tag": "RAÍZ",
+      "pos": [
+        80,
+        110
+      ],
+      "size": [
+        250,
+        135
+      ]
+    },
+    {
+      "id": "filaVenta",
+      "type": "backend",
+      "label": "Fila de venta",
+      "sublabel": "Ordena los intentos",
+      "tag": "RAÍZ",
+      "pos": [
+        450,
+        330
+      ],
+      "size": [
+        280,
+        174
+      ]
+    },
+    {
+      "id": "turno",
+      "type": "external",
+      "label": "Turno",
+      "sublabel": "Permiso para intentar",
+      "tag": "E · Fila de venta",
+      "pos": [
+        850,
+        330
+      ],
+      "size": [
+        250,
+        148
+      ]
+    },
+    {
+      "id": "promotor",
+      "type": "backend",
+      "label": "Promotor",
+      "sublabel": "Organiza y comercializa",
+      "tag": "RAÍZ",
+      "pos": [
+        80,
+        600
+      ],
+      "size": [
+        250,
+        174
+      ]
+    },
+    {
+      "id": "recinto",
+      "type": "backend",
+      "label": "Recinto",
+      "sublabel": "Lugar autorizado",
+      "tag": "RAÍZ",
+      "pos": [
+        80,
+        810
+      ],
+      "size": [
+        250,
+        109
+      ]
+    },
+    {
+      "id": "evento",
+      "type": "backend",
+      "label": "Evento",
+      "sublabel": "La oferta comercial",
+      "tag": "RAÍZ",
+      "pos": [
+        450,
+        600
+      ],
+      "size": [
+        280,
+        317
+      ]
+    },
+    {
+      "id": "localidad",
+      "type": "backend",
+      "label": "Localidad",
+      "sublabel": "Unidad de inventario",
+      "tag": "RAÍZ",
+      "pos": [
+        850,
+        620
+      ],
+      "size": [
+        250,
+        174
+      ]
+    },
+    {
+      "id": "silla",
+      "type": "external",
+      "label": "Silla",
+      "sublabel": "Unidad numerada",
+      "tag": "E · Localidad",
+      "pos": [
+        850,
+        820
+      ],
+      "size": [
+        250,
+        109
+      ]
+    },
+    {
+      "id": "reserva",
+      "type": "backend",
+      "label": "Reserva",
+      "sublabel": "Inventario comprometido",
+      "tag": "RAÍZ",
+      "pos": [
+        1640,
+        110
+      ],
+      "size": [
+        280,
+        161
+      ]
+    },
+    {
+      "id": "itemReserva",
+      "type": "external",
+      "label": "Ítem de reserva",
+      "sublabel": "Localidad y silla comprometidas",
+      "tag": "E · Reserva",
+      "pos": [
+        1640,
+        300
+      ],
+      "size": [
+        280,
+        161
+      ]
+    },
+    {
+      "id": "pago",
+      "type": "backend",
+      "label": "Pago",
+      "sublabel": "Resultado económico trazable",
+      "tag": "RAÍZ",
+      "pos": [
+        1640,
+        530
+      ],
+      "size": [
+        280,
+        213
+      ]
+    },
+    {
+      "id": "devolucion",
+      "type": "external",
+      "label": "Devolución",
+      "sublabel": "Reversión total o parcial",
+      "tag": "E · Pago",
+      "pos": [
+        1220,
+        530
+      ],
+      "size": [
+        300,
+        148
+      ]
+    },
+    {
+      "id": "discrepancia",
+      "type": "backend",
+      "label": "Discrepancia",
+      "sublabel": "Caso abierto de conciliación",
+      "tag": "RAÍZ",
+      "pos": [
+        1640,
+        800
+      ],
+      "size": [
+        280,
+        148
+      ]
+    },
+    {
+      "id": "liquidacion",
+      "type": "backend",
+      "label": "Liquidación",
+      "sublabel": "Cierre conciliado del promotor",
+      "tag": "RAÍZ",
+      "pos": [
+        1220,
+        800
+      ],
+      "size": [
+        300,
+        187
+      ]
+    },
+    {
+      "id": "movimiento",
+      "type": "external",
+      "label": "Movimiento",
+      "sublabel": "Hecho económico conciliado",
+      "tag": "E · Liquidación",
+      "pos": [
+        1220,
+        1030
+      ],
+      "size": [
+        300,
+        122
+      ]
+    },
+    {
+      "id": "boleta",
+      "type": "backend",
+      "label": "Boleta",
+      "sublabel": "Derecho verificable de ingreso",
+      "tag": "RAÍZ",
+      "pos": [
+        2040,
+        510
+      ],
+      "size": [
+        300,
+        252
+      ]
+    },
+    {
+      "id": "reventa",
+      "type": "external",
+      "label": "Reventa",
+      "sublabel": "Compraventa autorizada",
+      "tag": "E · Boleta",
+      "pos": [
+        2040,
+        810
+      ],
+      "size": [
+        300,
+        161
+      ]
+    },
+    {
+      "id": "titularidad",
+      "type": "external",
+      "label": "Titularidad",
+      "sublabel": "Intervalo de posesión",
+      "tag": "E · Boleta",
+      "pos": [
+        2460,
+        530
+      ],
+      "size": [
+        280,
+        122
+      ]
+    },
+    {
+      "id": "transferencia",
+      "type": "external",
+      "label": "Transferencia",
+      "sublabel": "Cambio sin compraventa",
+      "tag": "E · Boleta",
+      "pos": [
+        2460,
+        690
+      ],
+      "size": [
+        280,
+        135
+      ]
+    },
+    {
+      "id": "titular",
+      "type": "external",
+      "label": "Titular",
+      "sublabel": "Quien posee el derecho",
+      "tag": "E · Boleta",
+      "pos": [
+        2460,
+        870
+      ],
+      "size": [
+        280,
+        109
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "Contexto: admisión e identidad",
+      "wraps": [
+        "fan",
+        "consentimiento",
+        "identidad",
+        "filaVenta",
+        "turno"
+      ],
+      "pad": 30
+    },
+    {
+      "kind": "region",
+      "label": "Contexto: oferta de eventos",
+      "wraps": [
+        "promotor",
+        "recinto",
+        "evento",
+        "localidad",
+        "silla"
+      ],
+      "pad": 30
+    },
+    {
+      "kind": "region",
+      "label": "Contexto: venta y recaudo",
+      "wraps": [
+        "reserva",
+        "itemReserva",
+        "pago",
+        "devolucion",
+        "discrepancia",
+        "liquidacion",
+        "movimiento"
+      ],
+      "pad": 30
+    },
+    {
+      "kind": "region",
+      "label": "Contexto: derecho de asistencia",
+      "wraps": [
+        "boleta",
+        "reventa",
+        "titularidad",
+        "transferencia",
+        "titular"
+      ],
+      "pad": 30
+    },
+    {
+      "kind": "security-group",
+      "label": "Agregado Fan",
+      "wraps": [
+        "fan",
+        "consentimiento"
+      ],
+      "pad": 12
+    },
+    {
+      "kind": "security-group",
+      "label": "Agregado Fila de venta",
+      "wraps": [
+        "filaVenta",
+        "turno"
+      ],
+      "pad": 12
+    },
+    {
+      "kind": "security-group",
+      "label": "Agregado Localidad",
+      "wraps": [
+        "localidad",
+        "silla"
+      ],
+      "pad": 12
+    },
+    {
+      "kind": "security-group",
+      "label": "Agregado Reserva",
+      "wraps": [
+        "reserva",
+        "itemReserva"
+      ],
+      "pad": 12
+    },
+    {
+      "kind": "security-group",
+      "label": "Agregado Pago",
+      "wraps": [
+        "pago",
+        "devolucion"
+      ],
+      "pad": 12
+    },
+    {
+      "kind": "security-group",
+      "label": "Agregado Liquidación",
+      "wraps": [
+        "liquidacion",
+        "movimiento"
+      ],
+      "pad": 12
+    },
+    {
+      "kind": "security-group",
+      "label": "Agregado Boleta",
+      "wraps": [
+        "boleta",
+        "reventa",
+        "titularidad",
+        "transferencia",
+        "titular"
+      ],
+      "pad": 12
+    }
+  ],
+  "connections": [
+    {
+      "id": "promotor-organiza-evento",
+      "from": "promotor",
+      "to": "evento",
+      "label": "organiza · 1:0..*",
+      "variant": "emphasis",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "recinto-alberga-evento",
+      "from": "recinto",
+      "to": "evento",
+      "label": "alberga · 1:0..*",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "evento-define-localidad",
+      "from": "evento",
+      "to": "localidad",
+      "label": "define · 1:1..*",
+      "variant": "emphasis",
+      "fromSide": "right",
+      "toSide": "left",
+      "labelAt": [
+        790.0,
+        673.0
+      ]
+    },
+    {
+      "id": "evento-controla-fila",
+      "from": "evento",
+      "to": "filaVenta",
+      "label": "controla · 1:1",
+      "fromSide": "top",
+      "toSide": "bottom",
+      "labelAt": [
+        640.0,
+        552.0
+      ]
+    },
+    {
+      "id": "fan-identidad",
+      "from": "fan",
+      "to": "identidad",
+      "label": "se identifica · 1:1",
+      "fromSide": "bottom",
+      "toSide": "right",
+      "labelAt": [
+        500.0,
+        277.0
+      ],
+      "via": [
+        [
+          590.0,
+          285.0
+        ],
+        [
+          400.0,
+          285.0
+        ],
+        [
+          400.0,
+          177.5
+        ]
+      ]
+    },
+    {
+      "id": "fan-recibe-turno",
+      "from": "fan",
+      "to": "filaVenta",
+      "label": "recibe turno · 1:0..*",
+      "fromSide": "right",
+      "toSide": "right",
+      "labelAt": [
+        790.0,
+        350.0
+      ],
+      "via": [
+        [
+          790.0,
+          184.5
+        ],
+        [
+          790.0,
+          417.0
+        ]
+      ]
+    },
+    {
+      "id": "fan-crea-reserva",
+      "from": "fan",
+      "to": "reserva",
+      "label": "crea · 1:0..*",
+      "variant": "emphasis",
+      "fromSide": "top",
+      "toSide": "top",
+      "via": [
+        [
+          590.0,
+          30
+        ],
+        [
+          1780.0,
+          30
+        ]
+      ],
+      "labelAt": [
+        1000,
+        22
+      ]
+    },
+    {
+      "id": "turno-habilita-reserva",
+      "from": "turno",
+      "to": "reserva",
+      "label": "habilita · 1:0..1",
+      "fromSide": "right",
+      "toSide": "left",
+      "via": [
+        [
+          1136,
+          404.0
+        ],
+        [
+          1136,
+          190.5
+        ]
+      ],
+      "labelAt": [
+        1150,
+        297.25
+      ]
+    },
+    {
+      "id": "localidad-asigna-item",
+      "from": "localidad",
+      "to": "itemReserva",
+      "label": "asigna · 1:0..*",
+      "fromSide": "right",
+      "toSide": "left",
+      "via": [
+        [
+          1166.0,
+          707.0
+        ],
+        [
+          1166.0,
+          380.5
+        ]
+      ],
+      "labelAt": [
+        1150,
+        573.75
+      ]
+    },
+    {
+      "id": "reserva-origina-pago",
+      "from": "reserva",
+      "to": "pago",
+      "label": "origina · 1:0..1",
+      "variant": "emphasis",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "via": [
+        [
+          1780.0,
+          285
+        ],
+        [
+          1970.0,
+          285
+        ],
+        [
+          1970.0,
+          520
+        ],
+        [
+          1780.0,
+          520
+        ]
+      ],
+      "labelAt": [
+        1855.0,
+        285.0
+      ]
+    },
+    {
+      "id": "pago-abre-discrepancia",
+      "from": "pago",
+      "to": "discrepancia",
+      "label": "abre · 1:0..*",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelAt": [
+        1830.0,
+        771.5
+      ]
+    },
+    {
+      "id": "pago-aporta-liquidacion",
+      "from": "pago",
+      "to": "liquidacion",
+      "label": "aporta · 0..*:1",
+      "fromSide": "left",
+      "toSide": "right",
+      "labelAt": [
+        1580.0,
+        879.5
+      ]
+    },
+    {
+      "id": "pago-emite-boleta",
+      "from": "pago",
+      "to": "boleta",
+      "label": "emite · 1:1..*",
+      "variant": "emphasis",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "reventa-origina-pago",
+      "from": "reventa",
+      "to": "pago",
+      "label": "origina · 1:0..1",
+      "fromSide": "left",
+      "toSide": "right"
+    },
+    {
+      "id": "boleta-tiene-titular",
+      "from": "boleta",
+      "to": "titular",
+      "label": "titular activo · 1:1",
+      "variant": "emphasis",
+      "fromSide": "right",
+      "toSide": "left",
+      "labelAt": [
+        2400.0,
+        910.5
+      ]
+    },
+    {
+      "id": "fan-es-titular",
+      "from": "fan",
+      "to": "titular",
+      "label": "es titular · 1:0..*",
+      "fromSide": "left",
+      "toSide": "bottom",
+      "via": [
+        [
+          360.0,
+          184.5
+        ],
+        [
+          360.0,
+          300.0
+        ],
+        [
+          40.0,
+          300.0
+        ],
+        [
+          40.0,
+          1222.0
+        ],
+        [
+          2600.0,
+          1222.0
+        ]
+      ],
+      "labelAt": [
+        1300,
+        1212
+      ]
+    }
+  ],
+  "cards": [
+    {
+      "dot": "amber",
+      "title": "Reglas R1–R5",
+      "items": [
+        "R1: nunca superar el aforo autorizado",
+        "R2: una silla solo tiene una asignación activa",
+        "R3: la reserva sin pago vence en máximo 10 minutos",
+        "R4: ningún pago inicia sin reserva o reventa vigente",
+        "R5: cobro confirmado termina en boleta o devolución trazable"
+      ]
+    },
+    {
+      "dot": "orange",
+      "title": "Reglas R6–R10",
+      "items": [
+        "R6: el turno respeta una política reconstruible",
+        "R7: cada boleta tiene un único titular activo",
+        "R8: transferir invalida titularidad y código anteriores",
+        "R9: reventa solo dentro de las reglas de reventa del evento",
+        "R10: devolución invalida boleta y ajusta pago y liquidación"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Reglas R11–R14",
+      "items": [
+        "R11: datos compartidos solo con consentimiento vigente",
+        "R12: liquidación solo con movimientos conciliados",
+        "R13: todo cobro lleva su desglose: nominal, cargo y parafiscal",
+        "R14: toda discrepancia se cierra con una resolución trazable"
+      ]
+    }
+  ]
+}

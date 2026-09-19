@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TicketRight — Pago</title>
+<link rel="stylesheet" href="estilos.css">
+<script>(function(){try{document.documentElement.setAttribute('data-tema', localStorage.getItem('tr-tema')||'dark');}catch(e){}})();</script>
+<script>
+  window.ESTADOS_SIMULADOS = {
+    grupo: "pago",
+    inicial: "formulario",
+    opciones: [
+      { valor: "formulario", etiqueta: "Formulario" },
+      { valor: "procesando", etiqueta: "Procesando" },
+      { valor: "confirmado", etiqueta: "Confirmado" },
+      { valor: "rechazado", etiqueta: "Error — pago rechazado" },
+      { valor: "conciliacion", etiqueta: "Alerta — en conciliación" }
+    ]
+  };
+</script>
+</head>
+<body>
+<div class="app-layout">
+  <aside class="barra-lateral" id="barra-lateral"></aside>
+  <main class="contenido-principal">
+    <div class="contenedor">
+
+      <div class="encabezado-pagina">
+        <span class="etiqueta">Pago · $488.000</span>
+        <h1>Completa tu pago</h1>
+      </div>
+
+      <div data-estado-panel="formulario" data-grupo-panel="pago" class="visible">
+        <div class="tarjeta formulario">
+          <label for="medio">Medio de pago</label>
+          <select id="medio"><option>Tarjeta de crédito o débito</option><option>PSE</option><option>Billetera digital</option></select>
+          <label for="numero">Número de tarjeta</label>
+          <input id="numero" type="text" placeholder="•••• •••• •••• ••••" inputmode="numeric">
+          <label for="titular">Nombre del titular</label>
+          <input id="titular" type="text" placeholder="Como aparece en la tarjeta">
+          <button class="btn btn-primario btn-ancho" onclick="pagar()">Pagar $488.000</button>
+          <p style="text-align:center;font-size:12px;color:var(--color-text-muted);margin-top:12px;margin-bottom:0">🔒 Pago procesado de forma segura</p>
+        </div>
+      </div>
+
+      <div data-estado-panel="procesando" data-grupo-panel="pago">
+        <div class="tarjeta">
+          <div class="carga">
+            <div class="spinner"></div>
+            <h3>Procesando tu pago<span class="puntos-carga"><span></span><span></span><span></span></span></h3>
+            <p>Estamos esperando la confirmación de la pasarela. No cierres esta ventana.</p>
+          </div>
+        </div>
+      </div>
+
+      <div data-estado-panel="confirmado" data-grupo-panel="pago">
+        <div class="tarjeta">
+          <div class="alerta alerta-exito">
+            <strong>Pago confirmado</strong>
+            Tu boleta se está emitiendo.
+          </div>
+          <a href="fan-boleta.html" class="btn btn-primario btn-ancho">Ver mi boleta</a>
+        </div>
+      </div>
+
+      <div data-estado-panel="rechazado" data-grupo-panel="pago">
+        <div class="tarjeta">
+          <div class="alerta alerta-peligro">
+            <strong>El medio de pago fue rechazado</strong>
+            Tu reserva sigue vigente por el tiempo restante; puedes intentar con otro medio de
+            pago sin perder tu cupo.
+          </div>
+          <button class="btn btn-primario btn-ancho" onclick="window.aplicarEstadoSimulado('pago','formulario')">Intentar con otro medio</button>
+        </div>
+      </div>
+
+      <div data-estado-panel="conciliacion" data-grupo-panel="pago">
+        <div class="tarjeta">
+          <div class="alerta alerta-alerta">
+            <strong>Tu pago está confirmado, estamos emitiendo tu boleta</strong>
+            La pasarela tardó en responder. No te preocupes: tu cobro ya quedó registrado y no
+            se te va a cobrar dos veces. Si tu boleta no aparece en los próximos minutos,
+            nuestro equipo de soporte ya tiene el caso abierto.
+          </div>
+          <div class="fila-datos"><span class="k">Estado del pago</span><span class="v"><span class="insignia insignia-alerta">enConciliacion</span></span></div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+<script src="nav.js"></script>
+<script>
+  function pagar() {
+    window.aplicarEstadoSimulado('pago', 'procesando');
+    setTimeout(function () { window.aplicarEstadoSimulado('pago', 'confirmado'); }, 1800);
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,782 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Arquitectura de implementación de TicketRight — producción en AWS",
+    "output": "arquitectura-de-implementacion.html",
+    "quality_profile": "standard",
+    "engineering_profile": "deployment-ownership",
+    "views": [
+      {
+        "id": "compra",
+        "label": "1 · Camino de compra",
+        "focus": [
+          "usuarios",
+          "cdn",
+          "apigw",
+          "admision",
+          "redis",
+          "inventario",
+          "proxy",
+          "aurora",
+          "saga",
+          "pasarela",
+          "boletas"
+        ],
+        "note": "La multitud se atiende en memoria; la autoridad del aforo es Aurora; el cobro es idempotente y conciliable."
+      },
+      {
+        "id": "datos",
+        "label": "2 · Datos y proyecciones",
+        "focus": [
+          "catalogo",
+          "opensearch",
+          "redis",
+          "msk",
+          "procesadores",
+          "aurora",
+          "auroraId",
+          "proxy"
+        ],
+        "note": "CQRS: comandos contra la autoridad y proyecciones reconstruibles de búsqueda, fila y disponibilidad."
+      },
+      {
+        "id": "seguridad",
+        "label": "3 · Borde y seguridad",
+        "focus": [
+          "cdn",
+          "apigw",
+          "cognito",
+          "identidad",
+          "auroraId",
+          "pasarela"
+        ],
+        "note": "Defensa en profundidad: WAF y cuotas en el borde, identidad federada, admisión firmada y datos personales aislados."
+      },
+      {
+        "id": "operacion",
+        "label": "4 · Escalado y operación",
+        "focus": [
+          "fargate",
+          "keda",
+          "grafana",
+          "prometheus",
+          "entrega",
+          "procesadores"
+        ],
+        "note": "Capacidad base mínima, ráfaga serverless en la ventana y evidencia de negocio y técnica."
+      }
+    ]
+  },
+  "components": [
+    {
+      "id": "usuarios",
+      "type": "external",
+      "label": "Fans y promotores",
+      "sublabel": "navegador y móvil",
+      "pos": [
+        10,
+        300
+      ],
+      "size": [
+        140,
+        64
+      ],
+      "tag": "externo"
+    },
+    {
+      "id": "cdn",
+      "type": "security",
+      "label": "CloudFront + AWS WAF",
+      "sublabel": "TLS, Bot Control y cuotas",
+      "pos": [
+        210,
+        300
+      ],
+      "size": [
+        166,
+        64
+      ],
+      "tag": "plataforma"
+    },
+    {
+      "id": "portal",
+      "type": "cloud",
+      "label": "Portal web en S3",
+      "sublabel": "build versionado por OAC",
+      "pos": [
+        450,
+        140
+      ],
+      "size": [
+        156,
+        60
+      ],
+      "tag": "frontend"
+    },
+    {
+      "id": "apigw",
+      "type": "cloud",
+      "label": "API Gateway",
+      "sublabel": "JWT y VPC Link",
+      "pos": [
+        800,
+        290
+      ],
+      "size": [
+        150,
+        60
+      ],
+      "tag": "plataforma"
+    },
+    {
+      "id": "cognito",
+      "type": "security",
+      "label": "Amazon Cognito",
+      "sublabel": "OIDC/OAuth 2.0",
+      "pos": [
+        1020,
+        290
+      ],
+      "size": [
+        150,
+        60
+      ],
+      "tag": "seguridad"
+    },
+    {
+      "id": "identidad",
+      "type": "backend",
+      "label": "Identidad y consentimiento",
+      "sublabel": "namespace identidad",
+      "pos": [
+        450,
+        540
+      ],
+      "size": [
+        170,
+        62
+      ],
+      "tag": "ventas"
+    },
+    {
+      "id": "catalogo",
+      "type": "backend",
+      "label": "Catálogo y eventos",
+      "sublabel": "aforo y reglas de venta",
+      "pos": [
+        690,
+        540
+      ],
+      "size": [
+        170,
+        62
+      ],
+      "tag": "oferta"
+    },
+    {
+      "id": "admision",
+      "type": "backend",
+      "label": "Admisión y fila",
+      "sublabel": "token firmado de un uso",
+      "pos": [
+        930,
+        540
+      ],
+      "size": [
+        170,
+        62
+      ],
+      "tag": "ventas"
+    },
+    {
+      "id": "inventario",
+      "type": "backend",
+      "label": "Inventario y reservas",
+      "sublabel": "autoridad del aforo",
+      "pos": [
+        1170,
+        540
+      ],
+      "size": [
+        170,
+        62
+      ],
+      "tag": "ventas"
+    },
+    {
+      "id": "saga",
+      "type": "backend",
+      "label": "Orquestador de compra",
+      "sublabel": "SAGA + outbox",
+      "pos": [
+        1410,
+        540
+      ],
+      "size": [
+        170,
+        62
+      ],
+      "tag": "ventas"
+    },
+    {
+      "id": "boletas",
+      "type": "backend",
+      "label": "Boletas y titularidad",
+      "sublabel": "emisión atómica",
+      "pos": [
+        1650,
+        540
+      ],
+      "size": [
+        170,
+        62
+      ],
+      "tag": "ventas"
+    },
+    {
+      "id": "procesadores",
+      "type": "backend",
+      "label": "Procesadores asíncronos",
+      "sublabel": "pago, emisión y conciliación",
+      "pos": [
+        1950,
+        740
+      ],
+      "size": [
+        176,
+        62
+      ],
+      "tag": "plataforma"
+    },
+    {
+      "id": "auroraId",
+      "type": "database",
+      "label": "Aurora · identidad",
+      "sublabel": "Serverless v2 aislada",
+      "pos": [
+        450,
+        740
+      ],
+      "size": [
+        164,
+        62
+      ],
+      "tag": "datos",
+      "brand": "postgresql"
+    },
+    {
+      "id": "opensearch",
+      "type": "database",
+      "label": "OpenSearch Service",
+      "sublabel": "búsqueda reconstruible",
+      "pos": [
+        700,
+        740
+      ],
+      "size": [
+        170,
+        62
+      ],
+      "tag": "datos",
+      "brand": "opensearch"
+    },
+    {
+      "id": "redis",
+      "type": "database",
+      "label": "ElastiCache for Redis",
+      "sublabel": "fila, sesión y vistas",
+      "pos": [
+        950,
+        740
+      ],
+      "size": [
+        170,
+        62
+      ],
+      "tag": "datos",
+      "brand": "redis"
+    },
+    {
+      "id": "proxy",
+      "type": "database",
+      "label": "RDS Proxy",
+      "sublabel": "pool y contrapresión",
+      "pos": [
+        1200,
+        740
+      ],
+      "size": [
+        150,
+        62
+      ],
+      "tag": "datos"
+    },
+    {
+      "id": "aurora",
+      "type": "database",
+      "label": "Aurora PostgreSQL",
+      "sublabel": "autoridad Multi-AZ",
+      "pos": [
+        1450,
+        740
+      ],
+      "size": [
+        164,
+        62
+      ],
+      "tag": "datos",
+      "brand": "postgresql"
+    },
+    {
+      "id": "msk",
+      "type": "messagebus",
+      "label": "MSK Serverless",
+      "sublabel": "eventos durables y DLQ",
+      "pos": [
+        1700,
+        740
+      ],
+      "size": [
+        170,
+        62
+      ],
+      "tag": "datos",
+      "brand": "apache-kafka"
+    },
+    {
+      "id": "fargate",
+      "type": "cloud",
+      "label": "AWS Fargate · sala",
+      "sublabel": "60 tareas en la ventana",
+      "pos": [
+        670,
+        900
+      ],
+      "size": [
+        170,
+        62
+      ],
+      "tag": "plataforma"
+    },
+    {
+      "id": "keda",
+      "type": "cloud",
+      "label": "Kubernetes (EKS)",
+      "sublabel": "KEDA + Karpenter + calendario",
+      "pos": [
+        890,
+        900
+      ],
+      "size": [
+        176,
+        62
+      ],
+      "tag": "plataforma",
+      "brand": "kubernetes"
+    },
+    {
+      "id": "grafana",
+      "type": "backend",
+      "label": "Grafana",
+      "sublabel": "tableros y alertas",
+      "pos": [
+        1450,
+        900
+      ],
+      "size": [
+        140,
+        62
+      ],
+      "tag": "SRE",
+      "brand": "grafana"
+    },
+    {
+      "id": "prometheus",
+      "type": "database",
+      "label": "Prometheus + Tempo + Loki",
+      "sublabel": "métricas, trazas y logs",
+      "pos": [
+        1700,
+        900
+      ],
+      "size": [
+        176,
+        64
+      ],
+      "tag": "SRE",
+      "brand": "prometheus"
+    },
+    {
+      "id": "pasarela",
+      "type": "external",
+      "label": "Pasarela de pagos",
+      "sublabel": "Wompi · webhook firmado",
+      "pos": [
+        20,
+        740
+      ],
+      "size": [
+        166,
+        62
+      ],
+      "tag": "externo"
+    },
+    {
+      "id": "entrega",
+      "type": "external",
+      "label": "Entrega automatizada",
+      "sublabel": "GitHub Actions · ECR · Argo CD",
+      "pos": [
+        20,
+        1040
+      ],
+      "size": [
+        210,
+        64
+      ],
+      "tag": "plataforma",
+      "brand": "github-actions"
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "AWS · servicios globales",
+      "wraps": [
+        "cdn"
+      ],
+      "pad": 20
+    },
+    {
+      "kind": "region",
+      "label": "AWS us-east-1 · producción",
+      "wraps": [
+        "portal",
+        "apigw",
+        "cognito",
+        "identidad",
+        "catalogo",
+        "admision",
+        "inventario",
+        "saga",
+        "boletas",
+        "procesadores",
+        "auroraId",
+        "opensearch",
+        "redis",
+        "proxy",
+        "aurora",
+        "msk",
+        "fargate",
+        "keda",
+        "grafana",
+        "prometheus"
+      ],
+      "pad": 28
+    },
+    {
+      "kind": "security-group",
+      "label": "VPC 10.20.0.0/16 · subredes privadas (EKS + datos)",
+      "wraps": [
+        "identidad",
+        "catalogo",
+        "admision",
+        "inventario",
+        "saga",
+        "boletas",
+        "procesadores",
+        "auroraId",
+        "opensearch",
+        "redis",
+        "proxy",
+        "aurora",
+        "msk",
+        "fargate",
+        "keda",
+        "grafana",
+        "prometheus"
+      ],
+      "pad": 18
+    },
+    {
+      "kind": "security-group",
+      "label": "Plano de datos aislado",
+      "wraps": [
+        "auroraId",
+        "opensearch",
+        "redis",
+        "proxy",
+        "aurora",
+        "msk"
+      ],
+      "pad": 14
+    }
+  ],
+  "connections": [
+    {
+      "from": "usuarios",
+      "to": "cdn",
+      "label": "HTTPS",
+      "variant": "emphasis"
+    },
+    {
+      "from": "cdn",
+      "to": "portal",
+      "label": "sitio estático"
+    },
+    {
+      "from": "cdn",
+      "to": "apigw",
+      "label": "API /v1"
+    },
+    {
+      "from": "apigw",
+      "to": "cognito",
+      "label": "valida JWT",
+      "variant": "security",
+      "labelDy": -24
+    },
+    {
+      "from": "apigw",
+      "to": "catalogo",
+      "label": "catálogo",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "from": "apigw",
+      "to": "admision",
+      "label": "ingreso a fila",
+      "variant": "emphasis",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "from": "admision",
+      "to": "redis",
+      "label": "posición",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelDy": 45
+    },
+    {
+      "from": "admision",
+      "to": "inventario",
+      "label": "token de admisión",
+      "variant": "emphasis",
+      "labelDy": -24
+    },
+    {
+      "from": "inventario",
+      "to": "proxy",
+      "label": "SQL/TLS",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelDy": 45
+    },
+    {
+      "from": "proxy",
+      "to": "aurora",
+      "label": "conexiones acotadas",
+      "labelDy": -24
+    },
+    {
+      "from": "identidad",
+      "to": "auroraId",
+      "label": "datos aislados",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelDy": 45
+    },
+    {
+      "from": "catalogo",
+      "to": "opensearch",
+      "label": "búsqueda",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelDy": 45
+    },
+    {
+      "from": "saga",
+      "to": "aurora",
+      "label": "estado SAGA + outbox",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelDy": 45
+    },
+    {
+      "from": "saga",
+      "to": "msk",
+      "label": "eventos de pago",
+      "variant": "dashed",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "via": [
+        [
+          1495,
+          670
+        ],
+        [
+          1785,
+          670
+        ]
+      ]
+    },
+    {
+      "from": "saga",
+      "to": "boletas",
+      "label": "ordena emitir",
+      "labelDy": -24
+    },
+    {
+      "from": "saga",
+      "to": "pasarela",
+      "label": "cobro idempotente",
+      "variant": "emphasis",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "via": [
+        [
+          1495,
+          670
+        ],
+        [
+          103,
+          670
+        ]
+      ],
+      "labelAt": [
+        103,
+        698
+      ]
+    },
+    {
+      "from": "pasarela",
+      "to": "apigw",
+      "label": "webhook firmado",
+      "variant": "dashed",
+      "fromSide": "right",
+      "toSide": "bottom",
+      "via": [
+        [
+          240,
+          771
+        ],
+        [
+          240,
+          450
+        ],
+        [
+          875,
+          450
+        ]
+      ],
+      "labelAt": [
+        500,
+        434
+      ]
+    },
+    {
+      "from": "msk",
+      "to": "procesadores",
+      "label": "consume",
+      "variant": "dashed",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "from": "keda",
+      "to": "procesadores",
+      "label": "escala por lag",
+      "variant": "dashed",
+      "fromSide": "bottom",
+      "toSide": "bottom",
+      "via": [
+        [
+          978,
+          1020
+        ],
+        [
+          2038,
+          1020
+        ]
+      ]
+    },
+    {
+      "from": "keda",
+      "to": "fargate",
+      "label": "ráfaga de la sala",
+      "variant": "dashed",
+      "fromSide": "left",
+      "toSide": "right",
+      "labelDy": -24
+    },
+    {
+      "from": "procesadores",
+      "to": "prometheus",
+      "label": "OTLP",
+      "variant": "dashed",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "via": [
+        [
+          2038,
+          850
+        ],
+        [
+          1788,
+          850
+        ]
+      ]
+    },
+    {
+      "from": "prometheus",
+      "to": "grafana",
+      "label": "señales",
+      "fromSide": "left",
+      "toSide": "right"
+    },
+    {
+      "from": "entrega",
+      "to": "keda",
+      "label": "despliegue continuo",
+      "variant": "dashed",
+      "fromSide": "right",
+      "toSide": "bottom",
+      "labelAt": [
+        620,
+        1168
+      ]
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Fronteras de confianza",
+      "items": [
+        "Sin balanceador público: todo entra por CloudFront y API Gateway",
+        "Pods en subredes privadas, sin SSH y con rol IAM por pod",
+        "Identidad y datos personales aislados con llave propia"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Contratos de integración",
+      "items": [
+        "APIs en OpenAPI 3.1, versionado /v1 y cuotas por ruta",
+        "Eventos durables en MSK con JSON Schema, clave por venta y DLQ",
+        "Cobros idempotentes, webhook firmado y conciliación"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Costo y disponibilidad",
+      "items": [
+        "Multi-AZ en EKS, Aurora, ElastiCache, MSK y OpenSearch",
+        "Fargate cubre la ráfaga; KEDA y Karpenter el resto del año",
+        "Techo de réplicas y costo etiquetado por evento (A-7)"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TicketRight — Iniciar sesión</title>
+<link rel="stylesheet" href="estilos.css">
+<script>(function(){try{document.documentElement.setAttribute('data-tema', localStorage.getItem('tr-tema')||'dark');}catch(e){}})();</script>
+</head>
+<body>
+<div class="pantalla-login">
+  <div class="tarjeta-login">
+    <div class="marca">Ticket<span class="acento">Right</span></div>
+    <p class="tagline">Inicia sesión para comprar tus boletas</p>
+
+    <div class="tarjeta" id="panel-inicial">
+      <button type="button" class="btn btn-primario btn-ancho" onclick="iniciarSesion()">
+        Iniciar sesión
+      </button>
+    </div>
+
+    <div class="tarjeta" id="panel-redirigiendo" style="display:none">
+      <div class="carga">
+        <div class="spinner"></div>
+        <h3>Iniciando sesión…</h3>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  function iniciarSesion() {
+    document.getElementById('panel-inicial').style.display = 'none';
+    document.getElementById('panel-redirigiendo').style.display = 'block';
+    setTimeout(function () {
+      window.location.href = 'fan-eventos.html';
+    }, 1200);
+  }
+</script>
+</body>
+</html>

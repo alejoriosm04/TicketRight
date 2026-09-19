@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TicketRight — Discrepancias abiertas (operación interna)</title>
+<link rel="stylesheet" href="estilos.css">
+<script>(function(){try{document.documentElement.setAttribute('data-tema', localStorage.getItem('tr-tema')||'dark');}catch(e){}})();</script>
+<script>
+  window.ESTADOS_SIMULADOS = {
+    grupo: "discrepancias",
+    inicial: "conCasos",
+    opciones: [
+      { valor: "conCasos", etiqueta: "Con casos abiertos" },
+      { valor: "vacio", etiqueta: "Cero discrepancias" }
+    ]
+  };
+</script>
+</head>
+<body>
+<div class="app-layout">
+  <aside class="barra-lateral" id="barra-lateral"></aside>
+  <main class="contenido-principal">
+    <div class="contenedor-ancho">
+
+      <div class="encabezado-pagina">
+        <span class="etiqueta">Conciliación · objetivo: cero discrepancias abiertas al cierre</span>
+        <h1>Discrepancias abiertas</h1>
+      </div>
+
+      <div class="kpis">
+        <div class="kpi">
+          <div class="etiqueta">Casos abiertos</div>
+          <div class="valor">2</div>
+        </div>
+        <div class="kpi">
+          <div class="etiqueta">Edad promedio</div>
+          <div class="valor">9 min</div>
+          <div class="delta neg">umbral: 15 min</div>
+        </div>
+        <div class="kpi">
+          <div class="etiqueta">Resueltos hoy</div>
+          <div class="valor">14</div>
+        </div>
+        <div class="kpi">
+          <div class="etiqueta">Tiempo medio de resolución</div>
+          <div class="valor">4 min</div>
+          <div class="delta pos">dentro del umbral</div>
+        </div>
+      </div>
+
+      <div data-estado-panel="conCasos" data-grupo-panel="discrepancias" class="visible">
+        <div class="tarjeta" style="padding:0">
+          <table class="tabla">
+            <thead>
+              <tr><th>Tipo</th><th>Pago</th><th>Detectada</th><th>Edad</th><th>Umbral</th></tr>
+            </thead>
+            <tbody>
+              <tr class="fila-clic" onclick="irA('operacion-detalle.html?caso=pg_7f21')">
+                <td>cobroSinBoleta</td>
+                <td>pg_7f21</td>
+                <td>Hace 6 min</td>
+                <td><span class="insignia insignia-alerta">6 / 15 min</span></td>
+                <td>≤ 15 min</td>
+              </tr>
+              <tr class="fila-clic" onclick="irA('operacion-detalle.html?caso=pg_3a90')">
+                <td>respuestaTardiaPasarela</td>
+                <td>pg_3a90</td>
+                <td>Hace 12 min</td>
+                <td><span class="insignia insignia-peligro">12 / 15 min</span></td>
+                <td>≤ 15 min</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p style="margin-top:8px;font-size:13px">Haz clic en un caso para conciliarlo manualmente.</p>
+      </div>
+
+      <div data-estado-panel="vacio" data-grupo-panel="discrepancias">
+        <div class="tarjeta">
+          <div class="vacio">
+            <h3>Cero discrepancias abiertas</h3>
+            <p>Todos los pagos confirmados de las últimas 24 horas terminaron en boleta
+            emitida o devolución ejecutada dentro del umbral.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+<script src="nav.js"></script>
+</body>
+</html>

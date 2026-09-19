@@ -1,0 +1,635 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Diagrama de clases — vista 1: dominio del caso «Comprar en la ventana de alta demanda»",
+    "quality_profile": "standard",
+    "viewBox": [
+      1920,
+      1040
+    ],
+    "legend": {
+      "mode": "hidden"
+    },
+    "views": [
+      {
+        "id": "reservar",
+        "label": "1 · Reservar",
+        "focus": [
+          "localidad",
+          "aforo",
+          "silla",
+          "reserva",
+          "itemReserva",
+          "desglose",
+          "calculadora",
+          "aforoExcedido",
+          "reservaVencida",
+          "excepcion"
+        ],
+        "note": "Localidad protege aforo y silla (R1, R2); Reserva vence a los 10 min (R3); el precio lleva su desglose (R13)."
+      },
+      {
+        "id": "pagar",
+        "label": "2 · Pagar",
+        "focus": [
+          "reserva",
+          "pago",
+          "origenPago",
+          "discrepancia",
+          "reservaVencida"
+        ],
+        "note": "Pago es idempotente (R4) y una discrepancia conserva la relación dinero–boleta (R14)."
+      },
+      {
+        "id": "emitir",
+        "label": "3 · Emitir y hechos",
+        "focus": [
+          "pago",
+          "boleta",
+          "codigoBoleta",
+          "titularidad",
+          "titular",
+          "eventoDominio",
+          "evPagoSolicitado",
+          "evPagoConfirmado"
+        ],
+        "note": "Una sola titularidad vigente (R7) y los hechos durables que mueven la SAGA."
+      },
+      {
+        "id": "estado-evento",
+        "label": "4 · Pago: estado y evento",
+        "focus": [
+          "pago",
+          "evPagoSolicitado",
+          "evPagoConfirmado",
+          "eventoDominio"
+        ],
+        "note": "Pago.estado es la foto interna (R4); los eventos PagoSolicitado y PagoConfirmado son hechos durables que mueven la SAGA (AD-002)."
+      },
+      {
+        "id": "precio",
+        "label": "5 · Precio: desglose y calculadora",
+        "focus": [
+          "itemReserva",
+          "desglose",
+          "calculadora",
+          "reserva"
+        ],
+        "note": "DesglosePrecio es el valor guardado (tres bolsillos y total); CalculadoraDePrecio es la política que lo fabrica y no se conserva (R13)."
+      }
+    ]
+  },
+  "components": [
+    {
+      "id": "localidad",
+      "type": "backend",
+      "label": "Localidad",
+      "sublabel": "«aggregate root»",
+      "tag": "DOMINIO",
+      "pos": [
+        60,
+        40
+      ],
+      "size": [
+        321,
+        186
+      ]
+    },
+    {
+      "id": "aforo",
+      "type": "external",
+      "label": "Aforo",
+      "sublabel": "«value object»",
+      "tag": "DOMINIO",
+      "pos": [
+        481,
+        200
+      ],
+      "size": [
+        200,
+        134
+      ]
+    },
+    {
+      "id": "silla",
+      "type": "external",
+      "label": "Silla",
+      "sublabel": "«entity»",
+      "tag": "DOMINIO",
+      "pos": [
+        481,
+        40
+      ],
+      "size": [
+        200,
+        147
+      ]
+    },
+    {
+      "id": "reserva",
+      "type": "backend",
+      "label": "Reserva",
+      "sublabel": "«aggregate root»",
+      "tag": "DOMINIO",
+      "pos": [
+        741,
+        40
+      ],
+      "size": [
+        415,
+        238
+      ]
+    },
+    {
+      "id": "itemReserva",
+      "type": "external",
+      "label": "ItemReserva",
+      "sublabel": "«entity»",
+      "tag": "DOMINIO",
+      "pos": [
+        1276,
+        40
+      ],
+      "size": [
+        200,
+        134
+      ]
+    },
+    {
+      "id": "desglose",
+      "type": "external",
+      "label": "DesglosePrecio",
+      "sublabel": "«value object»",
+      "tag": "DOMINIO",
+      "pos": [
+        1596,
+        40
+      ],
+      "size": [
+        206,
+        108
+      ]
+    },
+    {
+      "id": "calculadora",
+      "type": "external",
+      "label": "CalculadoraDePrecio",
+      "sublabel": "«domain service»",
+      "tag": "DOMINIO",
+      "pos": [
+        1030,
+        380
+      ],
+      "size": [
+        354,
+        108
+      ]
+    },
+    {
+      "id": "pago",
+      "type": "backend",
+      "label": "Pago",
+      "sublabel": "«aggregate root»",
+      "tag": "DOMINIO",
+      "pos": [
+        60,
+        380
+      ],
+      "size": [
+        486,
+        238
+      ]
+    },
+    {
+      "id": "origenPago",
+      "type": "external",
+      "label": "OrigenPago",
+      "sublabel": "«value object»",
+      "tag": "DOMINIO",
+      "pos": [
+        60,
+        650
+      ],
+      "size": [
+        200,
+        90
+      ]
+    },
+    {
+      "id": "discrepancia",
+      "type": "backend",
+      "label": "Discrepancia",
+      "sublabel": "«aggregate root»",
+      "tag": "DOMINIO",
+      "pos": [
+        640,
+        380
+      ],
+      "size": [
+        354,
+        174
+      ]
+    },
+    {
+      "id": "boleta",
+      "type": "backend",
+      "label": "Boleta",
+      "sublabel": "«aggregate root»",
+      "tag": "DOMINIO",
+      "pos": [
+        300,
+        650
+      ],
+      "size": [
+        387,
+        238
+      ]
+    },
+    {
+      "id": "codigoBoleta",
+      "type": "external",
+      "label": "CodigoBoleta",
+      "sublabel": "«value object»",
+      "tag": "DOMINIO",
+      "pos": [
+        300,
+        910
+      ],
+      "size": [
+        200,
+        95
+      ]
+    },
+    {
+      "id": "titularidad",
+      "type": "external",
+      "label": "Titularidad",
+      "sublabel": "«entity»",
+      "tag": "DOMINIO",
+      "pos": [
+        827,
+        650
+      ],
+      "size": [
+        200,
+        135
+      ]
+    },
+    {
+      "id": "titular",
+      "type": "external",
+      "label": "Titular",
+      "sublabel": "«entity»",
+      "tag": "DOMINIO",
+      "pos": [
+        827,
+        820
+      ],
+      "size": [
+        200,
+        116
+      ]
+    },
+    {
+      "id": "eventoDominio",
+      "type": "external",
+      "label": "EventoDeDominio",
+      "sublabel": "«abstract»",
+      "tag": "DOMINIO",
+      "pos": [
+        1420,
+        380
+      ],
+      "size": [
+        424,
+        108
+      ]
+    },
+    {
+      "id": "evPagoSolicitado",
+      "type": "external",
+      "label": "PagoSolicitado",
+      "sublabel": "«event»",
+      "tag": "DOMINIO",
+      "pos": [
+        1420,
+        520
+      ],
+      "size": [
+        200,
+        90
+      ]
+    },
+    {
+      "id": "evPagoConfirmado",
+      "type": "external",
+      "label": "PagoConfirmado",
+      "sublabel": "«event»",
+      "tag": "DOMINIO",
+      "pos": [
+        1660,
+        520
+      ],
+      "size": [
+        200,
+        90
+      ]
+    },
+    {
+      "id": "excepcion",
+      "type": "external",
+      "label": "ExcepcionDeDominio",
+      "sublabel": "«abstract»",
+      "tag": "DOMINIO",
+      "pos": [
+        1050,
+        650
+      ],
+      "size": [
+        424,
+        90
+      ]
+    },
+    {
+      "id": "aforoExcedido",
+      "type": "external",
+      "label": "AforoExcedido",
+      "sublabel": "«exception»",
+      "tag": "DOMINIO",
+      "pos": [
+        1050,
+        780
+      ],
+      "size": [
+        200,
+        103
+      ]
+    },
+    {
+      "id": "reservaVencida",
+      "type": "external",
+      "label": "ReservaVencida",
+      "sublabel": "«exception»",
+      "tag": "DOMINIO",
+      "pos": [
+        1290,
+        780
+      ],
+      "size": [
+        200,
+        90
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "Capa de dominio · agregados, entidades, objetos de valor, eventos y excepciones del caso",
+      "wraps": [
+        "localidad",
+        "aforo",
+        "silla",
+        "reserva",
+        "itemReserva",
+        "desglose",
+        "calculadora",
+        "pago",
+        "origenPago",
+        "discrepancia",
+        "boleta",
+        "codigoBoleta",
+        "titularidad",
+        "titular",
+        "eventoDominio",
+        "evPagoSolicitado",
+        "evPagoConfirmado",
+        "excepcion",
+        "aforoExcedido",
+        "reservaVencida"
+      ],
+      "pad": 30
+    }
+  ],
+  "connections": [
+    {
+      "id": "comp-localidad-aforo",
+      "from": "localidad",
+      "to": "aforo",
+      "label": "aforo · 1 → 1",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "comp-localidad-silla",
+      "from": "localidad",
+      "to": "silla",
+      "label": "sillas · 1 → 0..*",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "comp-reserva-item",
+      "from": "reserva",
+      "to": "itemReserva",
+      "label": "items · 1 → 1..*",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "comp-item-desglose",
+      "from": "itemReserva",
+      "to": "desglose",
+      "label": "precio · 1 → 1",
+      "fromSide": "right",
+      "toSide": "left",
+      "labelAt": [
+        1536,
+        114
+      ]
+    },
+    {
+      "id": "dep-calc-desglose",
+      "from": "calculadora",
+      "to": "desglose",
+      "label": "«create»",
+      "variant": "dashed",
+      "fromSide": "top",
+      "toSide": "bottom",
+      "via": [
+        [
+          1207,
+          357
+        ],
+        [
+          1699,
+          357
+        ]
+      ]
+    },
+    {
+      "id": "assoc-pago-reserva",
+      "from": "pago",
+      "to": "reserva",
+      "label": "origen · 0..1 → 1",
+      "fromSide": "top",
+      "toSide": "bottom",
+      "via": [
+        [
+          303,
+          357
+        ],
+        [
+          948.5,
+          357
+        ]
+      ],
+      "labelAt": [
+        760,
+        343
+      ]
+    },
+    {
+      "id": "comp-pago-origen",
+      "from": "pago",
+      "to": "origenPago",
+      "label": "origen · 1 → 1",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "via": [
+        [
+          303,
+          630
+        ],
+        [
+          160,
+          630
+        ]
+      ],
+      "labelAt": [
+        231,
+        640
+      ]
+    },
+    {
+      "id": "assoc-pago-discrepancia",
+      "from": "pago",
+      "to": "discrepancia",
+      "label": "abre · 1 → 0..*",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "assoc-boleta-pago",
+      "from": "boleta",
+      "to": "pago",
+      "label": "pagoId · 1..* → 1",
+      "fromSide": "top",
+      "toSide": "bottom",
+      "labelAt": [
+        493.5,
+        634
+      ]
+    },
+    {
+      "id": "comp-boleta-codigo",
+      "from": "boleta",
+      "to": "codigoBoleta",
+      "label": "codigo · 1 → 1",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "via": [
+        [
+          493.5,
+          899
+        ],
+        [
+          400,
+          899
+        ]
+      ],
+      "labelAt": [
+        446,
+        899
+      ]
+    },
+    {
+      "id": "comp-boleta-titularidad",
+      "from": "boleta",
+      "to": "titularidad",
+      "label": "titularidades · 1 → 1..*",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "assoc-titularidad-titular",
+      "from": "titularidad",
+      "to": "titular",
+      "label": "titular · 1 → 1",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelAt": [
+        827,
+        802
+      ]
+    },
+    {
+      "id": "gen-aforo-excedido",
+      "from": "aforoExcedido",
+      "to": "excepcion",
+      "label": "",
+      "fromSide": "top",
+      "toSide": "bottom"
+    },
+    {
+      "id": "gen-reserva-vencida",
+      "from": "reservaVencida",
+      "to": "excepcion",
+      "label": "",
+      "fromSide": "top",
+      "toSide": "bottom"
+    },
+    {
+      "id": "gen-pago-solicitado",
+      "from": "evPagoSolicitado",
+      "to": "eventoDominio",
+      "label": "",
+      "fromSide": "top",
+      "toSide": "bottom"
+    },
+    {
+      "id": "gen-pago-confirmado",
+      "from": "evPagoConfirmado",
+      "to": "eventoDominio",
+      "label": "",
+      "fromSide": "top",
+      "toSide": "bottom"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "amber",
+      "title": "Caso y alcance",
+      "items": [
+        "Entra: turno → reserva → pago → emisión",
+        "Fuera: fila, notificaciones, transferencia, reventa y liquidación"
+      ]
+    },
+    {
+      "dot": "orange",
+      "title": "Notación UML",
+      "items": [
+        "◆ composición · ◇ agregación · → asociación · - -> dependencia",
+        "—▷ generalización · - -▷ realización · visibilidad + - #"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Reglas por método",
+      "items": [
+        "Localidad.reservar/vender R1 R2 · Reserva.marcarEnPago R3",
+        "Pago.iniciar R4 · Boleta.emitir R7 · total R13 · Discrepancia R14"
+      ]
+    }
+  ]
+}

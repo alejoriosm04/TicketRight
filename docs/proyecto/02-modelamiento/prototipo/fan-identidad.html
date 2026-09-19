@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TicketRight — Tu identidad</title>
+<link rel="stylesheet" href="estilos.css">
+<script>(function(){try{document.documentElement.setAttribute('data-tema', localStorage.getItem('tr-tema')||'dark');}catch(e){}})();</script>
+</head>
+<body>
+<div class="app-layout">
+  <aside class="barra-lateral" id="barra-lateral"></aside>
+  <main class="contenido-principal">
+    <div class="contenedor">
+
+      <div class="encabezado-pagina">
+        <span class="etiqueta">Cuenta verificada</span>
+        <h1>Tu identidad</h1>
+      </div>
+
+      <div class="tarjeta formulario">
+        <label for="nombre">Nombre completo</label>
+        <input id="nombre" type="text" value="Quinn Villa" disabled>
+
+        <label for="tipo-doc">Tipo de documento</label>
+        <input id="tipo-doc" type="text" value="Cédula de ciudadanía" disabled>
+
+        <label for="numero-doc">Número de documento</label>
+        <input id="numero-doc" type="text" value="1.020.456.789" disabled>
+
+        <label for="correo">Correo</label>
+        <input id="correo" type="email" value="quinn.villa@ejemplo.com" disabled>
+
+        <a href="#" style="font-size:13px">Actualizar mis datos ↗</a>
+      </div>
+
+      <div class="tarjeta">
+        <h3 style="margin-bottom:16px">Tus autorizaciones de tratamiento de datos</h3>
+
+        <label class="casilla">
+          <input type="checkbox" checked disabled>
+          <span>Emitir mi boleta y validar mi documento en el ingreso al evento</span>
+        </label>
+
+        <label class="casilla">
+          <input type="checkbox" checked>
+          <span>Notificarme por correo mi turno, mi compra y mi boleta</span>
+        </label>
+
+        <label class="casilla">
+          <input type="checkbox">
+          <span>Compartir mis datos con Cardio Fest Producciones S.A.S., el promotor del evento</span>
+        </label>
+
+        <button type="button" class="btn btn-primario btn-ancho" style="margin-top:8px">Guardar cambios</button>
+      </div>
+
+      <a href="fan-eventos.html" class="btn btn-secundario btn-ancho">Volver</a>
+
+    </div>
+  </main>
+</div>
+<script src="nav.js"></script>
+</body>
+</html>

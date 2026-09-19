@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TicketRight — Especificaciones del evento (operación interna)</title>
+<link rel="stylesheet" href="estilos.css">
+<script>(function(){try{document.documentElement.setAttribute('data-tema', localStorage.getItem('tr-tema')||'dark');}catch(e){}})();</script>
+</head>
+<body>
+<div class="app-layout">
+  <aside class="barra-lateral" id="barra-lateral"></aside>
+  <main class="contenido-principal">
+    <div class="contenedor">
+
+      <div class="migas"><a href="operacion-convenio.html">← Convenio comercial</a></div>
+
+      <div class="encabezado-pagina">
+        <span class="etiqueta">Cardio Fest — Estéreo Picnic · paso 2 de 2</span>
+        <h1>Especificaciones del evento</h1>
+      </div>
+
+      <div class="tarjeta formulario">
+        <h3 style="margin-bottom:16px">Datos del evento</h3>
+        <label for="convenio">Convenio comercial (promotor)</label>
+        <div class="fila-datos" style="padding:10px 14px;background:var(--color-bg);border:1px solid var(--color-border);border-radius:var(--radius-card);margin-bottom:16px">
+          <span class="k">Cardio Fest Producciones S.A.S.</span>
+          <span class="v"><a href="operacion-convenio.html" style="color:var(--color-accent-text)">Ver convenio ✓</a></span>
+        </div>
+        <label for="nombre">Nombre del evento</label>
+        <input id="nombre" type="text" value="Cardio Fest — Estéreo Picnic">
+        <label for="inicio">Fecha y hora de inicio</label>
+        <input id="inicio" type="text" value="2026-03-21 16:00">
+        <label for="perfil">Perfil de demanda</label>
+        <select id="perfil">
+          <option>Masivo — abre con fila virtual</option>
+          <option>Cotidiano — paso directo, sin fila</option>
+        </select>
+      </div>
+
+      <div class="tarjeta formulario">
+        <h3 style="margin-bottom:16px">Localidades y tipo de boletería</h3>
+        <table class="tabla">
+          <thead><tr><th>Localidad</th><th>Tipo</th><th>Aforo autorizado</th><th>Precio nominal</th></tr></thead>
+          <tbody>
+            <tr class="fila-clic" data-tipo="general"><td>General</td><td>general</td><td>5.000</td><td>$200.000</td></tr>
+            <tr class="fila-clic activa" data-tipo="numerada"><td>Platino</td><td>numerada</td><td>800</td><td>$450.000</td></tr>
+          </tbody>
+        </table>
+        <button class="btn btn-secundario" style="margin-top:16px">+ Agregar localidad</button>
+
+        <div id="config-sillas" style="margin-top:24px">
+          <h3 style="margin-bottom:8px">Configuración de sillas — Platino</h3>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+            <div><label for="filas">Filas</label><input id="filas" type="text" value="A–J (10 filas)"></div>
+            <div><label for="por-fila">Sillas por fila</label><input id="por-fila" type="text" value="80"></div>
+          </div>
+          <div class="etiqueta">Vista previa — primeras 10 sillas de la fila A</div>
+          <div class="mapa-calor" id="previa-sillas" style="grid-template-columns:repeat(10,1fr);max-width:340px"></div>
+          <div class="leyenda-calor">
+            <span><span class="muestra" style="background:var(--color-border)"></span>libre</span>
+            <span><span class="muestra" style="background:var(--color-warning)"></span>reservada</span>
+            <span><span class="muestra" style="background:var(--color-success)"></span>vendida</span>
+            <span><span class="muestra" style="background:var(--color-text-muted)"></span>bloqueada</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="tarjeta formulario">
+        <h3 style="margin-bottom:16px">Reglas de venta</h3>
+        <label for="inicio-venta">Inicio de venta</label>
+        <input id="inicio-venta" type="text" value="2026-03-14 10:00">
+        <label for="fin-venta">Fin de venta</label>
+        <input id="fin-venta" type="text" value="2026-03-21 16:00">
+        <label for="limite">Límite de boletas por fan</label>
+        <input id="limite" type="text" value="4">
+        <label for="transferencia">Transferencia entre fans</label>
+        <select id="transferencia"><option>Permitida</option><option>No permitida</option></select>
+        <label for="reventa">Reventa autorizada</label>
+        <select id="reventa" onchange="alternarReglasReventa(this)">
+          <option value="si">Permitida</option>
+          <option value="no">No permitida</option>
+        </select>
+
+        <div id="reglas-reventa">
+          <label for="reventa-precio-max">Precio máximo de reventa</label>
+          <input id="reventa-precio-max" type="text" value="$200.000 (100% del valor nominal)">
+          <label for="reventa-comision">Comisión de reventa</label>
+          <input id="reventa-comision" type="text" value="8%">
+          <label for="reventa-desde">Reventa habilitada desde</label>
+          <input id="reventa-desde" type="text" value="2026-03-21 16:00">
+          <label for="reventa-hasta">Reventa habilitada hasta</label>
+          <input id="reventa-hasta" type="text" value="2026-03-21 20:00">
+        </div>
+      </div>
+
+      <button class="btn btn-primario btn-ancho">Publicar evento</button>
+
+    </div>
+  </main>
+</div>
+<script src="nav.js"></script>
+<script>
+  var colores = { libre: 'var(--color-border)', reservada: 'var(--color-warning)', vendida: 'var(--color-success)', bloqueada: 'var(--color-text-muted)' };
+  var estados = ['vendida','vendida','vendida','reservada','vendida','libre','vendida','reservada','vendida','vendida'];
+  document.getElementById('previa-sillas').innerHTML = estados.map(function (e) {
+    return '<div class="celda" title="Silla ' + e + '" style="background:' + colores[e] + '"></div>';
+  }).join('');
+
+  document.querySelectorAll('.tabla tr.fila-clic').forEach(function (fila) {
+    fila.addEventListener('click', function () {
+      document.querySelectorAll('.tabla tr.fila-clic').forEach(function (f) { f.classList.remove('activa'); });
+      fila.classList.add('activa');
+      var config = document.getElementById('config-sillas');
+      config.style.display = fila.getAttribute('data-tipo') === 'numerada' ? 'block' : 'none';
+    });
+  });
+
+  function alternarReglasReventa(select) {
+    document.getElementById('reglas-reventa').style.display = select.value === 'si' ? 'block' : 'none';
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,714 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Diagrama de clases — vista 2: aplicación, puertos y adaptadores del caso",
+    "quality_profile": "standard",
+    "viewBox": [
+      1990,
+      910
+    ],
+    "legend": {
+      "mode": "hidden"
+    },
+    "views": [
+      {
+        "id": "aplicacion",
+        "label": "1 · Aplicación",
+        "focus": [
+          "orquestador",
+          "crearReserva",
+          "iniciarPago",
+          "confirmarPago",
+          "compraEnCurso",
+          "dominio"
+        ],
+        "note": "La SAGA de AD-002; el orquestador solo conoce interfaces y el modelo del dominio."
+      },
+      {
+        "id": "puertos",
+        "label": "2 · Puertos",
+        "focus": [
+          "orquestador",
+          "pPasarela",
+          "pEventos",
+          "pAdmision",
+          "pCompras",
+          "pLocalidades",
+          "pReservas",
+          "pPagos",
+          "pDiscrepancias",
+          "pBoletas"
+        ],
+        "note": "Nueve colaboradores inyectados: agregación compartida; los puertos no conocen a quien los usa."
+      },
+      {
+        "id": "adaptadores",
+        "label": "3 · Adaptadores",
+        "focus": [
+          "aPasarela",
+          "aOutbox",
+          "aJwt",
+          "aLocalidades",
+          "aReservas",
+          "pPasarela",
+          "pEventos",
+          "pAdmision",
+          "pLocalidades",
+          "pReservas"
+        ],
+        "note": "La dependencia apunta hacia adentro: realizan el puerto y traducen al mundo externo."
+      }
+    ]
+  },
+  "components": [
+    {
+      "id": "crearReserva",
+      "type": "frontend",
+      "label": "CrearReserva",
+      "sublabel": "«command»",
+      "tag": "APLICACION",
+      "pos": [
+        740,
+        60
+      ],
+      "size": [
+        222,
+        142
+      ]
+    },
+    {
+      "id": "iniciarPago",
+      "type": "frontend",
+      "label": "IniciarPago",
+      "sublabel": "«command»",
+      "tag": "APLICACION",
+      "pos": [
+        1000,
+        60
+      ],
+      "size": [
+        222,
+        116
+      ]
+    },
+    {
+      "id": "confirmarPago",
+      "type": "frontend",
+      "label": "ConfirmarPago",
+      "sublabel": "«command»",
+      "tag": "APLICACION",
+      "pos": [
+        740,
+        250
+      ],
+      "size": [
+        222,
+        116
+      ]
+    },
+    {
+      "id": "orquestador",
+      "type": "frontend",
+      "label": "OrquestadorDeCompra",
+      "sublabel": "«application service»",
+      "tag": "APLICACION",
+      "pos": [
+        740,
+        430
+      ],
+      "size": [
+        468,
+        290
+      ]
+    },
+    {
+      "id": "compraEnCurso",
+      "type": "frontend",
+      "label": "CompraEnCurso",
+      "sublabel": "«entity»",
+      "tag": "APLICACION",
+      "pos": [
+        1000,
+        250
+      ],
+      "size": [
+        222,
+        160
+      ]
+    },
+    {
+      "id": "pPasarela",
+      "type": "cloud",
+      "label": "PasarelaDePago",
+      "sublabel": "«interface»",
+      "tag": "PUERTOS",
+      "pos": [
+        380,
+        300
+      ],
+      "size": [
+        294,
+        90
+      ]
+    },
+    {
+      "id": "pEventos",
+      "type": "cloud",
+      "label": "PublicadorDeEventos",
+      "sublabel": "«interface»",
+      "tag": "PUERTOS",
+      "pos": [
+        380,
+        416
+      ],
+      "size": [
+        294,
+        77
+      ]
+    },
+    {
+      "id": "pAdmision",
+      "type": "cloud",
+      "label": "ValidadorDeAdmision",
+      "sublabel": "«interface»",
+      "tag": "PUERTOS",
+      "pos": [
+        380,
+        524
+      ],
+      "size": [
+        294,
+        77
+      ]
+    },
+    {
+      "id": "pCompras",
+      "type": "cloud",
+      "label": "RepositorioDeCompras",
+      "sublabel": "«interface»",
+      "tag": "PUERTOS",
+      "pos": [
+        380,
+        632
+      ],
+      "size": [
+        294,
+        90
+      ]
+    },
+    {
+      "id": "pLocalidades",
+      "type": "cloud",
+      "label": "RepositorioDeLocalidades",
+      "sublabel": "«interface»",
+      "tag": "PUERTOS",
+      "pos": [
+        1270,
+        300
+      ],
+      "size": [
+        310,
+        90
+      ]
+    },
+    {
+      "id": "pReservas",
+      "type": "cloud",
+      "label": "RepositorioDeReservas",
+      "sublabel": "«interface»",
+      "tag": "PUERTOS",
+      "pos": [
+        1270,
+        410
+      ],
+      "size": [
+        310,
+        103
+      ]
+    },
+    {
+      "id": "pPagos",
+      "type": "cloud",
+      "label": "RepositorioDePagos",
+      "sublabel": "«interface»",
+      "tag": "PUERTOS",
+      "pos": [
+        1270,
+        530
+      ],
+      "size": [
+        310,
+        103
+      ]
+    },
+    {
+      "id": "pDiscrepancias",
+      "type": "cloud",
+      "label": "RepositorioDeDiscrepancias",
+      "sublabel": "«interface»",
+      "tag": "PUERTOS",
+      "pos": [
+        1270,
+        650
+      ],
+      "size": [
+        310,
+        90
+      ]
+    },
+    {
+      "id": "pBoletas",
+      "type": "cloud",
+      "label": "RepositorioDeBoletas",
+      "sublabel": "«interface»",
+      "tag": "PUERTOS",
+      "pos": [
+        1270,
+        760
+      ],
+      "size": [
+        310,
+        90
+      ]
+    },
+    {
+      "id": "aPasarela",
+      "type": "security",
+      "label": "AdaptadorDePasarelaTokenizada",
+      "sublabel": "«adapter»",
+      "tag": "INFRAESTRUCTURA",
+      "pos": [
+        40,
+        291
+      ],
+      "size": [
+        294,
+        108
+      ]
+    },
+    {
+      "id": "aOutbox",
+      "type": "messagebus",
+      "label": "OutboxTransaccional",
+      "sublabel": "«adapter»",
+      "tag": "INFRAESTRUCTURA",
+      "pos": [
+        40,
+        407
+      ],
+      "size": [
+        294,
+        95
+      ]
+    },
+    {
+      "id": "aJwt",
+      "type": "security",
+      "label": "ValidadorJwtDeAdmision",
+      "sublabel": "«adapter»",
+      "tag": "INFRAESTRUCTURA",
+      "pos": [
+        40,
+        515
+      ],
+      "size": [
+        294,
+        95
+      ]
+    },
+    {
+      "id": "aLocalidades",
+      "type": "database",
+      "label": "RepositorioPostgresDeLocalidades",
+      "sublabel": "«adapter»",
+      "tag": "INFRAESTRUCTURA",
+      "pos": [
+        1650,
+        298
+      ],
+      "size": [
+        272,
+        95
+      ]
+    },
+    {
+      "id": "aReservas",
+      "type": "database",
+      "label": "RepositorioPostgresDeReservas",
+      "sublabel": "«adapter»",
+      "tag": "INFRAESTRUCTURA",
+      "pos": [
+        1650,
+        408
+      ],
+      "size": [
+        272,
+        108
+      ]
+    },
+    {
+      "id": "dominio",
+      "type": "backend",
+      "label": "Modelo de dominio",
+      "sublabel": "«reference» · se detalla en la vista 1",
+      "tag": "REFERENCIA",
+      "pos": [
+        740,
+        745
+      ],
+      "size": [
+        468,
+        120
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "Capa de aplicación",
+      "wraps": [
+        "crearReserva",
+        "iniciarPago",
+        "confirmarPago",
+        "orquestador",
+        "compraEnCurso"
+      ],
+      "pad": 22
+    },
+    {
+      "kind": "region",
+      "label": "Adaptadores externos",
+      "wraps": [
+        "aPasarela",
+        "aOutbox",
+        "aJwt"
+      ],
+      "pad": 18
+    },
+    {
+      "kind": "region",
+      "label": "Adaptadores PostgreSQL",
+      "wraps": [
+        "aLocalidades",
+        "aReservas"
+      ],
+      "pad": 18
+    },
+    {
+      "kind": "region",
+      "label": "Puertos de salida",
+      "wraps": [
+        "pPasarela",
+        "pEventos",
+        "pAdmision",
+        "pCompras"
+      ],
+      "pad": 18
+    },
+    {
+      "kind": "region",
+      "label": "Puertos de persistencia",
+      "wraps": [
+        "pLocalidades",
+        "pReservas",
+        "pPagos",
+        "pDiscrepancias",
+        "pBoletas"
+      ],
+      "pad": 18
+    }
+  ],
+  "connections": [
+    {
+      "id": "dep-orq-crearReserva",
+      "from": "orquestador",
+      "to": "crearReserva",
+      "label": "«use»",
+      "variant": "dashed",
+      "fromSide": "left",
+      "toSide": "bottom",
+      "via": [
+        [
+          684,
+          575
+        ],
+        [
+          684,
+          222
+        ],
+        [
+          851,
+          222
+        ]
+      ],
+      "labelAt": [
+        712,
+        320
+      ]
+    },
+    {
+      "id": "dep-orq-iniciarPago",
+      "from": "orquestador",
+      "to": "iniciarPago",
+      "label": "«use»",
+      "variant": "dashed",
+      "fromSide": "right",
+      "toSide": "bottom",
+      "via": [
+        [
+          1264,
+          575
+        ],
+        [
+          1264,
+          222
+        ],
+        [
+          1111,
+          222
+        ]
+      ],
+      "labelAt": [
+        1240,
+        320
+      ]
+    },
+    {
+      "id": "dep-orq-confirmarPago",
+      "from": "orquestador",
+      "to": "confirmarPago",
+      "label": "«use»",
+      "variant": "dashed",
+      "fromSide": "top",
+      "toSide": "bottom"
+    },
+    {
+      "id": "dep-orq-compraEnCurso",
+      "from": "orquestador",
+      "to": "compraEnCurso",
+      "label": "«create»",
+      "variant": "dashed",
+      "fromSide": "top",
+      "toSide": "bottom",
+      "labelAt": [
+        1111,
+        420
+      ]
+    },
+    {
+      "id": "agg-orquestador-pPasarela",
+      "from": "orquestador",
+      "to": "pPasarela",
+      "label": "1 → 1",
+      "fromSide": "left",
+      "toSide": "right",
+      "labelAt": [
+        712,
+        345
+      ]
+    },
+    {
+      "id": "agg-orquestador-pEventos",
+      "from": "orquestador",
+      "to": "pEventos",
+      "label": "1 → 1",
+      "fromSide": "left",
+      "toSide": "right",
+      "labelAt": [
+        712,
+        454
+      ]
+    },
+    {
+      "id": "agg-orquestador-pAdmision",
+      "from": "orquestador",
+      "to": "pAdmision",
+      "label": "1 → 1",
+      "fromSide": "left",
+      "toSide": "right",
+      "labelAt": [
+        712,
+        562
+      ]
+    },
+    {
+      "id": "agg-orquestador-pCompras",
+      "from": "orquestador",
+      "to": "pCompras",
+      "label": "1 → 1",
+      "fromSide": "left",
+      "toSide": "right",
+      "labelAt": [
+        712,
+        677
+      ]
+    },
+    {
+      "id": "agg-orquestador-pLocalidades",
+      "from": "orquestador",
+      "to": "pLocalidades",
+      "label": "1 → 1",
+      "fromSide": "right",
+      "toSide": "left",
+      "labelAt": [
+        1240,
+        345
+      ]
+    },
+    {
+      "id": "agg-orquestador-pReservas",
+      "from": "orquestador",
+      "to": "pReservas",
+      "label": "1 → 1",
+      "fromSide": "right",
+      "toSide": "left",
+      "labelAt": [
+        1236,
+        461
+      ]
+    },
+    {
+      "id": "agg-orquestador-pPagos",
+      "from": "orquestador",
+      "to": "pPagos",
+      "label": "1 → 1",
+      "fromSide": "right",
+      "toSide": "left",
+      "labelAt": [
+        1236,
+        581
+      ]
+    },
+    {
+      "id": "agg-orquestador-pDiscrepancias",
+      "from": "orquestador",
+      "to": "pDiscrepancias",
+      "label": "1 → 1",
+      "fromSide": "right",
+      "toSide": "left",
+      "labelAt": [
+        1236,
+        695
+      ]
+    },
+    {
+      "id": "agg-orquestador-pBoletas",
+      "from": "orquestador",
+      "to": "pBoletas",
+      "label": "1 → 1",
+      "fromSide": "right",
+      "toSide": "left",
+      "labelAt": [
+        1236,
+        805
+      ]
+    },
+    {
+      "id": "real-aPasarela",
+      "from": "aPasarela",
+      "to": "pPasarela",
+      "label": "",
+      "variant": "dashed",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "real-aOutbox",
+      "from": "aOutbox",
+      "to": "pEventos",
+      "label": "",
+      "variant": "dashed",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "real-aJwt",
+      "from": "aJwt",
+      "to": "pAdmision",
+      "label": "",
+      "variant": "dashed",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "real-aLocalidades",
+      "from": "aLocalidades",
+      "to": "pLocalidades",
+      "label": "",
+      "variant": "dashed",
+      "fromSide": "left",
+      "toSide": "right"
+    },
+    {
+      "id": "real-aReservas",
+      "from": "aReservas",
+      "to": "pReservas",
+      "label": "",
+      "variant": "dashed",
+      "fromSide": "left",
+      "toSide": "right"
+    },
+    {
+      "id": "dep-reserva-crea",
+      "from": "orquestador",
+      "to": "dominio",
+      "label": "«create»",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "variant": "dashed",
+      "labelAt": [
+        850,
+        733
+      ]
+    },
+    {
+      "id": "dep-eventos-eventoDominio",
+      "from": "orquestador",
+      "to": "dominio",
+      "label": "«use»",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "variant": "dashed",
+      "labelAt": [
+        1010,
+        733
+      ]
+    },
+    {
+      "id": "dep-boletas-boleta",
+      "from": "pBoletas",
+      "to": "dominio",
+      "label": "«use»",
+      "fromSide": "left",
+      "toSide": "right",
+      "variant": "dashed"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "amber",
+      "title": "Caso y alcance",
+      "items": [
+        "Entra: turno → reserva → pago → emisión",
+        "Fuera: fila, notificaciones, transferencia, reventa y liquidación"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "Capas hexagonales",
+      "items": [
+        "Puertos: interfaces que define la aplicación",
+        "Adaptadores: los realizan y traducen; la dependencia apunta hacia adentro"
+      ]
+    },
+    {
+      "dot": "orange",
+      "title": "Notación UML",
+      "items": [
+        "◆ composición · ◇ agregación · → asociación · - -> dependencia",
+        "—▷ generalización · - -▷ realización · visibilidad + - #"
+      ]
+    }
+  ]
+}

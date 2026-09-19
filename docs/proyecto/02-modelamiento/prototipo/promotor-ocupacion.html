@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TicketRight — Ocupación y velocidad de venta (promotor)</title>
+<link rel="stylesheet" href="estilos.css">
+<script>(function(){try{document.documentElement.setAttribute('data-tema', localStorage.getItem('tr-tema')||'dark');}catch(e){}})();</script>
+</head>
+<body>
+<div class="app-layout">
+  <aside class="barra-lateral" id="barra-lateral"></aside>
+  <main class="contenido-principal">
+    <div class="contenedor-ancho">
+
+      <div class="encabezado-pagina">
+        <span class="etiqueta">Cardio Fest — Estéreo Picnic</span>
+        <h1>Ocupación por localidad</h1>
+      </div>
+
+      <div class="destacado">
+        <span class="emoji">🔥</span>
+        <h2>Platino se agotó primero</h2>
+        <p style="margin-top:4px">Se llenó en los primeros 42 minutos de venta — casi el
+        doble de rápido que General. Si organizas otro evento similar, Platino es la
+        localidad con más espacio para subir precio o ampliar aforo.</p>
+      </div>
+
+      <div class="tarjeta">
+        <h3 style="margin-bottom:20px">Cuánto se ha vendido</h3>
+
+        <div class="fila-ocupacion">
+          <div class="cabecera">
+            <span class="nombre">General</span>
+            <span class="cifra">94%</span>
+          </div>
+          <div class="pista"><div class="relleno" data-ancho="94"></div></div>
+          <div class="detalle"><span>4.700 de 5.000 vendidas · 180 reservadas ahora mismo</span><span>120 disponibles</span></div>
+        </div>
+
+        <div class="fila-ocupacion">
+          <div class="cabecera">
+            <span class="nombre">Platino</span>
+            <span class="cifra">100% <span class="insignia insignia-alerta">🔥 Agotado</span></span>
+          </div>
+          <div class="pista"><div class="relleno" data-ancho="100"></div></div>
+          <div class="detalle"><span>800 de 800 vendidas</span><span>0 disponibles</span></div>
+        </div>
+      </div>
+
+      <div class="tarjeta">
+        <h3 style="margin-bottom:4px">Velocidad de venta</h3>
+        <p style="margin-bottom:16px">Cada columna es un bloque de 5 minutos desde la apertura.
+        El color muestra qué tan rápido se está vendiendo cada localidad en ese momento —
+        no si algo está mal: entre más caliente, más rápido se agota.</p>
+
+        <div style="margin-bottom:16px">
+          <div class="etiqueta">General</div>
+          <div class="mapa-calor" id="calor-general" role="img" aria-label="Velocidad de venta por bloques de 5 minutos desde la apertura, zona General"></div>
+        </div>
+        <div style="margin-bottom:16px">
+          <div class="etiqueta">Platino</div>
+          <div class="mapa-calor" id="calor-platino" role="img" aria-label="Velocidad de venta por bloques de 5 minutos desde la apertura, zona Platino"></div>
+        </div>
+
+        <div class="leyenda-calor">
+          <span><span class="muestra" style="background:var(--color-calor-fria)"></span>Se vende lento</span>
+          <span><span class="muestra" style="background:var(--color-calor-media)"></span>Ritmo normal</span>
+          <span><span class="muestra" style="background:var(--color-calor-alta)"></span>Se vende muy rápido</span>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+<script src="nav.js"></script>
+<script src="graficos.js"></script>
+<script>
+  dibujarMapaCalor('calor-general', 12, [0.02, 0.08, 0.18, 0.31, 0.44, 0.55, 0.64, 0.72, 0.79, 0.85, 0.90, 0.94]);
+  dibujarMapaCalor('calor-platino', 12, [0.10, 0.35, 0.58, 0.74, 0.85, 0.92, 0.96, 0.98, 0.99, 1.0, 1.0, 1.0]);
+
+  document.querySelectorAll('.fila-ocupacion .relleno').forEach(function (r) {
+    r.style.width = '0%';
+    requestAnimationFrame(function () { setTimeout(function () { r.style.width = r.getAttribute('data-ancho') + '%'; }, 30); });
+  });
+</script>
+</body>
+</html>
