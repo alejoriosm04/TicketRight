@@ -15,16 +15,16 @@ tarde y responde dos veces.
 
 | Ruta | Qué contiene |
 |---|---|
-| `paquetes/` | El código: un paquete por contexto acotado —hexagonal— más `kernel` |
+| `packages/` | El código: un paquete por contexto acotado —hexagonal— más `shared-kernel` |
 | `docs/` | La base de conocimiento importada de `aas`: caso de negocio (Entrega 1), modelamiento (Entrega 2) y el material del curso digitalizado. Es la fuente de verdad y se publica como [wiki](https://github.com/alejoriosm04/TicketRight/wiki) |
 | `docs/proyecto/decisiones/` | Los ADR: el material con el que se defiende la Entrega 3 |
 | `docs/proyecto/02-modelamiento/` | Los diseños que la implementación convierte en código |
-| `herramientas/` | `publica-wiki.py`: publica `docs/` como wiki |
+| `tools/` | `publish-wiki.py`: publica `docs/` como wiki |
 | `docs/herramientas/` | Verificador de enlaces y utilidades de los entregables |
 | `docker-compose.yml` | Ambiente local: PostgreSQL, Redis y Kafka |
 
 El código es un monorepo de npm workspaces con TypeScript y Vitest
-([AD-007](docs/proyecto/decisiones/0007-stack-de-implementacion.md), 🟣 propuesto).
+([AD-007](docs/proyecto/decisiones/0007-stack-de-implementacion.md), ✅ aceptado):
 
 ```bash
 npm install                                    # dependencias

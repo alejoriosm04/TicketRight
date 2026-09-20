@@ -17,7 +17,7 @@ Este repositorio es donde ese diseño se convierte en código, se prueba y se de
 
 ```
 ESTADO.md     Estado vivo del repo y de la Entrega 3. Empieza aquí siempre
-paquetes/     El código: kernel + un paquete por contexto acotado, hexagonal dentro
+packages/     El código: shared-kernel + un paquete por contexto acotado, hexagonal dentro
 docs/         Base de conocimiento importada de aas
   ESTADO.md     Estado del proyecto y del curso hasta la Entrega 2 (bitácora del diseño)
   proyecto/     Entregas 1 y 2, ADRs y decisiones
@@ -26,21 +26,30 @@ docs/         Base de conocimiento importada de aas
   curso/        Material del curso digitalizado
     material/     Originales del profesor — SOLO LECTURA
   herramientas/ Verificador de enlaces y utilidades de los entregables
-herramientas/ publica-wiki.py — publica docs/ como wiki del repositorio
+tools/        publish-wiki.py — publica docs/ como wiki del repositorio
 docker-compose.yml  Ambiente local (PostgreSQL, Redis y Kafka)
 ```
 
 ## El código
 
-TypeScript sobre Node.js 24 en un monorepo con npm workspaces.
-[AD-007](docs/proyecto/decisiones/0007-stack-de-implementacion.md) lo propone y el equipo
-debe ratificarlo antes de escribir la lógica de dominio.
+TypeScript sobre Node.js 24 en un monorepo con npm workspaces, ratificado en
+[AD-007](docs/proyecto/decisiones/0007-stack-de-implementacion.md).
 
-- **Un paquete por contexto acotado** —Oferta de eventos, Admisión e identidad, Venta y
-  recaudo, Derecho de asistencia— más `kernel` para los tipos compartidos.
-- **Hexágono dentro de cada paquete:** `dominio/`, `aplicacion/`, `puertos/`, `adaptadores/`.
-  El dominio no importa infraestructura ni otros contextos; un paquete no importa a otro.
-- **Pruebas junto al código**, con Vitest, como exige el
+- **Estructura, paquetes y archivos en inglés**; el **vocabulario del dominio** se mantiene
+  tal como lo fija el modelo aprobado (Reserva, Pago, Boleta, Aforo…). Un paquete por
+  contexto acotado, con su nombre en inglés:
+
+  | Contexto (docs) | Paquete |
+  |---|---|
+  | Oferta de eventos | `@ticketright/event-catalog` |
+  | Admisión e identidad | `@ticketright/admission-identity` |
+  | Venta y recaudo | `@ticketright/sales` |
+  | Derecho de asistencia | `@ticketright/entitlements` |
+  | Tipos compartidos | `@ticketright/shared-kernel` |
+
+- **Hexágono dentro de cada paquete:** `src/domain/`, `src/application/`, `src/ports/`,
+  `src/adapters/`. El dominio no importa infraestructura ni otros contextos; un paquete no
+  importa a otro. Las pruebas viven en `tests/` del paquete, con Vitest, como exige el
   [plan de pruebas](docs/proyecto/02-modelamiento/plan-de-pruebas.md#automatización).
 - **El diseño manda:** el código implementa el
   [diagrama de clases](docs/proyecto/02-modelamiento/diagrama-de-clases.md) y el
@@ -57,8 +66,8 @@ es un **espejo generado** con las mismas páginas, enlaces adaptados y un menú 
 **No se edita a mano**: se regenera así.
 
 ```bash
-python3 herramientas/publica-wiki.py          # escribe la wiki local (../TicketRight.wiki)
-python3 herramientas/publica-wiki.py --push   # además la commitea y publica
+python3 tools/publish-wiki.py          # escribe la wiki local (../TicketRight.wiki)
+python3 tools/publish-wiki.py --push   # además la commitea y publica
 ```
 
 **Consulta la wiki —o `docs/` directamente, es lo mismo— siempre que una tarea necesite

@@ -1,6 +1,6 @@
 # AD-007 — Stack de implementación: TypeScript sobre Node.js
 
-**Fecha:** 2026-09-19 · **Estado:** 🟣 Propuesto — pendiente de ratificación del equipo
+**Fecha:** 2026-09-19 · **Estado:** ✅ Aceptado — ratificado por el equipo el mismo día
 **Participan:** Alejo, Lina, Quinnie
 **Dimensión:** implementación — **no cuenta entre las cinco decisiones arquitectónicas**
 **Relacionados:** [AD-005](0005-estilo-de-arquitectura.md) ·
@@ -25,15 +25,17 @@ La implementación de la Entrega 3 usará:
 - **Node.js 24 LTS** como runtime y **TypeScript en modo estricto** (`strict`,
   `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`) con módulos ESM.
 - **Un monorepo con npm workspaces**, un paquete por contexto acotado del modelo de dominio
-  —Oferta de eventos, Admisión e identidad, Venta y recaudo, Derecho de asistencia— más un
-  paquete `kernel` para los tipos compartidos. Los paquetes son desplegables por separado;
-  el límite entre contextos es verificable porque un paquete no importa a otro.
+  —Oferta de eventos → `@ticketright/event-catalog`, Admisión e identidad →
+  `@ticketright/admission-identity`, Venta y recaudo → `@ticketright/sales`, Derecho de
+  asistencia → `@ticketright/entitlements`— más `@ticketright/shared-kernel` para los tipos
+  compartidos. Los paquetes son desplegables por separado; el límite entre contextos es
+  verificable porque un paquete no importa a otro.
 - **Arquitectura hexagonal dentro de cada paquete**, como la documenta el
-  [diagrama de clases](../02-modelamiento/diagrama-de-clases.md): `dominio/`, `aplicacion/`,
-  `puertos/` y `adaptadores/`. El dominio no importa infraestructura; los adaptadores
-  implementan los puertos.
-- **Vitest** como marco de pruebas y **V8 como herramienta de cobertura**, con las pruebas
-  junto al código de cada contexto, como exige el
+  [diagrama de clases](../02-modelamiento/diagrama-de-clases.md): `src/domain/`,
+  `src/application/`, `src/ports/` y `src/adapters/`. El dominio no importa infraestructura;
+  los adaptadores implementan los puertos.
+- **Vitest** como marco de pruebas y **V8** como herramienta de cobertura, con las pruebas
+  en `tests/` de cada paquete, como exige el
   [plan de pruebas](../02-modelamiento/plan-de-pruebas.md#automatización).
 - **Docker Compose** para el ambiente local de desarrollo con PostgreSQL, Redis y Kafka,
   alineado con [AD-003](0003-consistencia-por-tipo-de-inventario.md) y
@@ -45,6 +47,11 @@ cliente de Kafka, SDK de OpenTelemetry—: se eligen al escribir cada adaptador 
 registradas en el `package.json` del paquete correspondiente. La decisión de lenguaje y
 runtime es la que condiciona el resto; elegir un ORM o un router no cambia la arquitectura
 porque el dominio depende de puertos, no de esos detalles.
+
+**Convención de nombres:** estructura, paquetes, archivos y scripts en inglés, como se usa en
+la industria (el esqueleto vive en `packages/`); el **vocabulario del dominio conserva los
+nombres del modelo aprobado** —Reserva, Pago, Boleta, Aforo…— porque son los que aparecen en
+los diagramas, en el plan de pruebas y en la defensa.
 
 ## 2. Identificador único
 
@@ -119,10 +126,9 @@ producción no cambia: esta decisión es la capa de lenguaje y herramientas de l
 [arquitectura de implementación](../02-modelamiento/arquitectura-de-implementacion.md), que
 sigue siendo la referencia para AWS.
 
-El **estado es propuesto**: el equipo debe ratificarlo antes de escribir la lógica de
-dominio, igual que se hizo con los cinco ADR técnicos el 16 de septiembre. Si se ratifica,
-pasa a **Aceptado** y el esqueleto ya puede crecer con los veintiún casos del plan de
-pruebas.
+El equipo **ratificó la decisión el 19 de septiembre de 2026**, el mismo día en que se
+propuso, igual que había hecho con los cinco ADR técnicos el 16 de septiembre. El esqueleto
+ya puede crecer con los veintiún casos del plan de pruebas.
 
 ## 7. Justificación
 

@@ -39,7 +39,7 @@ caso de uso principal, y encima de eso pruebas, carga, observabilidad y fallos.
 
 | # | Frente | Insumo ya escrito | Qué falta |
 |---|---|---|---|
-| 1 | Estructura del código | [AD-007](docs/proyecto/decisiones/0007-stack-de-implementacion.md): TypeScript/Node · [arquitectura hexagonal](docs/proyecto/02-modelamiento/diagrama-de-clases.md) | 🟣 ADR-007 propuesto y esqueleto listo en `paquetes/`; falta ratificación del equipo |
+| 1 | Estructura del código | [AD-007](docs/proyecto/decisiones/0007-stack-de-implementacion.md) ✅ aceptado: TypeScript/Node · [arquitectura hexagonal](docs/proyecto/02-modelamiento/diagrama-de-clases.md) | Esqueleto listo en `packages/`; siguiente: los 21 casos |
 | 2 | Caso de uso principal: *comprar en la ventana de alta demanda* | [Diagrama de clases](docs/proyecto/02-modelamiento/diagrama-de-clases.md) (39 clases) y [de secuencia](docs/proyecto/02-modelamiento/diagrama-de-secuencia.md) (38 mensajes, errores y compensaciones) | Implementarlo |
 | 3 | Pruebas | [Plan de pruebas](docs/proyecto/02-modelamiento/plan-de-pruebas.md): 21 casos UT sobre las reglas R1–R14 | Escribirlas, ejecutarlas y reportar |
 | 4 | Carga | [Volumetría](docs/proyecto/02-modelamiento/volumetria.md): nominal, pico, estrés y resistencia; 30.000 usuarios en 60 s contra 5.000 boletas | Corridas y resultados |
@@ -69,10 +69,10 @@ accidente y dejaba 25 enlaces rotos; los tres avisos de importación están en
 
 La **decisión de stack** quedó registrada como
 [AD-007](docs/proyecto/decisiones/0007-stack-de-implementacion.md) —TypeScript sobre
-Node.js con Vitest— y el esqueleto está en `paquetes/`: cuatro contextos hexagonales
-(Oferta de eventos, Admisión e identidad, Venta y recaudo, Derecho de asistencia), `kernel`,
-ambiente local en `docker-compose.yml` y CI en `.github/workflows/`. Queda **propuesta**
-hasta que el equipo la ratifique; a partir de ahí empieza el código de los veintiún casos.
+Node.js con Vitest, **aceptada el 19 de septiembre de 2026**— y el esqueleto está en
+`packages/`: cuatro contextos hexagonales con nombre en inglés —`event-catalog`,
+`admission-identity`, `sales` y `entitlements`— más `shared-kernel`, ambiente local en
+`docker-compose.yml` y CI en `.github/workflows/`. Sigue el código de los veintiún casos.
 
 ## Tablero
 
