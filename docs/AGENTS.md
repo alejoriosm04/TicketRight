@@ -50,6 +50,8 @@ pequeño; los grandes se leen por secciones, nunca enteros.
 | Qué dijo el profesor en las clases 1 y 2 | `curso/clase-01-02.md` | 57 KB · índice con número de lámina |
 | Patrones y estilos de arquitectura (clases 3 y 4) | `curso/clase-03-04.md` | 40 KB · con índice |
 | **Lo que el profesor explicó del Entregable 2** | `curso/clase-03-04-transcripcion.md` | 18 KB · con índice |
+| Arquitecturas evolutivas, migración, patrones y DDD (clases 5 y 6) | `curso/clase-05-06.md` | 88 KB · con índice |
+| **La rúbrica del Entregable 3** | `proyecto/03-implementacion/rubrica.md` | 6 KB |
 | Fechas, pesos y evaluación | `curso/syllabus.md` | 3 KB |
 | Cómo se calificó la Entrega 1 | `.../rubrica.md` | 15 KB |
 

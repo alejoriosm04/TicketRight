@@ -18,15 +18,18 @@ demostrarlo**. Los diseños que esta entrega convierte en realidad están en
 
 ## La Entrega 3
 
-Según el [syllabus](docs/curso/syllabus.md) y el
+La rúbrica completa llegó con las clases 5 y 6
+([`rubrica.md`](docs/proyecto/03-implementacion/rubrica.md)); el plan de trabajo está en el
 [README de la entrega](docs/proyecto/03-implementacion/README.md):
 
-| Frente | Qué es | Estado |
-|---|---|---|
-| Implementación | El código y la plataforma funcionando | ⚪ PENDIENTE |
-| Sustentación | Presentar la solución | ⚪ PENDIENTE |
-| Simulación | `PENDIENTE: confirmar qué se espera` | ❓ |
-| Defensa | Sostener las decisiones ante preguntas | 🟡 Material listo: los cinco ADR |
+| # | Criterio | Peso | Estado |
+|---|---|---|---|
+| 1 | Aplicación funcionando | **40%** | 🟡 Dominio y SAGA en verde; faltan adaptadores reales y despliegue |
+| 2 | Observabilidad | **20%** | 🟡 Diseño completo; falta instrumentar 3 métricas de negocio + 3 técnicas |
+| 3 | Simulación y análisis de fallos | **30%** | 🟡 4 escenarios elegidos del catálogo; falta ejecutarlos y bitacorar |
+| 4 | Patrones utilizados | **10%** | ✅ Catálogo en [`patrones.md`](docs/proyecto/03-implementacion/patrones.md) |
+| 5 | Autoevaluación | **+10%** | ⚪ Por escribir al cierre |
+| 6 | Coherencia | **-10%** | 🟢 21 casos ejecutados y diagramas reconciliados; mantener al día |
 
 La **defensa** se apoya en los ADR: para cada decisión visible en la demo hay que responder
 qué atributo de calidad la justifica y qué se sacrificó a cambio
@@ -37,20 +40,21 @@ qué atributo de calidad la justifica y qué se sacrificó a cambio
 De los entregables de diseño a la ejecución. **El orden importa**: primero el esqueleto y el
 caso de uso principal, y encima de eso pruebas, carga, observabilidad y fallos.
 
-| # | Frente | Insumo ya escrito | Qué falta |
+| # | Criterio | Insumo ya escrito | Qué falta |
 |---|---|---|---|
-| 1 | Estructura del código | [AD-007](docs/proyecto/decisiones/0007-stack-de-implementacion.md): TypeScript/Node · [arquitectura hexagonal](docs/proyecto/02-modelamiento/diagrama-de-clases.md) | ✅ Esqueleto en `packages/` con nombres en inglés (convención en AD-007) |
-| 2 | Caso de uso principal: *comprar en la ventana de alta demanda* | [Diagrama de clases](docs/proyecto/02-modelamiento/diagrama-de-clases.md) (39 clases) y [de secuencia](docs/proyecto/02-modelamiento/diagrama-de-secuencia.md) (38 mensajes, errores y compensaciones) | 🟡 Dominio y SAGA implementados con los dobles de prueba; `PENDIENTE: adaptadores reales (HTTP, PostgreSQL, outbox, pasarela), despliegue y demo` |
-| 3 | Pruebas | [Plan de pruebas](docs/proyecto/02-modelamiento/plan-de-pruebas.md): 21 casos UT sobre las reglas R1–R14 | ✅ Los 21 casos están escritos y en verde (38 pruebas; cobertura 78,25% sentencias). `PENDIENTE: reporte por commit y corrida en CI` |
-| 4 | Carga | [Volumetría](docs/proyecto/02-modelamiento/volumetria.md): nominal, pico, estrés y resistencia; 30.000 usuarios en 60 s contra 5.000 boletas | Corridas y resultados |
-| 5 | Observabilidad | [Observabilidad](docs/proyecto/02-modelamiento/observabilidad.md): métricas doradas, tableros, alertas y responsables | Instrumentar y demostrar con datos reales |
-| 6 | Inyección de fallos | [Inyección de fallos](docs/proyecto/02-modelamiento/inyeccion-de-fallos.md): Chaos Mesh, catálogo e hipótesis | Módulo funcionando y bitácora |
+| 1 | Aplicación funcionando (40%) | [AD-007](docs/proyecto/decisiones/0007-stack-de-implementacion.md): TypeScript/Node · [arquitectura hexagonal](docs/proyecto/02-modelamiento/diagrama-de-clases.md) · [caso de uso](docs/proyecto/02-modelamiento/diagrama-de-secuencia.md) | 🟡 Dominio y SAGA implementados con los dobles; `PENDIENTE: adaptadores reales (HTTP, PostgreSQL, outbox, pasarela), ambiente de demo y video` |
+| 2 | Pruebas y coherencia | [Plan de pruebas](docs/proyecto/02-modelamiento/plan-de-pruebas.md): 21 casos UT sobre las reglas R1–R14 | ✅ Los 21 casos están escritos y en verde (38 pruebas; cobertura 78,25% sentencias). `PENDIENTE: reporte por commit y corrida en CI` |
+| 3 | Observabilidad (20%) | [Observabilidad](docs/proyecto/02-modelamiento/observabilidad.md): las 6 métricas de la entrega, tableros y alertas | Instrumentar y demostrar con datos reales |
+| 4 | Simulación de fallos (30%) | [Inyección de fallos](docs/proyecto/02-modelamiento/inyeccion-de-fallos.md): IF-01, IF-02, IF-03 e IF-05 elegidos | Ejecutar los 4 escenarios y escribir la bitácora |
+| 5 | Carga | [Volumetría](docs/proyecto/02-modelamiento/volumetria.md): nominal, pico, estrés y resistencia; 30.000 usuarios en 60 s contra 5.000 boletas | Corridas y resultados |
+| 6 | Patrones (10%) | [Patrones utilizados](docs/proyecto/03-implementacion/patrones.md) | Revisar contra la demo y añadir capturas |
 | 7 | Prototipo | [Prototipo](docs/proyecto/02-modelamiento/prototipo/index.html): 16 pantallas, tres roles | `PENDIENTE: redesplegar en Netlify con los cambios del 18 sep` |
-| 8 | Defensa | [Los ADR](docs/proyecto/decisiones/README.md) | Repasar trazabilidad atributo → decisión → sacrificio |
+| 8 | Defensa y autoevaluación | [Los ADR](docs/proyecto/decisiones/README.md) · [tipos de deuda técnica](docs/curso/clase-05-06.md) | Repasar trazabilidad atributo → decisión → sacrificio; escribir la autoevaluación |
 
 ## Pendientes y preguntas abiertas
 
-- `PENDIENTE: confirmar qué se espera de «simulación» y el formato de la sustentación.`
+- `PENDIENTE: la diapositiva 46 trae una nota manuscrita «¿Máximo?»; preguntar al profesor si la nota del entregable tiene tope.`
+- `PENDIENTE: formato y duración del video demo; si basta un ambiente local con demo en video o espera accesos a un despliegue.`
 - `PENDIENTE: ratificar los doce umbrales de` [`atributos-de-calidad.md`](docs/proyecto/01-caso-de-negocio/atributos-de-calidad.md).
 - `PENDIENTE: la nota y la retroalimentación de la Entrega 1.`
 - `PENDIENTE: confirmar que el paquete de la Entrega 2 quedó subido a Teams` — el paquete
@@ -82,6 +86,14 @@ de pruebas están implementados con los cuatro dobles y en verde. Las vistas del
 clases y del diagrama de secuencia se regeneraron con el puerto `EmisorDeBoletas` y la
 anotación de contextos, sin cambiar los 39/37/38 presentados; Archify quedó vendorizada en
 `tools/archify/`. `PENDIENTE: anexar el reporte de cobertura al paquete de la Entrega 3.`
+
+El **20 de septiembre** se importó el material de las clases 5 y 6
+([`docs/curso/clase-05-06.md`](docs/curso/clase-05-06.md), fuente
+[`material/2026-09-19-clase-05-06.pdf`](docs/curso/material/2026-09-19-clase-05-06.pdf)) y la
+rúbrica del Entregable 3 quedó en
+[`docs/proyecto/03-implementacion/rubrica.md`](docs/proyecto/03-implementacion/rubrica.md),
+con el plan por criterios en el README de la entrega y el catálogo de patrones en
+[`patrones.md`](docs/proyecto/03-implementacion/patrones.md).
 
 ## Tablero
 

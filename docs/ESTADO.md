@@ -141,6 +141,12 @@ Canvas en el Excel del profesor y sustentación con presentación propia.
 **Entrega activa: Entrega 2 — Modelamiento de la solución.** Vence el **sábado 19 de
 septiembre de 2026 a las 3:00 p.m.** — no a medianoche. Se admiten varias entregas.
 
+> **Pasada la Entrega 2, la activa es la Entrega 3** (sáb 26 de septiembre). Su rúbrica llegó
+> con las [clases 5 y 6](curso/clase-05-06.md#diapositiva-46--rúbrica-entregable-3-proyecto-integrador)
+> y está en [`proyecto/03-implementacion/rubrica.md`](proyecto/03-implementacion/rubrica.md);
+> el plan por criterios y el catálogo de patrones están en esa misma carpeta. El estado vivo
+> del repositorio de código es [`../ESTADO.md`](../ESTADO.md).
+
 **Son once entregables**, no uno. El enunciado, la rúbrica con sus criterios, la plantilla
 de ADR del profesor y lo que explicó en clase están organizados en
 [`proyecto/02-modelamiento/README.md`](proyecto/02-modelamiento/README.md). **Los
@@ -241,7 +247,7 @@ No son bloqueos del proyecto, pero alguien tiene que responderlos:
 |---|---|---|---|---|
 | 1 | Caso de negocio | 20% | sáb 12 sep 2026 | ✅ **Entregada.** Falta la nota |
 | 2 | Modelamiento de la solución | 30% | **sáb 19 sep 2026, 3 p.m.** | 🟡 **Activa.** Los once entregables están listos y el paquete final quedó organizado en `exportaciones/entrega-02-modelamiento/` (más el ZIP hermano). Falta redesplegar el prototipo y subir a Teams |
-| 3 | Implementación, sustentación y defensa | 30% | sáb 26 sep 2026 | ⚪ Sin empezar — el código va en **repo aparte** |
+| 3 | Implementación, sustentación, simulación y defensa | 30% | sáb 26 sep 2026 | 🟡 **Activa.** Rúbrica y plan en [`proyecto/03-implementacion/`](proyecto/03-implementacion/README.md); el código vive en el repositorio [TicketRight](https://github.com/alejoriosm04/TicketRight) |
 
 > **Paquete de la Entrega 2.** La entrega final está en `exportaciones/entrega-02-modelamiento/`
 > (carpeta ignorada por git), con su ZIP en `exportaciones/entrega-02-modelamiento.zip`.
@@ -272,6 +278,11 @@ un agente no puede inventar — por qué se cambió y qué alternativas se consi
 
 ## Dudas para el profesor
 
+- **La diapositiva 46 de las clases 5 y 6 trae una nota manuscrita «¿Máximo?»** junto al
+  título de la rúbrica. ¿El puntaje del entregable tiene tope (por ejemplo, antes de
+  ponderar) o se refiere al tope de los +10 adicionales?
+- **¿Formato y duración del video demo del Entregable 3?** ¿Basta un ambiente local con la
+  demo grabada o se esperan accesos a un despliegue?
 - **¿El `.docx` estuvo bien como formato de entrega?** Se entregó Word y no PDF.
 - La definición de **política** de la lámina 17 (externa, sin excepciones) contradice la del
   cuestionario de fundamentos (interna, con ruta de excepción). ¿Cuál aplica?

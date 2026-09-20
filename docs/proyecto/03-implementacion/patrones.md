@@ -1,0 +1,54 @@
+# Patrones utilizados en TicketRight
+
+> Criterio 4 de la [rúbrica del Entregable 3](rubrica.md): identificar los patrones,
+> justificarlos, relacionarlos con los atributos de calidad y mostrar la evidencia en el
+> código y en la documentación. Insumo de clase:
+> [patrones de diseño](../../curso/clase-05-06.md#diapositiva-48--proyecto-integrador-patrones-de-diseño),
+> [idempotencia](../../curso/clase-05-06.md#diapositiva-50--qué-es-la-idempotencia),
+> [back pressure](../../curso/clase-05-06.md#diapositiva-51--funcionamiento-del-patrón-back-pressure)
+> y [circuit breaker](../../curso/clase-05-06.md#diapositiva-52--funcionamiento-del-patrón-circuit-breaker).
+
+Estados: ✅ implementado y probado · 🟡 diseñado, pendiente en los adaptadores · ⚪ no aplica.
+
+## Patrones de arquitectura
+
+| Patrón | Para qué | Dónde está la evidencia | Atributos | Estado |
+|---|---|---|---|---|
+| **Ports & Adapters (hexagonal)** | Aislar dominio y aplicación de la infraestructura; el dominio no conoce HTTP, PostgreSQL ni Kafka | [`diagrama de clases`](../02-modelamiento/diagrama-de-clases.md#capas-y-patrones) · `packages/sales/src/{domain,application,ports}` · [AD-007](../decisiones/0007-stack-de-implementacion.md) | A-12 · mantenibilidad · testeabilidad | ✅ |
+| **Bounded Contexts + Anti-Corruption Layer** | Separar los cuatro contextos del modelo; la emisión cruza por un contrato en vez de compartir el agregado | [`modelo de dominio`](../02-modelamiento/modelo-de-dominio.md#contextos-acotados) · `packages/*` · `packages/shared-kernel/src/ticket-issuance.ts` · [AD-008](../decisiones/0008-boleta-en-derecho-de-asistencia.md) | A-12 · evolución independiente | ✅ |
+| **SAGA orquestada** | Coordinar reserva → pago → emisión → compensación cuando la pasarela es externa y ambigua | [`OrquestadorDeCompra`](../../../packages/sales/src/application/purchase.ts) · [AD-002](../decisiones/0002-mensajeria-del-bus-de-eventos.md) · [diagrama de secuencia](../02-modelamiento/diagrama-de-secuencia.md) | A-1 · resiliencia | ✅ |
+| **Outbox transaccional** | Publicar hechos durables en la misma transacción del estado de negocio | [`OutboxTransaccional`](../02-modelamiento/arquitectura-de-referencia.md#componentes-e-interfaces) · [AD-002](../decisiones/0002-mensajeria-del-bus-de-eventos.md) | A-1 · consistencia | 🟡 |
+| **CQRS** | Separar lecturas de la autoridad transaccional; proyecciones reconstruibles | [`arquitectura de referencia`](../02-modelamiento/arquitectura-de-referencia.md#5-persistencia-y-modelos-de-lectura) · [AD-003](../decisiones/0003-consistencia-por-tipo-de-inventario.md) | A-10 · escalabilidad | 🟡 |
+| **Back pressure / válvula de admisión** | Frenar la entrada antes de ahogar el núcleo transaccional; la fila Space-Based como regulador | [`inyección de fallos`](../02-modelamiento/inyeccion-de-fallos.md#catálogo-de-fallos) · [AD-006](../decisiones/0006-escalado-programado-por-ventana-de-venta.md) · `packages/admission-identity/src/domain/queue.ts` | A-6 · A-9 · resiliencia | 🟡 |
+
+## Patrones de diseño de software
+
+| Patrón | Para qué | Dónde está la evidencia | Atributos | Estado |
+|---|---|---|---|---|
+| **Repository** | Ocultar la persistencia detrás de un puerto por agregado y poder probar el dominio sin base de datos | [`repositories.ts`](../../../packages/sales/src/ports/repositories.ts) · dobles en `packages/sales/tests/doubles/` | testeabilidad · A-12 | ✅ |
+| **Idempotencia** | Un webhook repetido produce el mismo resultado: un solo cobro, una sola boleta | [`Pago.registrarConfirmacion`](../../../packages/sales/src/domain/payment.ts) · UT-09 en el [plan de pruebas](../02-modelamiento/plan-de-pruebas.md) | A-1 · confiabilidad | ✅ |
+| **Domain Events (Observer)** | Publicar hechos confirmados para que emisión, proyecciones y auditoría reaccionen sin acoplar al emisor | [`events.ts`](../../../packages/sales/src/domain/events.ts) · [`PublicadorDeEventos`](../../../packages/sales/src/ports/services.ts) | desacoplamiento · A-1 | ✅ |
+| **Value Objects** | Hacer imposibles los valores inválidos y calcular sin efectos colaterales | [`Dinero` y `Porcentaje`](../../../packages/shared-kernel/src/money.ts) · [`Aforo`](../../../packages/sales/src/domain/inventory.ts) · [`DesglosePrecio`](../../../packages/sales/src/domain/pricing.ts) | corrección · R13 | ✅ |
+| **Factory Method** | Única forma de construir un agregado válido; las reglas se verifican al nacer | `Reserva.crear` en [`reservation.ts`](../../../packages/sales/src/domain/reservation.ts) · `Pago.iniciar` · `Discrepancia.abrir` · `Boleta.emitir` | invariantes R1–R14 | ✅ |
+| **Domain Service** | Sacar del agregado la política que no le pertenece | [`CalculadoraDePrecio`](../../../packages/sales/src/domain/pricing.ts) · [diagrama de clases](../02-modelamiento/diagrama-de-clases.md#precio-desglose-y-calculadora) | A-12 · R13 | ✅ |
+| **Adapter** | Traducir el mundo externo al lenguaje del dominio | [`AdaptadorDePasarelaTokenizada` y `ValidadorJwtDeAdmision`](../02-modelamiento/diagrama-de-clases.md#adaptadores) · `FakePaymentGateway` en [`tests/doubles/`](../../../packages/sales/tests/doubles/fake-payment-gateway.ts) | A-4 · A-12 | 🟡 |
+| **Circuit breaker** | Evitar fallas en cascada cuando la pasarela está lenta o caída | [IF-01](../02-modelamiento/inyeccion-de-fallos.md) · pendiente de implementar en el adaptador de pasarela | A-1 · resiliencia | 🟡 |
+
+## Patrones que no aplicamos, y por qué
+
+| Patrón de la clase 5-6 | Por qué no está | Cuándo aplicaría |
+|---|---|---|
+| **Strangler fig** | TicketRight es un sistema nuevo: no hay monolito que estrangular | Si se migrara un sistema de boletería existente |
+| **Branch by abstraction** | Se usa para cambiar una implementación con el sistema en producción; aquí no hay legado | Si se reemplazara la pasarela o el motor de inventario en caliente |
+| **Parallel run (ejecución en sombra)** | Requiere dos implementaciones completas para comparar resultados | Para validar un cambio de motor de precios o de inventario |
+
+*Fitness functions:* la [cláusula de coherencia](../../curso/clase-05-06.md#diapositiva-12--fitness-functions-definición)
+se materializa en el CI (`npm run typecheck` + `npm test` en cada push) y en las alertas de
+observabilidad; es la forma concreta de proteger A-12 entre entregas.
+
+## Cómo defender este catálogo
+
+Para cada patrón de las tablas: qué problema resolvía, qué alternativa simple se descartó y
+qué atributo de calidad lo justifica. La fuente son los ADR de
+[`../decisiones/`](../decisiones/README.md); el detalle de cada patrón de la clase está en las
+diapositivas 47 a 52 de [`clase-05-06.md`](../../curso/clase-05-06.md).

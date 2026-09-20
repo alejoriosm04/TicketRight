@@ -76,6 +76,8 @@ PAGES = [
     ("docs/proyecto/02-modelamiento/adr-para-excel.md", "Entrega-2-ADR-para-Excel", "Entrega 2 · Modelamiento", "ADR para Excel"),
 
     ("docs/proyecto/03-implementacion/README.md", "Entrega-3", "Entrega 3 · Implementación", "Implementación, sustentación y defensa"),
+    ("docs/proyecto/03-implementacion/rubrica.md", "Entrega-3-Rubrica", "Entrega 3 · Implementación", "Rúbrica del entregable"),
+    ("docs/proyecto/03-implementacion/patrones.md", "Entrega-3-Patrones", "Entrega 3 · Implementación", "Patrones utilizados"),
 
     ("docs/proyecto/decisiones/README.md", "ADR", "Decisiones · ADR", "Índice y formato"),
     ("docs/proyecto/decisiones/0001-idea-de-negocio.md", "ADR-001-Idea-de-negocio", "Decisiones · ADR", "AD-001 Idea de negocio"),
@@ -97,6 +99,7 @@ PAGES = [
     ("docs/curso/clase-01-02.md", "Curso-Clase-01-02-Fundamentos", "Curso", "Clases 1 y 2 — Fundamentos"),
     ("docs/curso/clase-03-04.md", "Curso-Clase-03-04-Patrones-y-estilos", "Curso", "Clases 3 y 4 — Patrones y estilos"),
     ("docs/curso/clase-03-04-transcripcion.md", "Curso-Clase-03-04-Explicacion-entrega-2", "Curso", "Clases 3 y 4 — Explicación del entregable 2"),
+    ("docs/curso/clase-05-06.md", "Curso-Clase-05-06-Evolutivas-patrones-DDD", "Curso", "Clases 5 y 6 — Evolutivas, patrones y DDD"),
     ("docs/curso/fundamentos-arquitectura.md", "Curso-Fundamentos-de-arquitectura", "Curso", "Fundamentos de arquitectura"),
     ("docs/curso/mensajeria-pubsub.md", "Curso-Mensajeria-pubsub", "Curso", "Mensajería pub/sub"),
 ]

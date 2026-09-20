@@ -59,6 +59,7 @@ curso/                    Material del curso, digitalizado
   clase-01-02.md          Las 57 láminas de las clases 1 y 2
   clase-03-04.md          Patrones y estilos de arquitectura (clases 3 y 4)
   clase-03-04-transcripcion.md  Lo que el profesor explicó del Entregable 2
+  clase-05-06.md          Arquitecturas evolutivas, migración, patrones y DDD (clases 5 y 6)
   fundamentos-arquitectura.md   Cuestionario de fundamentos, destilado por tema
   mensajeria-pubsub.md    Paper Kafka vs. RabbitMQ, destilado
   syllabus.md             Evaluación, fechas y ruta crítica
@@ -80,12 +81,12 @@ proyecto/                 Proyecto integrador (80%)
     validaciones.md       Todo lo verificado, con fuente
     ideas/                Las cuatro ideas que se evaluaron. La elegida es idea-lina.md
     evaluacion-ideas.md   Por qué se eligió esa y no las otras
-  02-modelamiento/        Entrega 2 — sáb 19 sep, 3 p.m. ← LA ENTREGA ACTIVA
+  02-modelamiento/        Entrega 2 — sáb 19 sep, 3 p.m.
     README.md             Los 11 entregables organizados. Empieza ahí
     rubrica.md            La rúbrica del profesor, digitalizada
     enunciado-teams.md    El enunciado literal. No se edita
     adr-plantilla.xlsx    La plantilla de ADR del profesor
-  03-implementacion/      Entrega 3 — sáb 26 sep
+  03-implementacion/      Entrega 3 — sáb 26 sep ← LA ENTREGA ACTIVA
   decisiones/             ADRs, formato de 8 elementos del profesor
 
 herramientas/             Utilidades del repo
