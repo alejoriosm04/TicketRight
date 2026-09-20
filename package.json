@@ -7,7 +7,7 @@
     "node": ">=24"
   },
   "workspaces": [
-    "paquetes/*"
+    "packages/*"
   ],
   "scripts": {
     "typecheck": "npm run typecheck --workspaces --if-present",

@@ -1,5 +1,5 @@
 {
-  "name": "@ticketright/kernel",
+  "name": "@ticketright/shared-kernel",
   "version": "0.0.0",
   "private": true,
   "type": "module",

@@ -1,19 +1,20 @@
 #!/usr/bin/env python3
-"""Publica docs/ como la wiki del repositorio.
+"""Publish docs/ as the repository wiki.
 
-`docs/` es la fuente de verdad de la documentación; la wiki de GitHub es un espejo
-generado: páginas planas, enlaces internos reescritos a nombres de página y un menú
-lateral con las secciones. La wiki **no se edita a mano**: se regenera con este script.
+`docs/` is the single source of truth for the documentation; the GitHub wiki is a
+generated mirror: flat pages, internal links rewritten to page names and a sidebar
+with the sections. The wiki is **not edited by hand**: it is regenerated with this
+script.
 
-Comprueba, antes de escribir nada:
-  1. que cada archivo del manifiesto exista;
-  2. que cada enlace interno del Markdown resuelva a otro documento o a un archivo real;
-  3. que cada ancla `#seccion` corresponda a un encabezado real del archivo destino.
+Before writing anything it checks that:
+  1. every file in the manifest exists;
+  2. every internal Markdown link resolves to a document or a real file;
+  3. every `#anchor` matches a real heading in the target file.
 
-Uso:
-  python3 herramientas/publica-wiki.py                 # escribe ../TicketRight.wiki
-  python3 herramientas/publica-wiki.py --push          # además la commitea y publica
-  python3 herramientas/publica-wiki.py --dest RUTA     # otra copia local de la wiki
+Usage:
+  python3 tools/publish-wiki.py                 # writes ../TicketRight.wiki
+  python3 tools/publish-wiki.py --push          # also commits and pushes it
+  python3 tools/publish-wiki.py --dest PATH     # another local copy of the wiki
 """
 
 import argparse
@@ -24,17 +25,17 @@ import re
 import subprocess
 import sys
 
-RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DESTINO_POR_DEFECTO = os.path.normpath(os.path.join(RAIZ, "..", "TicketRight.wiki"))
-REPO_GITHUB = "alejoriosm04/TicketRight"
-RAMA_GITHUB = "main"
-LISTA_GENERADOS = ".paginas-generadas"
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DEFAULT_DEST = os.path.normpath(os.path.join(ROOT, "..", "TicketRight.wiki"))
+GITHUB_REPO = "alejoriosm04/TicketRight"
+GITHUB_BRANCH = "main"
+GENERATED_LIST = ".generated-pages"
 
-ENLACE = re.compile(r"(!?)\[([^\]]*)\]\(([^)\s]+)\)")
-EXTENSIONES_IMAGEN = {".png", ".jpg", ".jpeg", ".gif", ".svg", ".webp"}
+LINK = re.compile(r"(!?)\[([^\]]*)\]\(([^)\s]+)\)")
+IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".gif", ".svg", ".webp"}
 
-# (fuente, página, sección, etiqueta). El orden manda: define el menú lateral.
-MANIFIESTO = [
+# (source, page, section, label). Order matters: it defines the sidebar.
+PAGES = [
     ("ESTADO.md", "Estado", "El repositorio", "Estado del repositorio (Entrega 3)"),
     ("docs/ESTADO.md", "Estado-del-curso", "El repositorio", "Estado del curso (hasta Entrega 2)"),
     ("docs/README.md", "Curso", "El repositorio", None),
@@ -100,103 +101,104 @@ MANIFIESTO = [
 ]
 
 
-def ancla(titulo):
-    """Replica cómo GitHub convierte un encabezado en ancla."""
-    t = titulo.strip().lower()
-    t = re.sub(r"\[([^\]]*)\]\([^)]*\)", r"\1", t)
-    t = re.sub(r"[`*_]", "", t)
-    t = re.sub(r"[^\w\s-]", "", t, flags=re.UNICODE)
-    return t.replace(" ", "-")
+def anchor(heading):
+    """Mirror how GitHub turns a heading into an anchor."""
+    text = heading.strip().lower()
+    text = re.sub(r"\[([^\]]*)\]\([^)]*\)", r"\1", text)
+    text = re.sub(r"[`*_]", "", text)
+    text = re.sub(r"[^\w\s-]", "", text, flags=re.UNICODE)
+    return text.replace(" ", "-")
 
 
-def leer(ruta):
-    with open(ruta, encoding="utf-8") as f:
+def read(path):
+    with open(path, encoding="utf-8") as f:
         return f.read()
 
 
-def url_github(ruta, es_directorio=False):
-    tipo = "tree" if es_directorio else "blob"
-    return f"https://github.com/{REPO_GITHUB}/{tipo}/{RAMA_GITHUB}/{ruta}"
+def github_url(path, is_directory=False):
+    kind = "tree" if is_directory else "blob"
+    return f"https://github.com/{GITHUB_REPO}/{kind}/{GITHUB_BRANCH}/{path}"
 
 
-def url_imagen(ruta):
-    return f"https://raw.githubusercontent.com/{REPO_GITHUB}/{RAMA_GITHUB}/{ruta}"
+def image_url(path):
+    return f"https://raw.githubusercontent.com/{GITHUB_REPO}/{GITHUB_BRANCH}/{path}"
 
 
-def construir_indice():
-    por_fuente = {}
-    for fuente, pagina, seccion, etiqueta in MANIFIESTO:
-        por_fuente[fuente] = pagina
-    return por_fuente
+def build_index():
+    return {source: page for source, page, _, _ in PAGES}
 
 
-def resolver_destino(destino, fuente, por_fuente, problemas):
-    """Convierte el destino de un enlace Markdown a su forma en la wiki."""
-    if destino.startswith(("http://", "https://", "mailto:", "tel:")):
-        return destino
-    camino, _, fragmento = destino.partition("#")
-    if not camino:
-        return destino if not fragmento else destino
-    objetivo = posixpath.normpath(
-        posixpath.join(posixpath.dirname(fuente), camino)
-    )
-    completo = os.path.normpath(os.path.join(RAIZ, objetivo))
-    if not os.path.exists(completo):
-        problemas.append(f"enlace roto        {fuente} → {destino}")
-        return destino
-    sufijo = f"#{fragmento}" if fragmento else ""
-    if os.path.isdir(completo):
-        return url_github(objetivo, es_directorio=True) + sufijo
-    if objetivo.endswith(".md"):
-        pagina = por_fuente.get(objetivo)
-        if pagina:
-            return pagina + sufijo
-        return url_github(objetivo) + sufijo
-    if os.path.splitext(objetivo)[1].lower() in EXTENSIONES_IMAGEN:
-        return url_imagen(objetivo) + sufijo
-    return url_github(objetivo) + sufijo
+def resolve_destination(destination, source, page_by_source, problems):
+    """Turn a Markdown link destination into its wiki form."""
+    if destination.startswith(("http://", "https://", "mailto:", "tel:")):
+        return destination
+    path, _, fragment = destination.partition("#")
+    if not path:
+        return destination
+    target = posixpath.normpath(posixpath.join(posixpath.dirname(source), path))
+    absolute = os.path.normpath(os.path.join(ROOT, target))
+    if not os.path.exists(absolute):
+        problems.append(f"broken link        {source} → {destination}")
+        return destination
+    suffix = f"#{fragment}" if fragment else ""
+    if os.path.isdir(absolute):
+        return github_url(target, is_directory=True) + suffix
+    if target.endswith(".md"):
+        page = page_by_source.get(target)
+        if page:
+            return page + suffix
+        return github_url(target) + suffix
+    if os.path.splitext(target)[1].lower() in IMAGE_EXTENSIONS:
+        return image_url(target) + suffix
+    return github_url(target) + suffix
 
 
-def reescribir(contenido, fuente, por_fuente, problemas):
-    def reemplazo(m):
-        signo, texto, destino = m.groups()
-        nuevo = resolver_destino(destino, fuente, por_fuente, problemas)
-        return f"{signo}[{texto}]({nuevo})"
+def rewrite(content, source, page_by_source, problems):
+    def replacement(match):
+        bang, label, destination = match.groups()
+        new_destination = resolve_destination(
+            destination, source, page_by_source, problems
+        )
+        return f"{bang}[{label}]({new_destination})"
 
-    return ENLACE.sub(reemplazo, contenido)
+    return LINK.sub(replacement, content)
 
 
-def validar_anclas(fuentes, por_fuente, problemas):
-    """Comprueba que cada `#ancla` exista en el documento destino."""
-    anclas = {}
-    for fuente in fuentes:
-        ruta = os.path.join(RAIZ, fuente)
-        if os.path.exists(ruta):
-            anclas[fuente] = {
-                ancla(l.lstrip("#")) for l in leer(ruta).splitlines() if l.startswith("#")
+def validate_anchors(sources, problems):
+    """Check that every `#anchor` exists in the target document."""
+    anchors = {}
+    for source in sources:
+        path = os.path.join(ROOT, source)
+        if os.path.exists(path):
+            anchors[source] = {
+                anchor(line.lstrip("#"))
+                for line in read(path).splitlines()
+                if line.startswith("#")
             }
 
-    for fuente in fuentes:
-        ruta = os.path.join(RAIZ, fuente)
-        if not os.path.exists(ruta):
+    for source in sources:
+        path = os.path.join(ROOT, source)
+        if not os.path.exists(path):
             continue
-        for m in ENLACE.finditer(leer(ruta)):
-            destino = m.group(3)
-            if destino.startswith(("http://", "https://", "mailto:", "tel:")):
+        for match in LINK.finditer(read(path)):
+            destination = match.group(3)
+            if destination.startswith(("http://", "https://", "mailto:", "tel:")):
                 continue
-            camino, _, fragmento = destino.partition("#")
-            if not fragmento:
+            path, _, fragment = destination.partition("#")
+            if not fragment:
                 continue
-            objetivo = posixpath.normpath(
-                posixpath.join(posixpath.dirname(fuente), camino)
-            ) if camino else fuente
-            if not objetivo.endswith(".md"):
+            target = (
+                posixpath.normpath(posixpath.join(posixpath.dirname(source), path))
+                if path
+                else source
+            )
+            if not target.endswith(".md"):
                 continue
-            if objetivo in anclas and fragmento not in anclas[objetivo]:
-                problemas.append(f"ancla inexistente  {fuente} → {destino}")
+            if target in anchors and fragment not in anchors[target]:
+                problems.append(f"missing anchor    {source} → {destination}")
 
 
-def generar_home(fecha):
+def home_page(date):
     return f"""# TicketRight
 
 Plataforma de venta de boletería para eventos de alta demanda: la correspondencia entre el
@@ -212,7 +214,7 @@ defensa** (26 de septiembre).
 | [Estado del repositorio](Estado) | En qué va la Entrega 3 y qué falta |
 | [Proyecto](Proyecto) | El arco de las tres entregas |
 | [Entrega 2](Entrega-2) | Los once diseños que la implementación convierte en código |
-| [ADR](ADR) | Las cinco decisiones con las que se defiende la entrega |
+| [ADR](ADR) | Las decisiones con las que se defiende la entrega |
 | [Curso](Curso) | El material del curso que sostiene cada argumento |
 
 ## Secciones
@@ -229,132 +231,131 @@ defensa** (26 de septiembre).
 
 ---
 
-> Espejo de `docs/` generado el {fecha} con `python3 herramientas/publica-wiki.py`.
+> Espejo de `docs/` generado el {date} con `python3 tools/publish-wiki.py`.
 > **No edites esta wiki a mano**: los cambios se hacen en el repositorio y se republican.
 """
 
 
-def generar_sidebar():
-    lineas = []
-    seccion_actual = None
-    for _, pagina, seccion, etiqueta in MANIFIESTO:
-        etiqueta = etiqueta or pagina.replace("-", " ")
-        if seccion != seccion_actual:
-            if lineas:
-                lineas.append("")
-            lineas.append(f"**{seccion}**")
-            seccion_actual = seccion
-        lineas.append(f"- [{etiqueta}]({pagina})")
-    return "\n".join(lineas) + "\n"
+def sidebar_page():
+    lines = []
+    current_section = None
+    for _, page, section, label in PAGES:
+        label = label or page.replace("-", " ")
+        if section != current_section:
+            if lines:
+                lines.append("")
+            lines.append(f"**{section}**")
+            current_section = section
+        lines.append(f"- [{label}]({page})")
+    return "\n".join(lines) + "\n"
 
 
-def generar_footer(fecha):
+def footer_page(date):
     return (
         "> Espejo de `docs/` ([repositorio](https://github.com/"
-        f"{REPO_GITHUB})) · generado el {fecha}. No editar aquí.\n"
+        f"{GITHUB_REPO})) · generado el {date}. No editar aquí.\n"
     )
 
 
-def limpiar_paginas_previas(destino):
-    ruta_lista = os.path.join(destino, LISTA_GENERADOS)
-    if not os.path.exists(ruta_lista):
+def clean_previous_pages(destination):
+    list_path = os.path.join(destination, GENERATED_LIST)
+    if not os.path.exists(list_path):
         return
-    for nombre in leer(ruta_lista).splitlines():
-        nombre = nombre.strip()
-        if nombre:
-            ruta = os.path.join(destino, nombre)
-            if os.path.exists(ruta):
-                os.remove(ruta)
+    for name in read(list_path).splitlines():
+        name = name.strip()
+        if name:
+            path = os.path.join(destination, name)
+            if os.path.exists(path):
+                os.remove(path)
 
 
-def avisar_paginas_ajenas(destino, generados):
-    ruta_lista = os.path.join(destino, LISTA_GENERADOS)
-    anteriores = set()
-    if os.path.exists(ruta_lista):
-        anteriores = {l.strip() for l in leer(ruta_lista).splitlines() if l.strip()}
-    for nombre in sorted(os.listdir(destino)):
-        if not nombre.endswith(".md"):
+def warn_foreign_pages(destination, generated):
+    list_path = os.path.join(destination, GENERATED_LIST)
+    previous = set()
+    if os.path.exists(list_path):
+        previous = {line.strip() for line in read(list_path).splitlines() if line.strip()}
+    for name in sorted(os.listdir(destination)):
+        if not name.endswith(".md"):
             continue
-        if nombre not in generados and nombre not in anteriores:
-            print(f"aviso: se conserva una página que no genera este script: {nombre}")
+        if name not in generated and name not in previous:
+            print(f"warning: keeping a page this script does not generate: {name}")
 
 
-def publicar(destino, empujar):
-    fecha = datetime.date.today().isoformat()
-    por_fuente = construir_indice()
+def publish(destination, push):
+    date = datetime.date.today().isoformat()
+    page_by_source = build_index()
 
-    duplicadas = {p for _, p, _, _ in MANIFIESTO if [x[1] for x in MANIFIESTO].count(p) > 1}
-    if duplicadas:
-        sys.exit(f"error: páginas duplicadas en el manifiesto: {sorted(duplicadas)}")
+    page_names = [page for _, page, _, _ in PAGES]
+    duplicates = {page for page in page_names if page_names.count(page) > 1}
+    if duplicates:
+        sys.exit(f"error: duplicate pages in the manifest: {sorted(duplicates)}")
 
-    problemas = []
-    for fuente, _, _, _ in MANIFIESTO:
-        if not os.path.exists(os.path.join(RAIZ, fuente)):
-            problemas.append(f"fuente inexistente {fuente}")
+    problems = []
+    for source, _, _, _ in PAGES:
+        if not os.path.exists(os.path.join(ROOT, source)):
+            problems.append(f"missing source {source}")
 
-    validar_anclas([f for f, _, _, _ in MANIFIESTO], por_fuente, problemas)
+    validate_anchors([source for source, _, _, _ in PAGES], problems)
 
-    paginas = {}
-    for fuente, pagina, _, _ in MANIFIESTO:
-        ruta = os.path.join(RAIZ, fuente)
-        if os.path.exists(ruta):
-            paginas[pagina] = reescribir(
-                leer(ruta), fuente, por_fuente, problemas
-            )
+    pages = {}
+    for source, page, _, _ in PAGES:
+        path = os.path.join(ROOT, source)
+        if os.path.exists(path):
+            pages[page] = rewrite(read(path), source, page_by_source, problems)
 
-    if problemas:
-        print(f"{len(problemas)} problema(s):\n")
-        print("\n".join(problemas))
+    if problems:
+        print(f"{len(problems)} problem(s):\n")
+        print("\n".join(problems))
         return 1
 
-    if not os.path.isdir(destino):
-        sys.exit(f"error: no existe el destino {destino}")
-    if not os.path.isdir(os.path.join(destino, ".git")):
-        sys.exit(f"error: {destino} no es un repositorio git")
+    if not os.path.isdir(destination):
+        sys.exit(f"error: destination {destination} does not exist")
+    if not os.path.isdir(os.path.join(destination, ".git")):
+        sys.exit(f"error: {destination} is not a git repository")
 
-    archivos_generados = {f"{p}.md" for p in paginas} | {
+    generated_files = {f"{page}.md" for page in pages} | {
         "Home.md",
         "_Sidebar.md",
         "_Footer.md",
     }
-    avisar_paginas_ajenas(destino, archivos_generados)
-    limpiar_paginas_previas(destino)
+    warn_foreign_pages(destination, generated_files)
+    clean_previous_pages(destination)
 
-    for pagina, contenido in paginas.items():
-        with open(os.path.join(destino, f"{pagina}.md"), "w", encoding="utf-8") as f:
-            f.write(contenido)
-    with open(os.path.join(destino, "Home.md"), "w", encoding="utf-8") as f:
-        f.write(generar_home(fecha))
-    with open(os.path.join(destino, "_Sidebar.md"), "w", encoding="utf-8") as f:
-        f.write(generar_sidebar())
-    with open(os.path.join(destino, "_Footer.md"), "w", encoding="utf-8") as f:
-        f.write(generar_footer(fecha))
-    with open(os.path.join(destino, LISTA_GENERADOS), "w", encoding="utf-8") as f:
-        f.write("\n".join(sorted(archivos_generados)) + "\n")
+    for page, content in pages.items():
+        with open(os.path.join(destination, f"{page}.md"), "w", encoding="utf-8") as f:
+            f.write(content)
+    with open(os.path.join(destination, "Home.md"), "w", encoding="utf-8") as f:
+        f.write(home_page(date))
+    with open(os.path.join(destination, "_Sidebar.md"), "w", encoding="utf-8") as f:
+        f.write(sidebar_page())
+    with open(os.path.join(destination, "_Footer.md"), "w", encoding="utf-8") as f:
+        f.write(footer_page(date))
+    with open(os.path.join(destination, GENERATED_LIST), "w", encoding="utf-8") as f:
+        f.write("\n".join(sorted(generated_files)) + "\n")
 
-    print(f"{len(paginas)} páginas escritas en {destino}")
+    print(f"{len(pages)} pages written to {destination}")
 
-    if empujar:
-        subprocess.run(["git", "-C", destino, "add", "-A"], check=True)
+    if push:
+        subprocess.run(["git", "-C", destination, "add", "-A"], check=True)
         commit = subprocess.run(
-            ["git", "-C", destino, "commit", "-m", f"publica la wiki desde docs/ ({fecha})"],
+            ["git", "-C", destination, "commit", "-m", f"publica la wiki desde docs/ ({date})"],
             capture_output=True,
             text=True,
         )
         if commit.returncode != 0:
             print(commit.stdout.strip() or commit.stderr.strip())
             return 0 if "nothing to commit" in commit.stdout else 1
-        subprocess.run(["git", "-C", destino, "push", "origin", "HEAD"], check=True)
-        print("wiki publicada")
+        subprocess.run(["git", "-C", destination, "push", "origin", "HEAD"], check=True)
+        print("wiki published")
     return 0
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--dest", default=DESTINO_POR_DEFECTO, help="copia local de la wiki")
-    parser.add_argument("--push", action="store_true", help="commitea y publica la wiki")
+    parser.add_argument("--dest", default=DEFAULT_DEST, help="local copy of the wiki")
+    parser.add_argument("--push", action="store_true", help="commit and publish the wiki")
     args = parser.parse_args()
-    return publicar(args.dest, args.push)
+    return publish(args.dest, args.push)
 
 
 if __name__ == "__main__":
