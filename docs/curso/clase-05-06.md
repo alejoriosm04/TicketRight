@@ -1,10 +1,10 @@
 # Clases 5 y 6 — Arquitecturas evolutivas, migración, patrones y DDD
 
-**Universidad EAFIT · Septiembre 2026**
+**Universidad EAFIT · viernes 18 y sábado 19 de septiembre de 2026**
 
 > Transcripción completa de la presentación (generada en NotebookLM), organizada diapositiva
 > por diapositiva para consumo directo por agentes. Fuente:
-> [`material/2026-09-19-clase-05-06.pdf`](material/2026-09-19-clase-05-06.pdf).
+> [`material/2026-09-18-19-clase-05-06.pdf`](material/2026-09-18-19-clase-05-06.pdf).
 
 ## Contenido
 

@@ -35,6 +35,10 @@ La **defensa** se apoya en los ADR: para cada decisión visible en la demo hay q
 qué atributo de calidad la justifica y qué se sacrificó a cambio
 ([`docs/proyecto/decisiones/`](docs/proyecto/decisiones/README.md)).
 
+**Ambiente de la demo:** local con **k3d o minikube** (el mínimo es el ambiente local; AWS es
+opcional si alcanza el tiempo). Para las corridas se propone **k6 con `ramping-vus`** y, para
+dar accesos sin despliegue público, **Tailscale** ([plan por criterios](docs/proyecto/03-implementacion/README.md)).
+
 ## Lo que hay que sacar
 
 De los entregables de diseño a la ejecución. **El orden importa**: primero el esqueleto y el
@@ -54,11 +58,10 @@ caso de uso principal, y encima de eso pruebas, carga, observabilidad y fallos.
 ## Pendientes y preguntas abiertas
 
 - `PENDIENTE: la diapositiva 46 trae una nota manuscrita «¿Máximo?»; preguntar al profesor si la nota del entregable tiene tope.`
-- `PENDIENTE: formato y duración del video demo; si basta un ambiente local con demo en video o espera accesos a un despliegue.`
+- `PENDIENTE: formato y duración del video demo; el ambiente será local con k3d o minikube, así que también hay que confirmar si la demo en video y los accesos por Tailscale son suficientes.`
 - `PENDIENTE: ratificar los doce umbrales de` [`atributos-de-calidad.md`](docs/proyecto/01-caso-de-negocio/atributos-de-calidad.md).
 - `PENDIENTE: la nota y la retroalimentación de la Entrega 1.`
-- `PENDIENTE: confirmar que el paquete de la Entrega 2 quedó subido a Teams` — el paquete
-  quedó armado en `aas/exportaciones/entrega-02-modelamiento/`.
+- `PENDIENTE: la nota de la Entrega 2, entregada por Teams el 19 de septiembre.`
 - `PENDIENTE: verificar disponibilidad de dominio y marca de «TicketRight».`
 
 ## Organización del repositorio
@@ -89,7 +92,7 @@ anotación de contextos, sin cambiar los 39/37/38 presentados; Archify quedó ve
 
 El **20 de septiembre** se importó el material de las clases 5 y 6
 ([`docs/curso/clase-05-06.md`](docs/curso/clase-05-06.md), fuente
-[`material/2026-09-19-clase-05-06.pdf`](docs/curso/material/2026-09-19-clase-05-06.pdf)) y la
+[`material/2026-09-18-19-clase-05-06.pdf`](docs/curso/material/2026-09-18-19-clase-05-06.pdf)) y la
 rúbrica del Entregable 3 quedó en
 [`docs/proyecto/03-implementacion/rubrica.md`](docs/proyecto/03-implementacion/rubrica.md),
 con el plan por criterios en el README de la entrega y el catálogo de patrones en
@@ -100,5 +103,5 @@ con el plan por criterios en el README de la entrega y el catálogo de patrones 
 | # | Entrega | Peso | Fecha | Estado |
 |---|---|---|---|---|
 | 1 | Caso de negocio | 20% | sáb 12 sep 2026 | ✅ Entregada. Falta la nota |
-| 2 | Modelamiento de la solución | 30% | sáb 19 sep 2026, 3 p.m. | ✅ Diseño completo; `PENDIENTE: subida a Teams` |
+| 2 | Modelamiento de la solución | 30% | sáb 19 sep 2026, 3 p.m. | ✅ **Entregada** por Teams. Falta la nota |
 | 3 | Implementación, sustentación y defensa | 30% | **sáb 26 sep 2026** | ⚪ **Activa.** Sin empezar el código |

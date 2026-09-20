@@ -27,11 +27,22 @@ prototipo de 16 pantallas; la topología de producción documentada en la
 **Falta:** los adaptadores reales —HTTP, PostgreSQL, Redis, Kafka con outbox y la pasarela
 simulada—, el despliegue del ambiente de demo y las evidencias de uso.
 
-**Decisión pendiente del equipo:** el ambiente de la demo. El profesor aceptó Kubernetes
-local o un ambiente simulado con herramientas open source
-([transcripción §16](../../curso/clase-03-04-transcripcion.md#16-pregunta-de-un-estudiante-infraestructura-para-la-implementación)).
-`PENDIENTE: elegir entre docker compose (rápido) y k3d/minikube (fiel y permite Chaos Mesh);
-el video demo y los accesos dependen de esa elección.`
+**Ambiente decidido:** **local con k3d o minikube** — el mínimo es el ambiente local. El
+profesor aceptó Kubernetes local o un ambiente simulado con herramientas open source
+([transcripción §16](../../curso/clase-03-04-transcripcion.md#16-pregunta-de-un-estudiante-infraestructura-para-la-implementación));
+si el tiempo alcanza, se evalúa un despliegue en AWS siguiendo la
+[arquitectura de implementación](../02-modelamiento/arquitectura-de-implementacion.md).
+`PENDIENTE: elegir k3d o minikube; de eso depende el mecanismo de los 4 fallos (Chaos Mesh
+sobre el clúster local o su equivalente).`
+
+**Herramientas compartidas por Quinnie, por evaluar:**
+
+- **k6 con `ramping-vus`** para las corridas de la [volumetría](../02-modelamiento/volumetria.md):
+  ese *executor* sube y baja usuarios virtuales por etapas, que es la forma exacta de los
+  escenarios nominal, pico y estrés. Se adopta como arnés de carga propuesto.
+- **Tailscale** (plan gratuito para ambientes compartidos) para dar acceso al ambiente local
+  al equipo o al profesor y sostener las evidencias de «accesos» de la rúbrica, si no hay
+  despliegue público.
 
 **Escenario de la demo:** comprar en la ventana de alta demanda — turno → reserva → pago con
 pasarela lenta/repetida → emisión → compensación, con los mismos dobles convertidos en
@@ -108,7 +119,7 @@ Checklist antes de entregar:
 | Evidencia | Criterio | Herramienta o formato |
 |---|---|---|
 | Video demo de la aplicación | 1 | Guion: compra completa + un fallo en vivo |
-| Ejemplos de uso y accesos | 1 | URLs, capturas, README de arranque |
+| Ejemplos de uso y accesos | 1 | URLs, capturas, README de arranque; Tailscale si el ambiente es local |
 | Tablero de observabilidad | 2 | Grafana en vivo + capturas + video |
 | Alerta disparada y traza completa | 2 | Captura y `correlation_id` de prueba |
 | Bitácora de los 4 fallos | 3 | Un documento por experimento |
@@ -120,7 +131,7 @@ Checklist antes de entregar:
 
 | Día | Foco |
 |---|---|
-| Dom 20 – Lun 21 | Decisiones de ambiente y stack de demo; adaptadores HTTP, PostgreSQL, outbox y pasarela simulada; app corriendo |
+| Dom 20 – Lun 21 | Clúster local (k3d o minikube); adaptadores HTTP, PostgreSQL, outbox y pasarela simulada; app corriendo |
 | Mar 22 | Instrumentación OTel, las 6 métricas, tablero de Grafana y alertas |
 | Mié 23 | Los 4 fallos, con evidencia y bitácora |
 | Jue 24 | [`patrones.md`](patrones.md) final, video demo y guion |

@@ -6,7 +6,7 @@
 septiembre de 2026. Los once entregables están completos: modelo de dominio, ADR,
 arquitectura de referencia, arquitectura de implementación, diagrama de clases, diagrama de
 secuencia, prototipo, observabilidad, plan de pruebas unitarias, volumetría e inyección de
-fallos. Falta subir la entrega a Teams.
+fallos. **Entregada por Teams el 19 de septiembre de 2026.**
 
 > *«De la visión a un diseño concreto.»* El objetivo es modelar la **arquitectura de
 > referencia** y la **arquitectura de implementación** de la solución del Entregable 1

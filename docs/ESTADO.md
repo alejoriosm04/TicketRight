@@ -160,7 +160,8 @@ concentran el 65% de la nota.**
 > rúbrica pide evidencia de ejecución en varios criterios: es la rúbrica del proyecto
 > completo, no la de esta semana.
 
-`PENDIENTE: la nota y la retroalimentación de la Entrega 1 no han llegado.`
+`PENDIENTE: la nota y la retroalimentación de la Entrega 1 no han llegado.` La
+Entrega 2 se entregó por Teams el 19 de septiembre; `PENDIENTE: la nota.`
 
 ## Entrega 1 — qué se entregó ✅
 
@@ -246,7 +247,7 @@ No son bloqueos del proyecto, pero alguien tiene que responderlos:
 | # | Entrega | Peso | Fecha | Estado |
 |---|---|---|---|---|
 | 1 | Caso de negocio | 20% | sáb 12 sep 2026 | ✅ **Entregada.** Falta la nota |
-| 2 | Modelamiento de la solución | 30% | **sáb 19 sep 2026, 3 p.m.** | 🟡 **Activa.** Los once entregables están listos y el paquete final quedó organizado en `exportaciones/entrega-02-modelamiento/` (más el ZIP hermano). Falta redesplegar el prototipo y subir a Teams |
+| 2 | Modelamiento de la solución | 30% | **sáb 19 sep 2026, 3 p.m.** | ✅ **Entregada** por Teams el 19 sep. Falta la nota y redesplegar el prototipo |
 | 3 | Implementación, sustentación, simulación y defensa | 30% | sáb 26 sep 2026 | 🟡 **Activa.** Rúbrica y plan en [`proyecto/03-implementacion/`](proyecto/03-implementacion/README.md); el código vive en el repositorio [TicketRight](https://github.com/alejoriosm04/TicketRight) |
 
 > **Paquete de la Entrega 2.** La entrega final está en `exportaciones/entrega-02-modelamiento/`
