@@ -85,6 +85,7 @@ PAGES = [
     ("docs/proyecto/decisiones/0005-estilo-de-arquitectura.md", "ADR-005-Estilo-de-arquitectura", "Decisiones · ADR", "AD-005 Estilo de arquitectura"),
     ("docs/proyecto/decisiones/0006-escalado-programado-por-ventana-de-venta.md", "ADR-006-Escalado-por-ventana", "Decisiones · ADR", "AD-006 Escalado por ventana"),
     ("docs/proyecto/decisiones/0007-stack-de-implementacion.md", "ADR-007-Stack-de-implementacion", "Decisiones · ADR", "AD-007 Stack de implementación"),
+    ("docs/proyecto/decisiones/0008-boleta-en-derecho-de-asistencia.md", "ADR-008-Boleta-en-derecho-de-asistencia", "Decisiones · ADR", "AD-008 Boleta y emisión por puerto"),
     ("docs/proyecto/decisiones-propuesta-tecnica/README.md", "ADP", "Decisiones · ADR", "Antecedentes (ADP)"),
     ("docs/proyecto/decisiones-propuesta-tecnica/0001-arquitectura-compuesta-para-alta-concurrencia.md", "ADP-001-Arquitectura-compuesta", "Decisiones · ADR", "ADP-001 Arquitectura compuesta"),
     ("docs/proyecto/decisiones-propuesta-tecnica/0002-proteccion-y-control-de-admision-en-el-borde.md", "ADP-002-Proteccion-en-el-borde", "Decisiones · ADR", "ADP-002 Protección en el borde"),

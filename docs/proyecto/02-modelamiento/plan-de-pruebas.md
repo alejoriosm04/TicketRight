@@ -195,6 +195,29 @@ sí se fija aquí, porque depende del diseño de dominio y no de la tecnología:
 
 ## Evidencia de ejecución
 
+**Estado al 20 de septiembre de 2026: los veintiún casos están implementados y en verde.**
+El código vive junto a cada contexto y la primera ejecución completa reportó **38 pruebas
+aprobadas** —las veintiuno de esta matriz más las de estructura hexagonal de cada paquete—
+con una cobertura de **78,25% de sentencias y 58,82% de ramas**, medida con V8
+(`npm run test:coverage`). Interpretación: la cobertura cubre los caminos que cada caso
+declara; lo que falta son adaptadores, proyecciones y transacciones reales, que no
+pertenecen a este plan porque exigen infraestructura desplegada. Se ejecutan con `npm test`
+y el CI las corre en cada push y cada pull request.
+
+**Dónde vive cada caso:**
+
+| Casos | Archivo | Paquete |
+|---|---|---|
+| UT-01 a UT-03 | `tests/ut-01-03-queue.test.ts` | `@ticketright/admission-identity` |
+| UT-04 a UT-08 | `tests/ut-04-08-reservation.test.ts` | `@ticketright/sales` |
+| UT-09 a UT-13 | `tests/ut-09-13-payment.test.ts` | `@ticketright/sales` |
+| UT-14 | `tests/ut-14-titularity.test.ts` | `@ticketright/entitlements` |
+| UT-15 y UT-16 | `tests/ut-15-16-resale.test.ts` | `@ticketright/entitlements` |
+| UT-17 y UT-18 | `tests/ut-17-18-refund.test.ts` | `@ticketright/sales` |
+| UT-19 | `tests/ut-19-consent.test.ts` | `@ticketright/admission-identity` |
+| UT-20 | `tests/ut-20-pricing.test.ts` | `@ticketright/sales` |
+| UT-21 | `tests/ut-21-settlement.test.ts` | `@ticketright/sales` |
+
 En esta fase se define el diseño: estrategia, matriz y datos. La ejecución real, el reporte
 de resultados y la cobertura medida corresponden a la Entrega 3, igual que lo declaran
 [observabilidad](observabilidad.md#validación-posterior-del-diseño) y
@@ -220,8 +243,8 @@ implementación. Cuando existan, se conservarán:
   [`atributos-de-calidad.md`](../01-caso-de-negocio/atributos-de-calidad.md#ratificación-pendiente-del-equipo).
 - **Stack fijado:** [AD-007](../decisiones/0007-stack-de-implementacion.md) quedó aceptado el
   20 de septiembre de 2026 —TypeScript sobre Node.js, Vitest y cobertura V8—.
-- `PENDIENTE: escribir el código de los veintiún casos, ejecutarlos y anexar el reporte de
-  cobertura en la Entrega 3.`
+- ✅ El código de los veintiún casos está escrito y en verde; `PENDIENTE: anexar el reporte
+  de cobertura al paquete de la Entrega 3 y conservar la evidencia por *commit*.`
 
 ## Referencias
 

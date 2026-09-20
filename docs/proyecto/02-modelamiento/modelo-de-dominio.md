@@ -126,7 +126,7 @@ Los tipos son conceptuales, no de base de datos.
 | `EstadoDevolucion` | `solicitada`, `aprobada`, `rechazada`, `ejecutada` |
 | `TipoDiscrepancia` | `cobroSinBoleta`, `boletaSinCobro`, `inventarioDuplicado`, `devolucionSinAnulacion`, `respuestaTardiaPasarela` |
 | `ResolucionDiscrepancia` | `emisionCompletada`, `devolucionEjecutada`, `boletaAnulada`, `sinAccion` |
-| `TipoMovimiento` | `venta`, `devolucion`, `reventa`, `parafiscal`, `ajuste` |
+| `TipoMovimiento` | `venta`, `devolucion`, `reventa`, `parafiscal`, `participacion`, `ajuste` |
 | `EstadoLiquidacion` | `abierta`, `enConciliacion`, `cerrada`, `desembolsada` |
 | `EstadoBoleta` | `emitida`, `transferida`, `revendida`, `anulada` |
 | `EstadoTitular` | `activo`, `anterior` |

@@ -51,6 +51,9 @@ TypeScript sobre Node.js 24 en un monorepo con npm workspaces, ratificado en
   `src/adapters/`. El dominio no importa infraestructura ni otros contextos; un paquete no
   importa a otro. Las pruebas viven en `tests/` del paquete, con Vitest, como exige el
   [plan de pruebas](docs/proyecto/02-modelamiento/plan-de-pruebas.md#automatización).
+- **La frontera entre contextos** está registrada: `Boleta` vive en `entitlements` y la
+  emisión cruza por el puerto `EmisorDeBoletas`
+  ([AD-008](docs/proyecto/decisiones/0008-boleta-en-derecho-de-asistencia.md)).
 - **El diseño manda:** el código implementa el
   [diagrama de clases](docs/proyecto/02-modelamiento/diagrama-de-clases.md) y el
   [de secuencia](docs/proyecto/02-modelamiento/diagrama-de-secuencia.md); los cambios de

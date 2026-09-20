@@ -215,6 +215,11 @@ agregados son fábricas estáticas: la única forma de construir un agregado vá
 | RepositorioDePagos | «interface» | — | `+ obtener(id: UUID): Pago`, `+ porClaveIdempotencia(clave: String): Pago?`, `+ guardar(p: Pago): void` | Pago; la búsqueda por clave es la idempotencia de AD-002 |
 | RepositorioDeBoletas | «interface» | — | `+ guardar(b: Boleta): void`, `+ porPago(pagoId: UUID): List<Boleta>` | Boleta |
 
+> **Ajuste de la Entrega 3 ([AD-008](../decisiones/0008-boleta-en-derecho-de-asistencia.md)).**
+> La implementación mueve `Boleta` al contexto Derecho de asistencia y reemplaza este puerto
+> por `EmisorDeBoletas` con un DTO de emisión; los repositorios de pagos y compras ganan
+> lecturas `porReserva`. Los artefactos JSON y HTML se regeneran en la próxima pasada.
+
 ### Adaptadores
 
 | Clase | Estereotipo | Atributos | Métodos | Corresponde a |
