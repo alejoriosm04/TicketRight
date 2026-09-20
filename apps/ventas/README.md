@@ -22,6 +22,41 @@ En otra terminal:
 npm run e2e -w @ticketright/ventas   # reserva, paga y espera la emisión
 ```
 
+El archivo `.env` (ignorado por git) trae la cadena de conexión y el perfil de la pasarela; el
+puerto local es **5433** para no chocar con otros proyectos que usen el 5432.
+
+## Probarlo a mano
+
+Con la semilla cargada, estos son los identificadores de la demo:
+
+| Qué | Valor |
+|---|---|
+| Localidad general ($100.000, aforo 50) | `22222222-2222-4222-8222-222222222222` |
+| Localidad numerada ($200.000, 4 sillas) | `33333333-3333-4333-8333-333333333333` |
+| Sillas de la numerada | `44444444-4444-4444-8444-44444444440{1..4}` |
+| Fan de ejemplo | `88888888-8888-4888-8888-888888888888` |
+| Turno admitido (demo) | `turno:99999999-9999-4999-8999-999999999999` |
+
+```bash
+curl -s localhost:3000/compras -H 'content-type: application/json' -d '{
+  "fanId": "88888888-8888-4888-8888-888888888888",
+  "tokenAdmision": "turno:99999999-9999-4999-8999-999999999999",
+  "localidadId": "22222222-2222-4222-8222-222222222222",
+  "cantidad": 2
+}'
+```
+
+Guarda el `compraId` y sigue con `POST /compras/<compraId>/pago` y
+`GET /compras/<compraId>`.
+
+## Cambiar de perfil y reiniciar
+
+```bash
+PASARELA_PERFIL=repetida npm run dev -w @ticketright/ventas   # o edita .env
+npm run db:seed -w @ticketright/ventas                        # estado limpio para otra demo
+docker compose down                                           # apagar PostgreSQL
+```
+
 ## Rutas
 
 | Método y ruta | Qué hace |
