@@ -17,6 +17,7 @@ Este repositorio es donde ese diseño se convierte en código, se prueba y se de
 
 ```
 ESTADO.md     Estado vivo del repo y de la Entrega 3. Empieza aquí siempre
+apps/ventas/  Composición de la aplicación: API Fastify + adaptadores PostgreSQL
 packages/     El código: shared-kernel + un paquete por contexto acotado, hexagonal dentro
 docs/         Base de conocimiento importada de aas
   ESTADO.md     Estado del proyecto y del curso hasta la Entrega 2 (bitácora del diseño)
@@ -92,6 +93,7 @@ los grandes se leen por secciones, nunca enteros.
 | El estilo de arquitectura y por qué se eligió | `docs/proyecto/decisiones/0005-estilo-de-arquitectura.md` | 20 KB |
 | Cómo se escribe un ADR y cuáles son los cinco | `docs/proyecto/decisiones/README.md` | 12 KB |
 | El stack de implementación y sus alternativas | `docs/proyecto/decisiones/0007-stack-de-implementacion.md` | 16 KB |
+| Cómo correr la aplicación de la demo | `apps/ventas/README.md` | 4 KB |
 | **Los diseños que hay que implementar** | `docs/proyecto/02-modelamiento/README.md` | 28 KB · con índice |
 | El modelo de dominio (32 conceptos, 12 raíces) | `docs/proyecto/02-modelamiento/modelo-de-dominio.md` | 40 KB · con índice |
 | La arquitectura de referencia (capas y patrones) | `docs/proyecto/02-modelamiento/arquitectura-de-referencia.md` | 36 KB · con índice |

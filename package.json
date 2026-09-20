@@ -7,7 +7,8 @@
     "node": ">=24"
   },
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "apps/*"
   ],
   "scripts": {
     "typecheck": "npm run typecheck --workspaces --if-present",
@@ -17,7 +18,9 @@
   },
   "devDependencies": {
     "@types/node": "^24.13.6",
+    "@types/pg": "^8.23.1",
     "@vitest/coverage-v8": "^5.0.1",
+    "tsx": "^4.23.15",
     "typescript": "^7.0.2",
     "vitest": "^5.0.1"
   }

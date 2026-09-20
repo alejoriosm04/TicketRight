@@ -139,6 +139,38 @@ export class Boleta {
     );
   }
 
+  static rehidratar(
+    boletaId: UUID,
+    eventoId: UUID,
+    localidadId: UUID,
+    sillaId: UUID | undefined,
+    pagoId: UUID,
+    precioNominal: Dinero,
+    codigo: CodigoBoleta,
+    estado: EstadoBoleta,
+    emitidaEn: FechaHora,
+    anuladaEn: FechaHora | undefined,
+    titularidades: readonly Titularidad[],
+    transferencias: readonly Transferencia[],
+    reventas: readonly Reventa[],
+  ): Boleta {
+    return new Boleta(
+      boletaId,
+      eventoId,
+      localidadId,
+      sillaId,
+      pagoId,
+      precioNominal,
+      codigo,
+      estado,
+      emitidaEn,
+      anuladaEn,
+      [...titularidades],
+      [...transferencias],
+      [...reventas],
+    );
+  }
+
   get id(): UUID {
     return this.boletaId;
   }

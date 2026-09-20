@@ -15,6 +15,7 @@ tarde y responde dos veces.
 
 | Ruta | Qué contiene |
 |---|---|
+| `apps/ventas/` | La aplicación de la demo: API Fastify + PostgreSQL + outbox + pasarela simulada |
 | `packages/` | El código: un paquete por contexto acotado —hexagonal— más `shared-kernel` |
 | `docs/` | La base de conocimiento importada de `aas`: caso de negocio (Entrega 1), modelamiento (Entrega 2) y el material del curso digitalizado. Es la fuente de verdad y se publica como [wiki](https://github.com/alejoriosm04/TicketRight/wiki) |
 | `docs/proyecto/decisiones/` | Los ADR: el material con el que se defiende la Entrega 3 |

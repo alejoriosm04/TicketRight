@@ -46,7 +46,7 @@ caso de uso principal, y encima de eso pruebas, carga, observabilidad y fallos.
 
 | # | Criterio | Insumo ya escrito | Qué falta |
 |---|---|---|---|
-| 1 | Aplicación funcionando (40%) | [AD-007](docs/proyecto/decisiones/0007-stack-de-implementacion.md): TypeScript/Node · [arquitectura hexagonal](docs/proyecto/02-modelamiento/diagrama-de-clases.md) · [caso de uso](docs/proyecto/02-modelamiento/diagrama-de-secuencia.md) | 🟡 Dominio y SAGA implementados con los dobles; `PENDIENTE: adaptadores reales (HTTP, PostgreSQL, outbox, pasarela), ambiente de demo y video` |
+| 1 | Aplicación funcionando (40%) | [AD-007](docs/proyecto/decisiones/0007-stack-de-implementacion.md): TypeScript/Node · [arquitectura hexagonal](docs/proyecto/02-modelamiento/diagrama-de-clases.md) · [caso de uso](docs/proyecto/02-modelamiento/diagrama-de-secuencia.md) | 🟡 API Fastify + PostgreSQL + outbox + pasarela simulada en `apps/ventas`; compra completa, webhook repetido y rechazo verificados en local. `PENDIENTE: clúster k3d/minikube, más rutas y video demo` |
 | 2 | Pruebas y coherencia | [Plan de pruebas](docs/proyecto/02-modelamiento/plan-de-pruebas.md): 21 casos UT sobre las reglas R1–R14 | ✅ Los 21 casos están escritos y en verde (38 pruebas; cobertura 78,25% sentencias). `PENDIENTE: reporte por commit y corrida en CI` |
 | 3 | Observabilidad (20%) | [Observabilidad](docs/proyecto/02-modelamiento/observabilidad.md): las 6 métricas de la entrega, tableros y alertas | Instrumentar y demostrar con datos reales |
 | 4 | Simulación de fallos (30%) | [Inyección de fallos](docs/proyecto/02-modelamiento/inyeccion-de-fallos.md): IF-01, IF-02, IF-03 e IF-05 elegidos | Ejecutar los 4 escenarios y escribir la bitácora |
@@ -97,6 +97,12 @@ rúbrica del Entregable 3 quedó en
 [`docs/proyecto/03-implementacion/rubrica.md`](docs/proyecto/03-implementacion/rubrica.md),
 con el plan por criterios en el README de la entrega y el catálogo de patrones en
 [`patrones.md`](docs/proyecto/03-implementacion/patrones.md).
+
+**Incremento 1 de la aplicación (20 de septiembre):** `apps/ventas` compone Fastify +
+PostgreSQL con los repositorios, el outbox transaccional y la pasarela simulada; el guion
+`npm run e2e -w @ticketright/ventas` ejecuta la compra completa contra la base real, y los
+perfiles `repetida` (idempotencia) y `rechaza` (compensación) quedaron verificados. El puerto
+local de PostgreSQL es **5433** para no chocar con otros proyectos del equipo.
 
 ## Tablero
 

@@ -57,6 +57,18 @@ export class Reserva {
     );
   }
 
+  static rehidratar(
+    reservaId: UUID,
+    fanId: UUID,
+    turnoId: UUID,
+    estado: EstadoReserva,
+    creadaEn: FechaHora,
+    venceEn: FechaHora,
+    items: readonly ItemReserva[],
+  ): Reserva {
+    return new Reserva(reservaId, fanId, turnoId, estado, creadaEn, venceEn, items);
+  }
+
   get id(): UUID {
     return this.reservaId;
   }

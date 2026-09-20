@@ -1,0 +1,21 @@
+{
+  "name": "@ticketright/ventas",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node --env-file-if-exists=../../.env --import tsx src/main.ts",
+    "start": "node --env-file-if-exists=../../.env --import tsx src/main.ts",
+    "db:migrate": "node --env-file-if-exists=../../.env --import tsx src/db/migrate.ts",
+    "db:seed": "node --env-file-if-exists=../../.env --import tsx src/db/seed.ts",
+    "e2e": "node --env-file-if-exists=../../.env scripts/compra-completa.mjs",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@ticketright/entitlements": "0.0.0",
+    "@ticketright/sales": "0.0.0",
+    "@ticketright/shared-kernel": "0.0.0",
+    "fastify": "^5.0.0",
+    "pg": "^8.13.0"
+  }
+}

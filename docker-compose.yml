@@ -8,7 +8,7 @@ services:
       POSTGRES_USER: ticketright
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?define POSTGRES_PASSWORD en .env}
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - postgres-datos:/var/lib/postgresql
     healthcheck:

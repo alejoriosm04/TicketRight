@@ -24,14 +24,19 @@
 prototipo de 16 pantallas; la topología de producción documentada en la
 [arquitectura de implementación](../02-modelamiento/arquitectura-de-implementacion.md).
 
-**Falta:** los adaptadores reales —HTTP, PostgreSQL, Redis, Kafka con outbox y la pasarela
-simulada—, el despliegue del ambiente de demo y las evidencias de uso.
+**Falta:** Redis y Kafka reales (el outbox ya escribe en PostgreSQL), las rutas restantes
+—fila, reventa y devolución—, el despliegue en el clúster y el video demo.
 
-**Ambiente decidido:** **local con k3d o minikube** — el mínimo es el ambiente local. El
-profesor aceptó Kubernetes local o un ambiente simulado con herramientas open source
-([transcripción §16](../../curso/clase-03-04-transcripcion.md#16-pregunta-de-un-estudiante-infraestructura-para-la-implementación));
-si el tiempo alcanza, se evalúa un despliegue en AWS siguiendo la
-[arquitectura de implementación](../02-modelamiento/arquitectura-de-implementacion.md).
+**Incremento 1 entregado (20 de septiembre de 2026):** la composición vive en
+[`apps/ventas`](../../../apps/ventas/README.md) —Fastify + PostgreSQL, repositorios, outbox y
+pasarela simulada—. Verificado en local: compra completa con dos boletas, webhook repetido sin
+duplicar y rechazo con el inventario liberado (`npm run e2e -w @ticketright/ventas`).
+
+**Ambiente decidido:** **local con k3d o minikube** — el mínimo es el ambiente local; si el
+tiempo alcanza, se evalúa un despliegue en AWS siguiendo la
+[arquitectura de implementación](../02-modelamiento/arquitectura-de-implementacion.md). El
+profesor aceptó Kubernetes local o un ambiente simulado
+([transcripción §16](../../curso/clase-03-04-transcripcion.md#16-pregunta-de-un-estudiante-infraestructura-para-la-implementación)).
 `PENDIENTE: elegir k3d o minikube; de eso depende el mecanismo de los 4 fallos (Chaos Mesh
 sobre el clúster local o su equivalente).`
 

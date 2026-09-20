@@ -93,6 +93,17 @@ export class Localidad {
     this.aforoActual = aforo;
   }
 
+  static rehidratar(
+    localidadId: UUID,
+    eventoId: UUID,
+    tipo: TipoLocalidad,
+    aforo: Aforo,
+    precio: Dinero,
+    sillas: readonly Silla[] = [],
+  ): Localidad {
+    return new Localidad(localidadId, eventoId, tipo, aforo, precio, [...sillas]);
+  }
+
   get aforo(): Aforo {
     return this.aforoActual;
   }

@@ -76,6 +76,32 @@ export class Pago {
     );
   }
 
+  static rehidratar(
+    pagoId: UUID,
+    origen: OrigenPago,
+    monto: Dinero,
+    medio: MedioPago,
+    estado: EstadoPago,
+    claveIdempotencia: string,
+    referencia: string | undefined,
+    iniciadoEn: FechaHora,
+    confirmado: FechaHora | undefined,
+    devoluciones: readonly Devolucion[] = [],
+  ): Pago {
+    return new Pago(
+      pagoId,
+      origen,
+      monto,
+      medio,
+      estado,
+      claveIdempotencia,
+      referencia,
+      iniciadoEn,
+      confirmado,
+      [...devoluciones],
+    );
+  }
+
   get id(): UUID {
     return this.pagoId;
   }
@@ -178,6 +204,18 @@ export class Devolucion {
     solicitadaEn: FechaHora,
   ): Devolucion {
     return new Devolucion(nuevoId(), boletaId, "cancelacionEvento", monto, "solicitada", solicitadaEn, undefined);
+  }
+
+  static rehidratar(
+    devolucionId: UUID,
+    boletaId: UUID | undefined,
+    motivo: MotivoDevolucion,
+    monto: Dinero,
+    estado: EstadoDevolucion,
+    solicitadaEn: FechaHora,
+    resuelta: FechaHora | undefined,
+  ): Devolucion {
+    return new Devolucion(devolucionId, boletaId, motivo, monto, estado, solicitadaEn, resuelta);
   }
 
   get id(): UUID {

@@ -29,6 +29,18 @@ export class Discrepancia {
     return new Discrepancia(nuevoId(), tipo, pagoId, undefined, detectadaEn, undefined, undefined);
   }
 
+  static rehidratar(
+    discrepanciaId: UUID,
+    tipo: TipoDiscrepancia,
+    pagoId: UUID,
+    boletaId: UUID | undefined,
+    detectadaEn: FechaHora,
+    resuelta: FechaHora | undefined,
+    resolucion: ResolucionDiscrepancia | undefined,
+  ): Discrepancia {
+    return new Discrepancia(discrepanciaId, tipo, pagoId, boletaId, detectadaEn, resuelta, resolucion);
+  }
+
   get id(): UUID {
     return this.discrepanciaId;
   }
