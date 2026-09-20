@@ -177,7 +177,7 @@ caso de este plan** antes de mirar el porcentaje agregado.
 
 La [arquitectura de implementación](arquitectura-de-implementacion.md) fija la topología, y
 [AD-007](../decisiones/0007-stack-de-implementacion.md) fija el lenguaje y el marco de
-pruebas —TypeScript sobre Node.js con Vitest, aceptado el 19 de septiembre de 2026—. Lo que
+pruebas —TypeScript sobre Node.js con Vitest, aceptado el 20 de septiembre de 2026—. Lo que
 sí se fija aquí, porque depende del diseño de dominio y no de la tecnología:
 
 - Las pruebas unitarias vivirán junto al código de cada contexto acotado (Oferta de eventos,
@@ -219,7 +219,7 @@ implementación. Cuando existan, se conservarán:
   sigue `[S]` hasta la ratificación de umbrales de
   [`atributos-de-calidad.md`](../01-caso-de-negocio/atributos-de-calidad.md#ratificación-pendiente-del-equipo).
 - **Stack fijado:** [AD-007](../decisiones/0007-stack-de-implementacion.md) quedó aceptado el
-  19 de septiembre de 2026 —TypeScript sobre Node.js, Vitest y cobertura V8—.
+  20 de septiembre de 2026 —TypeScript sobre Node.js, Vitest y cobertura V8—.
 - `PENDIENTE: escribir el código de los veintiún casos, ejecutarlos y anexar el reporte de
   cobertura en la Entrega 3.`
 

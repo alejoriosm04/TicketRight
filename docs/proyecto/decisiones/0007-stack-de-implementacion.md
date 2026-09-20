@@ -1,6 +1,6 @@
 # AD-007 — Stack de implementación: TypeScript sobre Node.js
 
-**Fecha:** 2026-09-19 · **Estado:** ✅ Aceptado — ratificado por el equipo el mismo día
+**Fecha:** 2026-09-20 · **Estado:** ✅ Aceptado — propuesto el 19 de septiembre y ratificado por el equipo el 20
 **Participan:** Alejo, Lina, Quinnie
 **Dimensión:** implementación — **no cuenta entre las cinco decisiones arquitectónicas**
 **Relacionados:** [AD-005](0005-estilo-de-arquitectura.md) ·
@@ -126,9 +126,9 @@ producción no cambia: esta decisión es la capa de lenguaje y herramientas de l
 [arquitectura de implementación](../02-modelamiento/arquitectura-de-implementacion.md), que
 sigue siendo la referencia para AWS.
 
-El equipo **ratificó la decisión el 19 de septiembre de 2026**, el mismo día en que se
-propuso, igual que había hecho con los cinco ADR técnicos el 16 de septiembre. El esqueleto
-ya puede crecer con los veintiún casos del plan de pruebas.
+El equipo **ratificó la decisión el 20 de septiembre de 2026**, un día después de
+proponerla, igual que había hecho con los cinco ADR técnicos el 16 de septiembre. El
+esqueleto ya puede crecer con los veintiún casos del plan de pruebas.
 
 ## 7. Justificación
 

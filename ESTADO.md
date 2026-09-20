@@ -69,7 +69,7 @@ accidente y dejaba 25 enlaces rotos; los tres avisos de importación están en
 
 La **decisión de stack** quedó registrada como
 [AD-007](docs/proyecto/decisiones/0007-stack-de-implementacion.md) —TypeScript sobre
-Node.js con Vitest, **aceptada el 19 de septiembre de 2026**— y el esqueleto está en
+Node.js con Vitest, **aceptada el 20 de septiembre de 2026**— y el esqueleto está en
 `packages/`: cuatro contextos hexagonales con nombre en inglés —`event-catalog`,
 `admission-identity`, `sales` y `entitlements`— más `shared-kernel`, ambiente local en
 `docker-compose.yml` y CI en `.github/workflows/`. Sigue el código de los veintiún casos.
