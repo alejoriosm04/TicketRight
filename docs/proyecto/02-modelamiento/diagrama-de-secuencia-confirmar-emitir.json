@@ -87,7 +87,7 @@
       "id": "boleta",
       "type": "backend",
       "label": "Boleta",
-      "sublabel": "«aggregate root»"
+      "sublabel": "«aggregate root» · Derecho de asistencia"
     },
     {
       "id": "discrepancia",
@@ -379,6 +379,14 @@
         "Continua: síncrono · punteada: asíncrono · ✗ roja: excepción · gris: retorno",
         "Marcos alt / loop / par con guarda · bandas: pasos de la SAGA",
         "Cada mensaje es un método del diagrama de clases"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Contexto de Boleta",
+      "items": [
+        "Boleta es del contexto Derecho de asistencia (@ticketright/entitlements)",
+        "La emisión llega por el puerto EmisorDeBoletas (AD-008)"
       ]
     }
   ]

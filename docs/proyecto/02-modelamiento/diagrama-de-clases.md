@@ -43,27 +43,28 @@ notación (`comp-`, `agg-`, `assoc-`, `dep-`, `real-`, `gen-`).
 
 ```bash
 for v in dominio aplicacion; do
-  node .agents/skills/archify/bin/archify.mjs deliver architecture \
-    proyecto/02-modelamiento/diagrama-de-clases-$v.json \
-    proyecto/02-modelamiento/diagrama-de-clases-$v.html --quality standard --json
-  node herramientas/postprocesa-diagrama-clases.mjs \
-    proyecto/02-modelamiento/diagrama-de-clases-$v.json \
-    proyecto/02-modelamiento/diagrama-de-clases.md \
-    proyecto/02-modelamiento/diagrama-de-clases-$v.html
+  node tools/archify/bin/archify.mjs deliver architecture \
+    docs/proyecto/02-modelamiento/diagrama-de-clases-$v.json \
+    docs/proyecto/02-modelamiento/diagrama-de-clases-$v.html --quality standard --json
+  node docs/herramientas/postprocesa-diagrama-clases.mjs \
+    docs/proyecto/02-modelamiento/diagrama-de-clases-$v.json \
+    docs/proyecto/02-modelamiento/diagrama-de-clases.md \
+    docs/proyecto/02-modelamiento/diagrama-de-clases-$v.html
 done
 ```
 
 Las dos vistas usan el perfil `standard` de Archify, pasan las comprobaciones de composición
-(cero errores; la vista 1 con una advertencia y la vista 2 con diez, todas de rutas o
+(cero errores; la vista 1 con una advertencia y la vista 2 con catorce, todas de rutas o
 etiquetas) y la comprobación de contención sin desplazamiento horizontal ni vertical en
-1440×900, 1600×1000, 1920×1080 y 2048×1320. Recibos de `deliver` (18 de septiembre de 2026,
-antes del posprocesado): vista 1 fuente `sha256 1ebe7d10bed0…` (12.536 bytes) → HTML
-`sha256 dda44cb298f4…` (834.196 bytes); vista 2 fuente `sha256 5b433ee0d32e…` (13.790 bytes)
-→ HTML `sha256 8e993adf6a9b…` (836.991 bytes).
+1440×900, 1600×1000, 1920×1080 y 2048×1320. Recibos de `deliver` (20 de septiembre de 2026,
+antes del posprocesado): vista 1 fuente `sha256 a1ea39a4c405…` (12.564 bytes) → HTML
+`sha256 95b9a285e40c…` (834.223 bytes); vista 2 fuente `sha256 901ae92e1955…` (14.071 bytes)
+→ HTML `sha256 9d0f399a1e70…` (837.171 bytes).
 
 **Vistas guiadas.** Cada visor trae sus capítulos: la vista 1 recorre *Reservar*, *Pagar*,
 *Emitir y hechos*, *Pago: estado y evento* y *Precio: desglose y calculadora*; la vista 2
-recorre *Aplicación*, *Puertos* y *Adaptadores*.
+recorre *Aplicación*, *Puertos*, *Adaptadores* y *Contextos*, la vista que explica la
+propiedad de `Boleta` y `Localidad` ([AD-008](../decisiones/0008-boleta-en-derecho-de-asistencia.md)).
 
 ### Dos vistas del mismo caso
 
@@ -142,7 +143,7 @@ aceptadas. La arquitectura de referencia debe respetar estas capas.
 |---|---|---|
 | **Aplicación** | `OrquestadorDeCompra` (la SAGA), `CompraEnCurso` (su estado durable) y los tres comandos | [AD-002](../decisiones/0002-mensajeria-del-bus-de-eventos.md): «el orquestador formará parte del servicio de ventas y guardará su estado en PostgreSQL» |
 | **Dominio** | Los agregados del [modelo de dominio](modelo-de-dominio.md) con sus reglas como métodos, el servicio de dominio `CalculadoraDePrecio`, los eventos y las excepciones | El modelo de dominio; no depende de ninguna otra capa |
-| **Puertos** («interface») | Un repositorio por agregado, la pasarela, el validador de admisión y el publicador de eventos | [AD-003](../decisiones/0003-consistencia-por-tipo-de-inventario.md): PostgreSQL es la autoridad detrás de los repositorios; [AD-004](../decisiones/0004-datos-personales-almacenamiento-y-acceso.md): la pasarela y la admisión son fronteras de confianza |
+| **Puertos** («interface») | Un repositorio por agregado, la pasarela, el validador de admisión, el publicador de eventos y el emisor de boletas | [AD-003](../decisiones/0003-consistencia-por-tipo-de-inventario.md): PostgreSQL es la autoridad detrás de los repositorios; [AD-004](../decisiones/0004-datos-personales-almacenamiento-y-acceso.md): la pasarela y la admisión son fronteras de confianza; [AD-008](../decisiones/0008-boleta-en-derecho-de-asistencia.md): la emisión cruza al contexto Derecho de asistencia |
 | **Adaptadores** | Los repositorios PostgreSQL, la pasarela tokenizada, el validador JWT y el outbox | [AD-002](../decisiones/0002-mensajeria-del-bus-de-eventos.md) (outbox), [AD-003](../decisiones/0003-consistencia-por-tipo-de-inventario.md) (bloqueo de fila, transacción corta), [AD-004](../decisiones/0004-datos-personales-almacenamiento-y-acceso.md) (sin PAN ni CVV; JWT firmado) |
 
 Patrones visibles: **SAGA orquestada** (`OrquestadorDeCompra` + `CompraEnCurso`),
@@ -153,7 +154,7 @@ ante una referencia ya procesada) y **objetos de valor** inmutables (`Aforo.conR
 devuelve un Aforo nuevo).
 
 Se dibujan cinco adaptadores: los tres que encapsulan una frontera externa y dos
-repositorios PostgreSQL. Los repositorios de Pago, Boleta, Discrepancia y Compra siguen el
+repositorios PostgreSQL. Los repositorios de Pago, Discrepancia y Compra siguen el
 mismo patrón que `RepositorioPostgresDeReservas` y se omiten para no repetir cajas.
 
 ## Clases
@@ -173,7 +174,7 @@ agregados son fábricas estáticas: la única forma de construir un agregado vá
 | CrearReserva | «command» | `+ fanId: UUID`, `+ identidadRef: IdOpaco`, `+ tokenAdmision: String`, `+ localidadId: UUID`, `+ cantidad: int`, `+ sillaIds: List<UUID>` | — | Entrada del caso; lleva el `sub` opaco y el token de admisión de AD-004 |
 | IniciarPago | «command» | `+ compraId: UUID`, `+ medio: MedioPago`, `+ tokenTarjeta: String`, `+ claveIdempotencia: String` | — | Pago.medio y Pago.claveIdempotencia; el token de tarjeta nunca se persiste (AD-004) |
 | ConfirmarPago | «command» | `+ pagoId: UUID`, `+ referenciaExterna: String`, `+ aprobado: boolean`, `+ firma: String` | — | Webhook de la pasarela; Pago.referenciaExterna (AD-002 paso 3) |
-| OrquestadorDeCompra | «application service» | `- admision: ValidadorDeAdmision`, `- localidades: RepositorioDeLocalidades`, `- reservas: RepositorioDeReservas`, `- pagos: RepositorioDePagos`, `- boletas: RepositorioDeBoletas`, `- compras: RepositorioDeCompras`, `- discrepancias: RepositorioDeDiscrepancias`, `- pasarela: PasarelaDePago`, `- eventos: PublicadorDeEventos`, `- precios: CalculadoraDePrecio`, `- vigenciaReserva: Duracion`, `- limiteA1: Duracion` | `+ reservar(cmd: CrearReserva): CompraEnCurso`, `+ iniciarPago(cmd: IniciarPago): void`, `+ confirmarPago(cmd: ConfirmarPago): void`, `+ emitir(compraId: UUID): List<Boleta>`, `+ compensar(compraId: UUID, motivo: String): void`, `+ vencerReservasExpiradas(ahora: FechaHora): int` | La SAGA orquestada de AD-002 dentro del servicio de ventas: un dueño visible de reserva → pago → emisión y de sus compensaciones (R5; A-1 · correspondencia dinero–boleta cerrada en ≤ 15 min) |
+| OrquestadorDeCompra | «application service» | `- admision: ValidadorDeAdmision`, `- localidades: RepositorioDeLocalidades`, `- reservas: RepositorioDeReservas`, `- pagos: RepositorioDePagos`, `- emisor: EmisorDeBoletas`, `- compras: RepositorioDeCompras`, `- discrepancias: RepositorioDeDiscrepancias`, `- pasarela: PasarelaDePago`, `- eventos: PublicadorDeEventos`, `- precios: CalculadoraDePrecio`, `- vigenciaReserva: Duracion`, `- limiteA1: Duracion` | `+ reservar(cmd: CrearReserva): CompraEnCurso`, `+ iniciarPago(cmd: IniciarPago): void`, `+ confirmarPago(cmd: ConfirmarPago): void`, `+ emitir(compraId: UUID): List<BoletaEmitida>`, `+ compensar(compraId: UUID, motivo: String): void`, `+ vencerReservasExpiradas(ahora: FechaHora): int` | La SAGA orquestada de AD-002 dentro del servicio de ventas: un dueño visible de reserva → pago → emisión y de sus compensaciones (R5; A-1 · correspondencia dinero–boleta cerrada en ≤ 15 min) |
 | CompraEnCurso | «entity» | `- compraId: UUID`, `- reservaId: UUID`, `- pagoId: UUID?`, `- paso: PasoDeCompra`, `- intentos: int`, `- actualizadoEn: FechaHora` | `+ avanzar(paso: PasoDeCompra): void`, `+ registrarIntento(): int` | Estado durable de la SAGA en PostgreSQL (AD-002): recuerda en qué paso va cada compra |
 
 ### Capa de dominio
@@ -213,12 +214,13 @@ agregados son fábricas estáticas: la única forma de construir un agregado vá
 | RepositorioDeLocalidades | «interface» | — | `+ obtenerParaActualizar(id: UUID): Localidad`, `+ guardar(l: Localidad): void` | Autoridad del inventario en PostgreSQL (AD-003) |
 | RepositorioDeReservas | «interface» | — | `+ obtener(id: UUID): Reserva`, `+ guardar(r: Reserva): void`, `+ vencidasA(ahora: FechaHora): List<Reserva>` | Reserva durable (AD-003); `vencidasA` sostiene A-5 · liberación en ≤ 10 min |
 | RepositorioDePagos | «interface» | — | `+ obtener(id: UUID): Pago`, `+ porClaveIdempotencia(clave: String): Pago?`, `+ guardar(p: Pago): void` | Pago; la búsqueda por clave es la idempotencia de AD-002 |
-| RepositorioDeBoletas | «interface» | — | `+ guardar(b: Boleta): void`, `+ porPago(pagoId: UUID): List<Boleta>` | Boleta |
+| EmisorDeBoletas | «interface» | — | `+ emitir(datos: DatosDeEmision): BoletaEmitida` | Emisión de la boleta; el contrato vive en `shared-kernel` y lo realiza el contexto Derecho de asistencia ([AD-008](../decisiones/0008-boleta-en-derecho-de-asistencia.md)) |
 
 > **Ajuste de la Entrega 3 ([AD-008](../decisiones/0008-boleta-en-derecho-de-asistencia.md)).**
-> La implementación mueve `Boleta` al contexto Derecho de asistencia y reemplaza este puerto
-> por `EmisorDeBoletas` con un DTO de emisión; los repositorios de pagos y compras ganan
-> lecturas `porReserva`. Los artefactos JSON y HTML se regeneran en la próxima pasada.
+> `Boleta` se implementa en el contexto Derecho de asistencia (`@ticketright/entitlements`) y
+> este puerto es `EmisorDeBoletas`, con un DTO de emisión; los repositorios de pagos y compras
+> ganan lecturas `porReserva`. Las vistas de este diagrama ya traen la tarjeta «Contextos y
+> propiedad», y el caso, sus 39 clases y sus 37 relaciones no cambian.
 
 ### Adaptadores
 
@@ -259,7 +261,7 @@ posprocesado dibuja cada número en su extremo y deja en el centro solo el nombr
 | OrquestadorDeCompra `1` ◇—→ `1` cada puerto (9) | Agregación | Colaboradores inyectados —`admision`, `localidades`, `reservas`, `pagos`, `boletas`, `compras`, `discrepancias`, `pasarela`, `eventos`—: el orquestador los usa como partes, pero no los crea ni los destruye y una misma instancia se comparte entre orquestadores. Es la agregación compartida de UML. Navegable solo desde el orquestador: los puertos no conocen quién los usa. |
 | OrquestadorDeCompra - - -> Reserva | Dependencia «create» | `reservar()` construye la Reserva con `Reserva.crear` y la entrega al repositorio. |
 | OrquestadorDeCompra - - -> EventoDeDominio | Dependencia «use» | La SAGA crea `PagoSolicitado` y `PagoConfirmado` y los publica por el puerto; el orquestador depende de la base de los hechos. Ancla el grupo de eventos al resto del diagrama. |
-| RepositorioDeBoletas - - -> Boleta | Dependencia «use» | Los puertos hablan en tipos del dominio: el dominio no depende de ellos, ellos del dominio. Los demás repositorios dependen igual de su agregado; se dibuja uno. |
+| EmisorDeBoletas - - -> Modelo de dominio | Dependencia «use» | El puerto habla en tipos del dominio y cruza la frontera al contexto Derecho de asistencia ([AD-008](../decisiones/0008-boleta-en-derecho-de-asistencia.md)); los demás repositorios dependen igual de su agregado, y se dibuja uno. |
 | Adaptador - - -▷ puerto (5) | Realización | `AdaptadorDePasarelaTokenizada` ⇒ `PasarelaDePago`, `OutboxTransaccional` ⇒ `PublicadorDeEventos`, `ValidadorJwtDeAdmision` ⇒ `ValidadorDeAdmision`, `RepositorioPostgresDeLocalidades` ⇒ `RepositorioDeLocalidades`, `RepositorioPostgresDeReservas` ⇒ `RepositorioDeReservas`. La dependencia apunta hacia adentro: el dominio y la aplicación no conocen la infraestructura. |
 
 No hay relación `Reserva → Localidad`: la reserva guarda `localidadId` en sus ítems y es el
@@ -278,7 +280,7 @@ en la tabla clase → concepto → regla y en la columna «Corresponde a» de ca
 | Localidad, Aforo, Silla | Localidad (RAÍZ), Aforo (VO), Silla (E) | `reservar` → R1, R2; `vender` → R2 al emitir; `Aforo` inmutable |
 | Reserva, ItemReserva, DesglosePrecio | Reserva (RAÍZ), Ítem de reserva (E), Desglose de precio (VO) | `marcarEnPago` → R3; `total` → R13 |
 | Pago, OrigenPago | Pago (RAÍZ), Origen de pago (VO) | `iniciar` → R4; `registrarConfirmacion` → idempotencia AD-002; R5 |
-| Boleta, CodigoBoleta, Titularidad, Titular | Boleta (RAÍZ), Código de boleta (VO), Titularidad (E), Titular (E) | `emitir` → R7 (R2 la garantiza `Localidad.vender` en la misma transacción); `codigo.version` → R8 |
+| Boleta, CodigoBoleta, Titularidad, Titular | Boleta (RAÍZ), Código de boleta (VO), Titularidad (E), Titular (E) | `emitir` → R7 (R2 la garantiza `Localidad.vender` en la misma transacción); `codigo.version` → R8. Se implementan en `@ticketright/entitlements` ([AD-008](../decisiones/0008-boleta-en-derecho-de-asistencia.md)) |
 | Discrepancia | Discrepancia (RAÍZ) | `abrir`/`resolver` → R14; A-1 · correspondencia dinero–boleta cerrada en ≤ 15 min |
 | CalculadoraDePrecio | Servicio de dominio; no es un concepto: fabrica el VO | R13, Ley 1493 `[V]` |
 | AforoExcedido, ReservaVencida | Violaciones de R1/R2 y R3 | Resultado «rechazar» de la tabla de reglas |

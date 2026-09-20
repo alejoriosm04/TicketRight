@@ -26,7 +26,7 @@ docs/         Base de conocimiento importada de aas
   curso/        Material del curso digitalizado
     material/     Originales del profesor — SOLO LECTURA
   herramientas/ Verificador de enlaces y utilidades de los entregables
-tools/        publish-wiki.py — publica docs/ como wiki del repositorio
+tools/        publish-wiki.py y archify/ — publica la wiki y regenera los diagramas
 docker-compose.yml  Ambiente local (PostgreSQL, Redis y Kafka)
 ```
 

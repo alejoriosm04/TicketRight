@@ -5457,15 +5457,15 @@ html[data-preset="classic"] g[data-graph-role="segment-label"] text{paint-order:
           <text data-detail="context" x="959.6666666666666" y="111" class="t-muted" font-size="7" text-anchor="middle">«aggregate root»</text>
         </g>
 
-        <g id="node-boleta" data-node-id="boleta" data-node-label="Boleta" tabindex="0" role="button" aria-label="Focus Boleta, «aggregate root», Sequence participant" aria-pressed="false" data-node-kind="backend" data-node-sublabel="«aggregate root»" data-node-context="Sequence participant">
-          <title>Boleta · «aggregate root» · Sequence participant</title>
+        <g id="node-boleta" data-node-id="boleta" data-node-label="Boleta" tabindex="0" role="button" aria-label="Focus Boleta, «aggregate root» · Derecho de asistencia, Sequence participant" aria-pressed="false" data-node-kind="backend" data-node-sublabel="«aggregate root» · Derecho de asistencia" data-node-context="Sequence participant">
+          <title>Boleta · «aggregate root» · Derecho de asistencia · Sequence participant</title>
           <rect x="1075.3333333333333" y="72" width="174" height="54" rx="6" class="c-mask"/>
           <rect x="1075.3333333333333" y="72" width="174" height="54" rx="6" class="c-backend" stroke-width="1.5"/>
           <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(1081.3333333333333 78) scale(0.6875)">
             <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
           </g>
           <text data-node-label="" data-detail-anchor="" x="1162.3333333333333" y="94" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Boleta</text>
-          <text data-detail="context" x="1162.3333333333333" y="111" class="t-muted" font-size="7" text-anchor="middle">«aggregate root»</text>
+          <text data-detail="context" x="1162.3333333333333" y="111" class="t-muted" font-size="6.9" text-anchor="middle">«aggregate root» · Derecho de asistencia</text>
         </g>
 
         <g id="node-discrepancia" data-node-id="discrepancia" data-node-label="Discrepancia" tabindex="0" role="button" aria-label="Focus Discrepancia, «aggregate root», Sequence participant" aria-pressed="false" data-node-kind="backend" data-node-sublabel="«aggregate root»" data-node-context="Sequence participant">
@@ -5725,6 +5725,17 @@ html[data-preset="classic"] g[data-graph-role="segment-label"] text{paint-order:
           <li>&bull; Continua: síncrono · punteada: asíncrono · ✗ roja: excepción · gris: retorno</li>
           <li>&bull; Marcos alt / loop / par con guarda · bandas: pasos de la SAGA</li>
           <li>&bull; Cada mensaje es un método del diagrama de clases</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-dot rose"></div>
+          <h3>Contexto de Boleta</h3>
+        </div>
+        <ul>
+          <li>&bull; Boleta es del contexto Derecho de asistencia (@ticketright/entitlements)</li>
+          <li>&bull; La emisión llega por el puerto EmisorDeBoletas (AD-008)</li>
         </ul>
       </div>
     </div>

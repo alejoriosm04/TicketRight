@@ -34,12 +34,12 @@ pantalla. Juntas contienen los **38 mensajes y los 7 fragmentos** del caso.
 
 ```bash
 for v in reservar-pagar confirmar-emitir; do
-  node .agents/skills/archify/bin/archify.mjs deliver sequence \
-    proyecto/02-modelamiento/diagrama-de-secuencia-$v.json \
-    proyecto/02-modelamiento/diagrama-de-secuencia-$v.html --quality standard --json
-  node herramientas/postprocesa-diagrama-secuencia.mjs \
-    proyecto/02-modelamiento/diagrama-de-secuencia-$v.json \
-    proyecto/02-modelamiento/diagrama-de-secuencia-$v.html
+  node tools/archify/bin/archify.mjs deliver sequence \
+    docs/proyecto/02-modelamiento/diagrama-de-secuencia-$v.json \
+    docs/proyecto/02-modelamiento/diagrama-de-secuencia-$v.html --quality standard --json
+  node docs/herramientas/postprocesa-diagrama-secuencia.mjs \
+    docs/proyecto/02-modelamiento/diagrama-de-secuencia-$v.json \
+    docs/proyecto/02-modelamiento/diagrama-de-secuencia-$v.html
 done
 ```
 
@@ -49,9 +49,9 @@ operador y su guarda; también cuida el contraste WCAG AA del tema claro y el ha
 notas que van sobre líneas de vida. Cada vista tiene sus propias vistas guiadas: la 1 con
 *Reservar* y *Pagar*; la 2 con *Confirmar*, *Emitir* y *Liberar*.
 
-Recibos de `deliver` (18 de septiembre de 2026, antes del posprocesado): vista 1 fuente
+Recibos de `deliver` (20 de septiembre de 2026, antes del posprocesado): vista 1 fuente
 `sha256 27b8a5fb93aa…` (8.210 bytes) → HTML `sha256 145b76166704…` (822.780 bytes); vista 2
-fuente `sha256 782c45cf67b1…` (8.639 bytes) → HTML `sha256 3c2af7894c72…` (824.258 bytes).
+fuente `sha256 9475b5c1e519…` (8.912 bytes) → HTML `sha256 bacf755c591a…` (824.739 bytes).
 Ambas pasan la contención sin desplazamiento en 1440×900, 1600×1000, 1920×1080 y 2048×1320.
 
 ## Escenario, precondiciones y postcondiciones
@@ -75,14 +75,18 @@ de vida propia y aparecen como nota sobre el mensaje que los usa: `ValidadorDeAd
 (1.1), `CalculadoraDePrecio` (1.4) y `PasarelaDePago.verificarFirma` (3.1). `CompraEnCurso`
 se muestra dentro del `guardar(...)` de cada paso —`compra.avanzar(paso)`— porque es ahí
 donde el estado de la SAGA se persiste. Los seis repositorios comparten una línea de vida:
-cada mensaje nombra el repositorio y `[COMMIT]` marca el límite transaccional.
+cada mensaje nombra el repositorio y `[COMMIT]` marca el límite transaccional. La tarjeta
+«Contexto de Boleta» de la vista 2 recuerda que el agregado pertenece al contexto Derecho de
+asistencia y que la emisión llega por el puerto `EmisorDeBoletas`
+([AD-008](../decisiones/0008-boleta-en-derecho-de-asistencia.md)).
 
 | Línea de vida | Clase | Capa |
 |---|---|---|
 | Fan | actor externo (prototipo, pantallas 4 a 8) | — |
 | OrquestadorDeCompra | `OrquestadorDeCompra` «application service»; persiste `CompraEnCurso` | Aplicación |
-| Localidad, Reserva, Pago, Boleta, Discrepancia | raíces de agregado | Dominio |
-| Repositorios | `RepositorioDeLocalidades`, `…Reservas`, `…Pagos`, `…Boletas`, `…Discrepancias`, `…Compras` sobre PostgreSQL ([AD-003](../decisiones/0003-consistencia-por-tipo-de-inventario.md)) | Puerto / adaptador |
+| Localidad, Reserva, Pago, Discrepancia | raíces de agregado | Dominio · Venta y recaudo |
+| Boleta | `Boleta` «aggregate root» | Dominio · Derecho de asistencia; la emisión llega por `EmisorDeBoletas` ([AD-008](../decisiones/0008-boleta-en-derecho-de-asistencia.md)) |
+| Repositorios y emisión | `RepositorioDeLocalidades`, `…Reservas`, `…Pagos`, `…Discrepancias`, `…Compras` sobre PostgreSQL ([AD-003](../decisiones/0003-consistencia-por-tipo-de-inventario.md)); `EmisorDeBoletas` cruza la frontera (AD-008) | Puerto / adaptador |
 | PasarelaDePago | puerto realizado por `AdaptadorDePasarelaTokenizada`; también origina el webhook | Puerto / adaptador |
 | PublicadorDeEventos | puerto realizado por `OutboxTransaccional` → Kafka ([AD-002](../decisiones/0002-mensajeria-del-bus-de-eventos.md)) | Puerto / adaptador |
 

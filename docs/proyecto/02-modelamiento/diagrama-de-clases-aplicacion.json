@@ -58,6 +58,15 @@
           "pReservas"
         ],
         "note": "La dependencia apunta hacia adentro: realizan el puerto y traducen al mundo externo."
+      },
+      {
+        "id": "contextos",
+        "label": "4 · Contextos",
+        "focus": [
+          "pBoletas",
+          "dominio"
+        ],
+        "note": "EmisorDeBoletas cruza a Derecho de asistencia: Boleta y su titularidad viven en @ticketright/entitlements (AD-008)."
       }
     ]
   },
@@ -260,7 +269,7 @@
     {
       "id": "pBoletas",
       "type": "cloud",
-      "label": "RepositorioDeBoletas",
+      "label": "EmisorDeBoletas",
       "sublabel": "«interface»",
       "tag": "PUERTOS",
       "pos": [

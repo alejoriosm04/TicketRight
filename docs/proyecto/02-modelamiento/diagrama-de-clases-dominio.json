@@ -54,7 +54,7 @@
           "evPagoSolicitado",
           "evPagoConfirmado"
         ],
-        "note": "Una sola titularidad vigente (R7) y los hechos durables que mueven la SAGA."
+        "note": "Una sola titularidad vigente (R7); Boleta se implementa en el contexto Derecho de asistencia (AD-008)."
       },
       {
         "id": "estado-evento",

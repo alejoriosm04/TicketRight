@@ -78,8 +78,10 @@ La **frontera entre contextos** quedó registrada como
 [AD-008](docs/proyecto/decisiones/0008-boleta-en-derecho-de-asistencia.md): `Boleta` vive en
 `@ticketright/entitlements` y la emisión viaja por el puerto `EmisorDeBoletas`; `Localidad`,
 `Reserva`, `Pago` y `Discrepancia` viven en `@ticketright/sales`. Los veintiún casos del plan
-de pruebas están implementados con los cuatro dobles y en verde. `PENDIENTE: regenerar los
-artefactos del diagrama de clases con el ajuste de puertos y anexar el reporte de cobertura.`
+de pruebas están implementados con los cuatro dobles y en verde. Las vistas del diagrama de
+clases y del diagrama de secuencia se regeneraron con el puerto `EmisorDeBoletas` y la
+anotación de contextos, sin cambiar los 39/37/38 presentados; Archify quedó vendorizada en
+`tools/archify/`. `PENDIENTE: anexar el reporte de cobertura al paquete de la Entrega 3.`
 
 ## Tablero
 

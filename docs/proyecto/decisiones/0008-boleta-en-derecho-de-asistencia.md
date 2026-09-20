@@ -31,6 +31,12 @@ Los puertos del diagrama se ajustan en consecuencia:
   proceso de expiración de [AD-003](0003-consistencia-por-tipo-de-inventario.md) pueda
   distinguir una reserva abandonada de una con pago confirmado.
 
+La misma lectura aplica a `Localidad`: el modelo la dibuja como raíz del contexto Oferta de
+eventos y el [plan de pruebas](../02-modelamiento/plan-de-pruebas.md) ubica su operación en
+Venta y recaudo; `@ticketright/sales` implementa esa operación transaccional (`reservar` y
+`vender` sobre el aforo, [AD-003](0003-consistencia-por-tipo-de-inventario.md)) y
+`@ticketright/event-catalog` conservará la definición del evento y su oferta.
+
 ## 2. Identificador único
 
 AD-008
@@ -53,8 +59,10 @@ claro obligaría a importar tipos entre paquetes, prohibido por la regla de depe
   lectura por evento, no un repositorio compartido.
 - `[V]` Los contextos acotados y sus conceptos son los del modelo aprobado en la Entrega 2.
   Fuente: [`modelo-de-dominio.md`](../02-modelamiento/modelo-de-dominio.md#contextos-acotados).
-- `PENDIENTE: regenerar los artefactos del diagrama de clases (JSON y HTML) con el ajuste de
-  puertos de este ADR; el Markdown ya trae la nota.`
+- `[V]` La vista guiada «Contextos» del diagrama de clases y la tarjeta «Contexto de Boleta»
+  del diagrama de secuencia ya traen la anotación, junto con el puerto `EmisorDeBoletas`; no
+  cambiaron las 39 clases, las 37 relaciones ni los 38 mensajes presentados. Fuente: este
+  repositorio, 20 de septiembre de 2026.
 
 ## 5. Alternativas
 
@@ -93,8 +101,8 @@ mantenerlos versionados; si el contrato cambia, cambian los dos lados.
 
 ### Consecuencias negativas, riesgos y deuda asumida
 
-- Los artefactos del diagrama de clases (JSON y HTML) quedan desalineados en la fila de
-  `RepositorioDeBoletas` hasta regenerarlos.
+- Los artefactos presentados el 19 de septiembre conservan el nombre `RepositorioDeBoletas`;
+  las vistas vivas ya dicen `EmisorDeBoletas`, y la diferencia la explica este ADR.
 - La consistencia entre venta de inventario y emisión depende de la unidad de trabajo del
   adaptador (transacción local, outbox), que se implementa en la Entrega 3.
 - El contrato compartido debe versionarse si cambia la forma de la emisión.

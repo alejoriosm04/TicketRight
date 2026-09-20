@@ -36,25 +36,25 @@ representa tablas, servicios, colas ni decisiones de despliegue.
 El HTML permite ampliar, buscar y exportar sin perder calidad. Para regenerarlo:
 
 ```bash
-node .agents/skills/archify/bin/archify.mjs deliver architecture \
-  proyecto/02-modelamiento/modelo-de-dominio.json \
-  proyecto/02-modelamiento/modelo-de-dominio.html --quality standard --json
-node herramientas/postprocesa-modelo-dominio.mjs \
-  proyecto/02-modelamiento/modelo-de-dominio.json \
-  proyecto/02-modelamiento/modelo-de-dominio.md \
-  proyecto/02-modelamiento/modelo-de-dominio.html
+node tools/archify/bin/archify.mjs deliver architecture \
+  docs/proyecto/02-modelamiento/modelo-de-dominio.json \
+  docs/proyecto/02-modelamiento/modelo-de-dominio.html --quality standard --json
+node docs/herramientas/postprocesa-modelo-dominio.mjs \
+  docs/proyecto/02-modelamiento/modelo-de-dominio.json \
+  docs/proyecto/02-modelamiento/modelo-de-dominio.md \
+  docs/proyecto/02-modelamiento/modelo-de-dominio.html
 ```
 
 El mapa se regenera igual, con su propio posprocesado de atributos clave:
 
 ```bash
-node .agents/skills/archify/bin/archify.mjs deliver architecture \
-  proyecto/02-modelamiento/modelo-de-dominio-mapa.json \
-  proyecto/02-modelamiento/modelo-de-dominio-mapa.html --quality standard --json
-node herramientas/postprocesa-mapa-dominio.mjs \
-  proyecto/02-modelamiento/modelo-de-dominio-mapa.json \
-  proyecto/02-modelamiento/modelo-de-dominio.md \
-  proyecto/02-modelamiento/modelo-de-dominio-mapa.html
+node tools/archify/bin/archify.mjs deliver architecture \
+  docs/proyecto/02-modelamiento/modelo-de-dominio-mapa.json \
+  docs/proyecto/02-modelamiento/modelo-de-dominio-mapa.html --quality standard --json
+node docs/herramientas/postprocesa-mapa-dominio.mjs \
+  docs/proyecto/02-modelamiento/modelo-de-dominio-mapa.json \
+  docs/proyecto/02-modelamiento/modelo-de-dominio.md \
+  docs/proyecto/02-modelamiento/modelo-de-dominio-mapa.html
 ```
 
 Recibo del mapa (18 de septiembre de 2026, antes del posprocesado): fuente
