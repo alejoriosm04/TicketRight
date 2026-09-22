@@ -11,6 +11,7 @@ import {
   personasEnFila,
   reservasVencidasSinLiberar,
   sesionesActivas,
+  sobreventas,
 } from "./metrics.js";
 
 /** Estadísticas de conexiones que expone el pool de node-postgres. */
@@ -30,6 +31,9 @@ export class ColectorDeGauges {
   private temporizador: NodeJS.Timeout | undefined;
 
   private readonly costoInfraHoraCop: number;
+
+  // Exceso ya contado por localidad: el contador solo sube cuando el exceso crece.
+  private readonly excesoContado = new Map<string, number>();
 
   constructor(
     private readonly db: Consultable,
@@ -63,6 +67,7 @@ export class ColectorDeGauges {
       await this.refrescarDiscrepancias();
       await this.refrescarReservasVencidas();
       await this.refrescarInventario();
+      await this.detectarSobreventa();
       await this.refrescarPagosEnCurso();
       await this.refrescarCostoPorBoleta();
     } catch (error) {
@@ -131,6 +136,34 @@ export class ColectorDeGauges {
     );
     const fila = rows[0] ?? {};
     reservasVencidasSinLiberar.set(Number(fila.vencidas ?? 0));
+  }
+
+  /**
+   * Sobreventa (A-2) medida desde los hechos y no desde los contadores de la localidad:
+   * unidades en reservas vivas más boletas válidas, contra el aforo autorizado. Si el
+   * contador `aforo_reservado` se desincroniza (una actualización perdida), esta cuenta
+   * independiente lo delata; comparar el contador consigo mismo nunca lo haría.
+   */
+  private async detectarSobreventa(): Promise<void> {
+    const { rows } = await this.db.query(
+      `select l.localidad_id, coalesce(l.nombre, l.localidad_id::text) as nombre,
+              l.aforo_autorizado,
+              (select coalesce(sum(i.cantidad), 0) from items_reserva i
+                 join reservas r on r.reserva_id = i.reserva_id
+               where i.localidad_id = l.localidad_id and r.estado in ('vigente', 'enPago'))
+            + (select count(*) from boletas b
+               where b.localidad_id = l.localidad_id and b.estado <> 'anulada') as comprometido
+       from localidades l`,
+    );
+    for (const fila of rows) {
+      const id = String(fila.localidad_id);
+      const exceso = Math.max(0, Number(fila.comprometido) - Number(fila.aforo_autorizado));
+      const contado = this.excesoContado.get(id) ?? 0;
+      if (exceso > contado) {
+        sobreventas.inc({ localidad: String(fila.nombre) }, exceso - contado);
+        this.excesoContado.set(id, exceso);
+      }
+    }
   }
 
   private async refrescarInventario(): Promise<void> {

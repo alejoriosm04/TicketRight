@@ -29,7 +29,7 @@ import { PasarelaSimulada } from "./adapters/simulated-gateway.js";
 import { SalaDeEspera, type Fila } from "./adapters/waiting-room.js";
 import { SalaDeEsperaRedis } from "./adapters/waiting-room-redis.js";
 import { cargarConfig } from "./config.js";
-import { crearPool } from "./db/connection.js";
+import { BaseTransaccional, crearPool } from "./db/connection.js";
 import { registrarRutas } from "./http/routes.js";
 import { ColectorDeGauges } from "./observability/collector.js";
 import { opcionesDeLog } from "./observability/logger.js";
@@ -43,14 +43,17 @@ const LOCALIDAD_SONDA = "22222222-2222-4222-8222-222222222203"; // Sur
 
 const config = cargarConfig();
 const pool = crearPool(config.databaseUrl);
+// Repositorios, outbox y emisor comparten la unidad de trabajo: lo que el orquestador
+// ejecuta en un paso se confirma junto (AD-003) y el evento sale con su estado (AD-002).
+const db = new BaseTransaccional(pool);
 
-const localidades = new RepositorioPostgresDeLocalidades(pool);
-const reservas = new RepositorioPostgresDeReservas(pool);
-const pagos = new RepositorioPostgresDePagos(pool);
-const compras = new RepositorioPostgresDeCompras(pool);
-const discrepancias = new RepositorioPostgresDeDiscrepancias(pool);
-const eventos = new PublicadorDeEventosOutbox(pool);
-const emisor = new EmisorDeBoletasPostgres(pool);
+const localidades = new RepositorioPostgresDeLocalidades(db);
+const reservas = new RepositorioPostgresDeReservas(db);
+const pagos = new RepositorioPostgresDePagos(db);
+const compras = new RepositorioPostgresDeCompras(db);
+const discrepancias = new RepositorioPostgresDeDiscrepancias(db);
+const eventos = new PublicadorDeEventosOutbox(db);
+const emisor = new EmisorDeBoletasPostgres(db);
 
 const pasarela = new PasarelaSimulada({
   perfil: config.pasarelaPerfil,
@@ -77,6 +80,7 @@ const orquestador = new OrquestadorDeCompra({
   precios: new CalculadoraDePrecio(Porcentaje.de(12), Porcentaje.de(10), Dinero.pesos(150000)),
   vigenciaReserva: Duracion.minutos(10),
   maxIntentosEmision: config.maxIntentosEmision,
+  unidadDeTrabajo: db,
 });
 
 // Fila de admisión: Redis (Space-Based, AD-006) si REDIS_URL está definido; si no, en

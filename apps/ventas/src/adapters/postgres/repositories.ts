@@ -133,9 +133,11 @@ export class RepositorioPostgresDeReservas implements RepositorioDeReservas {
   constructor(private readonly db: Consultable) {}
 
   async obtener(reservaId: UUID): Promise<Reserva> {
-    const { rows } = await this.db.query("select * from reservas where reserva_id = $1", [
-      reservaId,
-    ]);
+    // Bloquea la fila para que el vencimiento y el pago no avancen la misma reserva a la vez.
+    const { rows } = await this.db.query(
+      "select * from reservas where reserva_id = $1 for update",
+      [reservaId],
+    );
     const fila = rows[0];
     if (!fila) {
       throw new Error(`No existe la reserva ${reservaId}`);
@@ -228,7 +230,11 @@ export class RepositorioPostgresDePagos implements RepositorioDePagos {
   constructor(private readonly db: Consultable) {}
 
   async obtener(pagoId: UUID): Promise<Pago> {
-    const { rows } = await this.db.query("select * from pagos where pago_id = $1", [pagoId]);
+    // Bloquea la fila: dentro de una unidad de trabajo, dos webhooks simultáneos del mismo
+    // pago se atienden uno tras otro y solo uno ve la confirmación como nueva (A-1).
+    const { rows } = await this.db.query("select * from pagos where pago_id = $1 for update", [
+      pagoId,
+    ]);
     const fila = rows[0];
     if (!fila) {
       throw new Error(`No existe el pago ${pagoId}`);

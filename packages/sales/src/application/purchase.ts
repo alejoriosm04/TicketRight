@@ -22,7 +22,12 @@ import type {
   RepositorioDePagos,
   RepositorioDeReservas,
 } from "../ports/repositories.js";
-import type { PasarelaDePago, PublicadorDeEventos, ValidadorDeAdmision } from "../ports/services.js";
+import type {
+  PasarelaDePago,
+  PublicadorDeEventos,
+  UnidadDeTrabajo,
+  ValidadorDeAdmision,
+} from "../ports/services.js";
 import type { ConfirmarPago, CrearReserva, IniciarPago } from "./commands.js";
 
 export type PasoDeCompra =
@@ -102,32 +107,49 @@ export interface DependenciasDelOrquestador {
   precios: CalculadoraDePrecio;
   vigenciaReserva: Duracion;
   maxIntentosEmision: number;
+  /** Sin unidad de trabajo (dobles en memoria) cada paso corre tal cual. */
+  unidadDeTrabajo?: UnidadDeTrabajo;
 }
 
+const SIN_TRANSACCION: UnidadDeTrabajo = { ejecutar: (trabajo) => trabajo() };
+
 export class OrquestadorDeCompra {
-  constructor(private readonly deps: DependenciasDelOrquestador) {}
+  private readonly transaccion: UnidadDeTrabajo;
+
+  constructor(private readonly deps: DependenciasDelOrquestador) {
+    this.transaccion = deps.unidadDeTrabajo ?? SIN_TRANSACCION;
+  }
 
   async reservar(cmd: CrearReserva, ahora: FechaHora): Promise<CompraEnCurso> {
     const turnoId = await this.deps.admision.validar(cmd.tokenAdmision, cmd.fanId);
-    const localidad = await this.deps.localidades.obtenerParaActualizar(cmd.localidadId);
-    localidad.reservar(cmd.cantidad, cmd.sillaIds);
-    const items = this.armarItems(localidad, cmd);
-    await this.deps.localidades.guardar(localidad);
-    const reserva = Reserva.crear(cmd.fanId, turnoId, items, ahora, this.deps.vigenciaReserva);
-    await this.deps.reservas.guardar(reserva);
-    const compra = new CompraEnCurso(
-      nuevoId(),
-      reserva.id,
-      cmd.fanId,
-      cmd.identidadRef,
-      "reservada",
-      ahora,
-    );
-    await this.deps.compras.guardar(compra);
-    return compra;
+    // 1.2–1.5: el bloqueo de la localidad dura hasta el COMMIT (R1, R2).
+    return this.transaccion.ejecutar(async () => {
+      const localidad = await this.deps.localidades.obtenerParaActualizar(cmd.localidadId);
+      localidad.reservar(cmd.cantidad, cmd.sillaIds);
+      const items = this.armarItems(localidad, cmd);
+      await this.deps.localidades.guardar(localidad);
+      const reserva = Reserva.crear(cmd.fanId, turnoId, items, ahora, this.deps.vigenciaReserva);
+      await this.deps.reservas.guardar(reserva);
+      const compra = new CompraEnCurso(
+        nuevoId(),
+        reserva.id,
+        cmd.fanId,
+        cmd.identidadRef,
+        "reservada",
+        ahora,
+      );
+      await this.deps.compras.guardar(compra);
+      return compra;
+    });
   }
 
   async iniciarPago(cmd: IniciarPago, ahora: FechaHora): Promise<Pago> {
+    // 2.1–2.3 en una transacción: el webhook que llegue antes del COMMIT espera el bloqueo
+    // del pago en vez de leerlo a medio escribir.
+    return this.transaccion.ejecutar(() => this.iniciarPagoEnTransaccion(cmd, ahora));
+  }
+
+  private async iniciarPagoEnTransaccion(cmd: IniciarPago, ahora: FechaHora): Promise<Pago> {
     const compra = await this.deps.compras.obtener(cmd.compraId);
     const reserva = await this.deps.reservas.obtener(compra.reservaId);
     reserva.marcarEnPago(ahora);
@@ -157,26 +179,34 @@ export class OrquestadorDeCompra {
     if (!firmaValida) {
       throw new FirmaDeWebhookInvalida();
     }
-    const pago = await this.deps.pagos.obtener(cmd.pagoId);
-    if (!cmd.aprobado) {
-      pago.registrarRechazo("La pasarela rechazó el cobro");
+    // 3.3: confirmar el pago es su propio COMMIT; la emisión (4.4) va aparte para que un
+    // fallo al emitir no deshaga el cobro confirmado, sino que abra la conciliación (A-1).
+    const compraId = await this.transaccion.ejecutar(async () => {
+      const pago = await this.deps.pagos.obtener(cmd.pagoId);
+      if (!cmd.aprobado) {
+        pago.registrarRechazo("La pasarela rechazó el cobro");
+        await this.deps.pagos.guardar(pago);
+        await this.compensarPorRechazo(pago, ahora);
+        return undefined;
+      }
+      const nuevaConfirmacion = pago.registrarConfirmacion(cmd.referenciaExterna, ahora);
+      if (!nuevaConfirmacion) {
+        return undefined;
+      }
       await this.deps.pagos.guardar(pago);
-      await this.compensarPorRechazo(pago, ahora);
-      return;
-    }
-    const nuevaConfirmacion = pago.registrarConfirmacion(cmd.referenciaExterna, ahora);
-    if (!nuevaConfirmacion) {
-      return;
-    }
-    await this.deps.pagos.guardar(pago);
-    await this.deps.eventos.publicar(
-      new PagoConfirmado(pago.id, cmd.referenciaExterna, ahora, pago.claveIdempotencia),
-    );
-    const compra = await this.deps.compras.porPago(pago.id);
-    if (compra) {
+      await this.deps.eventos.publicar(
+        new PagoConfirmado(pago.id, cmd.referenciaExterna, ahora, pago.claveIdempotencia),
+      );
+      const compra = await this.deps.compras.porPago(pago.id);
+      if (!compra) {
+        return undefined;
+      }
       compra.avanzar("pagoConfirmado", ahora);
       await this.deps.compras.guardar(compra);
-      await this.emitir(compra.id, ahora);
+      return compra.id;
+    });
+    if (compraId) {
+      await this.emitir(compraId, ahora);
     }
   }
 
@@ -185,28 +215,42 @@ export class OrquestadorDeCompra {
     if (!compra.pagoId) {
       throw new OrigenDePagoInvalido("La compra no tiene un pago iniciado");
     }
-    const pago = await this.deps.pagos.obtener(compra.pagoId);
-    const reserva = await this.deps.reservas.obtener(compra.reservaId);
+    const pagoId = compra.pagoId;
     for (let intento = 1; intento <= this.deps.maxIntentosEmision; intento += 1) {
       try {
-        const emitidas = await this.emitirBoletas(compra, reserva, pago);
-        reserva.confirmar();
-        await this.deps.reservas.guardar(reserva);
-        await this.resolverDiscrepanciasDe(pago.id, "emisionCompletada", ahora);
-        compra.avanzar("emitida", ahora);
-        await this.deps.compras.guardar(compra);
-        return emitidas;
+        // 4.1–4.4: cada intento es una transacción; si falla, el rollback no deja boletas
+        // a medias y el siguiente intento parte del estado confirmado.
+        return await this.transaccion.ejecutar(async () => {
+          const vigente = await this.deps.compras.obtener(compraId);
+          const pago = await this.deps.pagos.obtener(pagoId);
+          const reserva = await this.deps.reservas.obtener(vigente.reservaId);
+          const emitidas = await this.emitirBoletas(vigente, reserva, pago);
+          reserva.confirmar();
+          await this.deps.reservas.guardar(reserva);
+          await this.resolverDiscrepanciasDe(pago.id, "emisionCompletada", ahora);
+          vigente.avanzar("emitida", ahora);
+          await this.deps.compras.guardar(vigente);
+          return emitidas;
+        });
       } catch {
         compra.registrarIntento(ahora);
       }
     }
-    await this.abrirDiscrepanciaSiNoExiste(pago, "cobroSinBoleta", ahora);
-    compra.avanzar("enConciliacion", ahora);
-    await this.deps.compras.guardar(compra);
+    await this.transaccion.ejecutar(async () => {
+      const pago = await this.deps.pagos.obtener(pagoId);
+      await this.abrirDiscrepanciaSiNoExiste(pago, "cobroSinBoleta", ahora);
+      compra.avanzar("enConciliacion", ahora);
+      await this.deps.compras.guardar(compra);
+    });
     return [];
   }
 
   async compensar(compraId: UUID, motivo: string, ahora: FechaHora): Promise<void> {
+    // 5.2: liberar el inventario y cancelar la reserva confirman juntos.
+    await this.transaccion.ejecutar(() => this.compensarEnTransaccion(compraId, ahora));
+  }
+
+  private async compensarEnTransaccion(compraId: UUID, ahora: FechaHora): Promise<void> {
     const compra = await this.deps.compras.obtener(compraId);
     const reserva = await this.deps.reservas.obtener(compra.reservaId);
     const pago = compra.pagoId ? await this.deps.pagos.obtener(compra.pagoId) : undefined;
@@ -225,15 +269,26 @@ export class OrquestadorDeCompra {
   async vencerReservasExpiradas(ahora: FechaHora): Promise<number> {
     const vencidas = await this.deps.reservas.vencidasA(ahora);
     let liberadas = 0;
-    for (const reserva of vencidas) {
-      const pago = await this.deps.pagos.porReserva(reserva.id);
-      if (pago?.estaConfirmado()) {
-        continue;
+    for (const candidata of vencidas) {
+      // Una transacción por reserva: se relee con bloqueo porque un pago pudo avanzarla
+      // entre la consulta de vencidas y este punto.
+      const libero = await this.transaccion.ejecutar(async () => {
+        const reserva = await this.deps.reservas.obtener(candidata.id);
+        if (reserva.estado !== "vigente" && reserva.estado !== "enPago") {
+          return false;
+        }
+        const pago = await this.deps.pagos.porReserva(reserva.id);
+        if (pago?.estaConfirmado()) {
+          return false;
+        }
+        await this.liberarInventario(reserva);
+        reserva.vencer();
+        await this.deps.reservas.guardar(reserva);
+        return true;
+      });
+      if (libero) {
+        liberadas += 1;
       }
-      await this.liberarInventario(reserva);
-      reserva.vencer();
-      await this.deps.reservas.guardar(reserva);
-      liberadas += 1;
     }
     return liberadas;
   }

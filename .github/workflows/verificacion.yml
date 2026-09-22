@@ -8,6 +8,22 @@ on:
 jobs:
   node:
     runs-on: ubuntu-latest
+    # PostgreSQL real para las pruebas de integración de concurrencia (A-2): los dobles en
+    # memoria no pueden mostrar si el bloqueo de la localidad sobrevive hasta el COMMIT.
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_DB: ticketright
+          POSTGRES_USER: ticketright
+          POSTGRES_PASSWORD: ticketright
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd "pg_isready -U ticketright -d ticketright"
+          --health-interval 5s --health-timeout 3s --health-retries 10
+    env:
+      DATABASE_URL: postgres://ticketright:ticketright@localhost:5433/ticketright
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -16,8 +32,10 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run typecheck
+      - run: npm run db:migrate -w @ticketright/ventas
       # Los 21 casos del plan de pruebas con reporte de cobertura (criterio 6 de la rúbrica:
-      # "los 21 casos corren en CI y el reporte de cobertura está anexo").
+      # "los 21 casos corren en CI y el reporte de cobertura está anexo"), más la integración
+      # de concurrencia contra PostgreSQL.
       - run: npm run test:coverage
       - name: Publicar reporte de cobertura
         if: always()

@@ -1,6 +1,4 @@
 const base = process.env.API_URL ?? "http://127.0.0.1:3000";
-const localidadId =
-  process.env.LOCALIDAD_ID ?? "22222222-2222-4222-8222-222222222203"; // Sur
 
 async function pedir(metodo, ruta, cuerpo) {
   const headers = {
@@ -26,20 +24,39 @@ const dormir = (ms) => new Promise((resolver) => setTimeout(resolver, ms));
 console.log("1. salud");
 console.log("  ", await pedir("GET", "/health"));
 
-console.log("2. reservar dos boletas en la localidad general");
+// Los ids de localidad cambian con cada seed: se toma una con cupo del catálogo.
+const catalogo = await pedir("GET", "/catalogo");
+const localidadId =
+  process.env.LOCALIDAD_ID ??
+  catalogo.eventos.flatMap((e) => e.localidades).find((l) => l.disponibles > 1).localidadId;
+
+// El token de admisión solo lo emite la fila (JWT firmado, AD-004).
+console.log("2. entrar a la fila y esperar la admisión");
+const entrada = await pedir("POST", "/fila/entrar", { fanId: "88888888-8888-4888-8888-888888888888" });
+let turno;
+for (let intento = 0; intento < 20; intento += 1) {
+  turno = await pedir("GET", `/fila/${entrada.turnoId}`);
+  if (turno.estado === "admitido") break;
+  await dormir(1000);
+}
+if (turno.estado !== "admitido") {
+  throw new Error("la fila no admitió el turno en 20 s");
+}
+
+console.log("3. reservar dos boletas en la localidad general");
 const compra = await pedir("POST", "/compras", {
   fanId: "88888888-8888-4888-8888-888888888888",
-  tokenAdmision: "turno:99999999-9999-4999-8999-999999999999",
+  tokenAdmision: turno.token,
   localidadId,
   cantidad: 2,
 });
 console.log("  ", compra);
 
-console.log("3. iniciar el pago");
+console.log("4. iniciar el pago");
 const pago = await pedir("POST", `/compras/${compra.compraId}/pago`, {});
 console.log("  ", pago);
 
-console.log("4. esperar la confirmación de la pasarela simulada");
+console.log("5. esperar la confirmación de la pasarela simulada");
 await dormir(1500);
 let estado = await pedir("GET", `/compras/${compra.compraId}`);
 if (estado.pago && estado.pago.estado !== "confirmado") {
@@ -47,7 +64,7 @@ if (estado.pago && estado.pago.estado !== "confirmado") {
   await pedir("POST", `/demo/pasarela/confirmar/${pago.pagoId}`);
 }
 
-console.log("5. esperar la emisión");
+console.log("6. esperar la emisión");
 for (let intento = 0; intento < 20; intento += 1) {
   estado = await pedir("GET", `/compras/${compra.compraId}`);
   if (estado.compra.paso !== "pagoConfirmado" && estado.compra.paso !== "reservada" && estado.compra.paso !== "pagoSolicitado") {
@@ -56,7 +73,7 @@ for (let intento = 0; intento < 20; intento += 1) {
   await dormir(500);
 }
 
-console.log("6. resultado");
+console.log("7. resultado");
 console.log(JSON.stringify(estado, null, 2));
 
 if (estado.compra.paso !== "emitida") {

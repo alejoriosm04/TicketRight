@@ -14,6 +14,7 @@ import type { GestorDePerfiles, PerfilOperativo } from "../adapters/operational-
 import type { PasarelaSimulada } from "../adapters/simulated-gateway.js";
 import type { Fila } from "../adapters/waiting-room.js";
 import type { ServicioDeCuentas } from "../security/accounts.js";
+import { TokenDeAdmisionInvalido } from "../adapters/jwt-admission.js";
 import { boletasPorPago } from "../adapters/postgres/ticket-issuer.js";
 import type { Consultable } from "../db/pool.js";
 import { registrarHecho } from "../observability/logger.js";
@@ -300,7 +301,7 @@ export function registrarRutas(app: FastifyInstance, deps: DependenciasDeRutas):
       reservasCreadas.inc({ result: "rechazada" });
       if (error instanceof ExcepcionDeDominio) {
         erroresReserva.inc({ kind: "dominio" });
-      } else if (error instanceof ErrorDeSolicitud) {
+      } else if (error instanceof ErrorDeSolicitud || error instanceof TokenDeAdmisionInvalido) {
         erroresReserva.inc({ kind: "solicitud" });
       } else {
         erroresReserva.inc({ kind: "tecnico" });
@@ -470,6 +471,10 @@ export function registrarRutas(app: FastifyInstance, deps: DependenciasDeRutas):
   app.setErrorHandler((error, _peticion, respuesta) => {
     if (error instanceof ErrorDeSolicitud) {
       respuesta.code(400);
+      return { mensaje: error.message };
+    }
+    if (error instanceof TokenDeAdmisionInvalido) {
+      respuesta.code(401);
       return { mensaje: error.message };
     }
     if (error instanceof ExcepcionDeDominio) {
