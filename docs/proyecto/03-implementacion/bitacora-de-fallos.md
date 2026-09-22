@@ -29,6 +29,14 @@ de métricas antes, durante y después, y decide **aprobado/fallido** según la 
 > `apps/ventas`. Las métricas de Prometheus se reinician cuando se reinicia el proceso (IF-02);
 > esto es correcto porque el estado de negocio vive en PostgreSQL, no en el proceso.
 
+> **Corrección del 22 de septiembre.** El criterio «0 sobreventa» de IF-01, IF-02 e IF-03 se
+> midió con `ticketright_oversell_total`, que en esa versión **nunca se incrementaba**: valía 0
+> pasara lo que pasara. Además, IF-01 reenvió los webhooks uno tras otro; enviados **a la
+> vez**, un pago de una boleta emitía siete. Ambas cosas quedaron corregidas y documentadas en
+> el [hallazgo de sobreventa](coherencia-implementacion.md#7-hallazgo-posterior-sobreventa-por-falta-de-transacciones);
+> los demás criterios de cada experimento se sostienen.
+> `PENDIENTE: repetir IF-01, IF-02 e IF-03 con la métrica real y agregar a IF-01 el reenvío simultáneo.`
+
 ---
 
 ## IF-01 — La pasarela responde tarde y repite la confirmación

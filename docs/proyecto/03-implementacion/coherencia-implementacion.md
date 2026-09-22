@@ -14,6 +14,7 @@ difiere, **por qué** y si es una **desviación deliberada** (con su justificaci
 | Área | Coherencia | Nota |
 |---|---|---|
 | Flujo de compra (diagrama de secuencia) | 🟢 Alta | Los 5 pasos de la SAGA están implementados en el orquestador y las rutas |
+| Límites transaccionales `[COMMIT]` (AD-003) | 🟢 Corregido | No existían y había sobreventa; corregido el 22 sep (ver §7) |
 | Frontera de contextos y emisión (AD-008) | 🟢 Exacta | `Boleta` en `entitlements`, emisión por `EmisorDeBoletas` de `shared-kernel` |
 | Reglas de negocio R1–R14 | 🟢 Alta | Los 21 casos del plan de pruebas en verde cubren las reglas |
 | Infraestructura (ADR / arq. de implementación) | 🟢 Alta (piloto) | Homólogos locales documentados; AWS es diseño, no despliegue |
@@ -87,10 +88,14 @@ Ninguna cambia el comportamiento verificado por las pruebas; se registran por ho
 3. **Firma de `Boleta.emitir`.** El diagrama la define como `emitir(item, pago, titular)`; la
    implementación usa un DTO `DatosDeEmision` (shared-kernel). Es el ajuste que **AD-008**
    anticipa para no acoplar `sales` con `entitlements`, ya registrado.
-4. **Límites transaccionales y reintentos con backoff/circuit-breaker.** Los `COMMIT` atómicos
-   y el `FOR UPDATE` del diagrama son responsabilidad de los **adaptadores** (repositorios y
-   outbox transaccional en `apps/ventas`), no del orquestador; el disyuntor completo es deuda
-   declarada en [`fidelidad-arquitectonica.md`](fidelidad-arquitectonica.md).
+4. **Límites transaccionales.** El orquestador marca cada `[COMMIT]` del diagrama con el
+   puerto `UnidadDeTrabajo` y el adaptador `BaseTransaccional` hace `BEGIN`/`COMMIT`. Esta
+   auditoría decía antes que los adaptadores ya lo resolvían; no era así, y se corrigió (§7).
+   El puerto es una pieza nueva frente a las 39 clases del diagrama: realiza el `Transaccion`
+   que el diagrama ya nombra en los adaptadores. La emisión confirma aparte del pago (4.4
+   separado de 3.3), así que un fallo al emitir abre la conciliación sin deshacer el cobro.
+5. **Reintentos con backoff y circuit breaker.** El disyuntor completo es deuda declarada en
+   [`fidelidad-arquitectonica.md`](fidelidad-arquitectonica.md).
 
 ## 5. Estado de las evidencias de la rúbrica
 
@@ -121,3 +126,69 @@ Ninguna cambia el comportamiento verificado por las pruebas; se registran por ho
   [modelo de dominio](../02-modelamiento/modelo-de-dominio.md) solo modela nombre, documento y
   correo; el teléfono se usa como contacto de la boleta nominal (AD-004), no se añade como
   campo persistente del agregado. Se quitó de la UI el texto sobre el cifrado AES-256-GCM.
+
+## 7. Hallazgo posterior: sobreventa por falta de transacciones
+
+> **22 de septiembre de 2026**, al preparar las pruebas de carga. Es un **defecto**, no una
+> deuda deliberada: contradecía [AD-003](../decisiones/0003-consistencia-por-tipo-de-inventario.md)
+> y los `[COMMIT]` del [diagrama de secuencia](../02-modelamiento/diagrama-de-secuencia.md).
+
+**Qué pasaba.** Cien fans reservaban una boleta cada uno, al mismo tiempo, en una localidad
+de cincuenta cupos: se aceptaban **las cien reservas** y el contador `aforo_reservado` quedaba
+en **1**. Cinco webhooks simultáneos del mismo pago de una boleta emitían **siete boletas**.
+
+**Por qué.** La aplicación no abría transacciones en ninguna parte. El repositorio hacía
+`SELECT … FOR UPDATE` directo sobre el pool, en *autocommit*, y PostgreSQL soltaba el bloqueo
+al terminar esa sentencia. Cada solicitud leía el mismo contador, restaba en memoria y
+escribía encima de la anterior (actualización perdida). El `CHECK (reservado + vendido <=
+autorizado)` no lo veía, porque el contador quedaba por **debajo** de la realidad. Con el pago
+pasaba lo mismo: varios webhooks leían el pago como pendiente y cada uno emitía. En
+`connection.ts` ya existía un `enTransaccion` que nunca se conectó.
+
+**Por qué no lo detectó nada antes.**
+
+| Defensa | Por qué no lo vio |
+|---|---|
+| UT-04 («cien solicitudes sobre la misma silla») | Corre contra dobles en memoria que sí serializan; nunca toca PostgreSQL |
+| IF-01 (webhook repetido) | Reenvía los webhooks **uno tras otro**, no a la vez |
+| Métrica `ticketright_oversell_total` | Nunca se incrementaba: se inicializaba en 0 y ningún código la tocaba. El criterio «0 sobreventa» de IF-01/02/03 no comprobaba nada |
+| Token de admisión | El validador aceptaba cualquier `turno:<uuid>` inventado, así que la fila no frenaba a quien la saltara |
+
+**Corrección.**
+
+- **Unidad de trabajo.** Puerto `UnidadDeTrabajo` en `sales` y adaptador `BaseTransaccional`
+  en `apps/ventas`, que propaga el cliente de la transacción a repositorios, outbox y emisor.
+  El orquestador abre una transacción en cada `[COMMIT]` del diagrama: reservar (1.5),
+  iniciar pago (2.3), confirmar pago (3.3), cada intento de emisión (4.4), compensar (5.2) y
+  cada reserva que vence.
+- **Bloqueos.** El repositorio de pagos y el de reservas leen con `FOR UPDATE`, así que dos
+  webhooks del mismo pago se atienden uno tras otro.
+- **Admisión.** El validador solo acepta el JWT que firma la fila; un token inventado
+  responde **401** (antes, 500). Se borró `demo-admission.ts`, que ya no se usaba.
+- **Métrica de sobreventa.** El colector la calcula desde los hechos: unidades en reservas
+  vivas más boletas válidas, contra el aforo autorizado de cada localidad.
+
+**Verificación.**
+
+| Prueba | Antes | Después |
+|---|---|---|
+| 100 reservas simultáneas, 50 cupos ([`concurrencia-aforo.test.ts`](../../../apps/ventas/tests/concurrencia-aforo.test.ts)) | 100 aceptadas | 50 aceptadas, 50 `AforoExcedido`; contador = 50 = unidades reservadas |
+| 5 webhooks simultáneos de un pago de 1 boleta (misma prueba) | 7 boletas | 1 boleta; aforo vendido = 1 |
+| Recorrido real: 100 fans admitidos por la fila con JWT, reservando a la vez | — | 50 `201`, 50 `409` |
+| Token `turno:<uuid>` inventado | 201 (compraba) | 401 |
+| Sobreventa forzada a mano (aforo 40 con 50 reservadas) | métrica en 0 | `ticketright_oversell_total{localidad="Repro"} 10` |
+
+La prueba de integración corre en el CI contra un PostgreSQL de servicio. Sin la corrección,
+falla: se comprobó quitando la unidad de trabajo.
+
+**Lo que se cedió.** Las reservas sobre una misma localidad se serializan en el bloqueo de
+su fila: es el costo que AD-003 ya aceptó a cambio de cero sobreventa, y el que las pruebas
+de carga van a medir. Iniciar el pago sostiene la transacción mientras se llama a la
+pasarela; con la pasarela simulada es inmediato, pero con una real habría que partir ese paso
+en dos.
+
+**Pendientes que deja el hallazgo.**
+
+- `PENDIENTE: repetir IF-01, IF-02 e IF-03 con la métrica de sobreventa ya real, y agregar a IF-01 el reenvío simultáneo de webhooks.`
+- `PENDIENTE: chaos/lib.mjs usa ids de localidad fijos (2222…) que el seed actual ya no crea; hay que resolverlos del catálogo antes de repetir la campaña.`
+- `PENDIENTE: el JWT de admisión no se ata al fan ni se marca como usado (marcarUsado no se llama), así que un token admitido sirve para varias reservas y para otro fan.`
