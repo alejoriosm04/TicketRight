@@ -109,6 +109,40 @@ export function registrarRutas(app: FastifyInstance, deps: DependenciasDeRutas):
     return registro.metrics();
   });
 
+  // --- Catálogo (lectura CQRS): eventos y tribunas con disponibilidad en vivo ---
+  // Alimenta la plataforma web. Es una consulta de lectura sobre PostgreSQL (la
+  // autoridad); no toca el camino de escritura.
+  app.get("/catalogo", async () => {
+    const { rows: eventos } = await deps.consultas.query(
+      "select evento_id, nombre from eventos order by nombre",
+    );
+    const { rows: locs } = await deps.consultas.query(
+      `select localidad_id, coalesce(nombre, localidad_id::text) as nombre, tipo,
+              precio_centavos, aforo_autorizado, aforo_reservado, aforo_vendido, evento_id
+       from localidades order by precio_centavos desc`,
+    );
+    return {
+      eventos: eventos.map((e) => ({
+        eventoId: String(e.evento_id),
+        nombre: String(e.nombre),
+        localidades: locs
+          .filter((l) => String(l.evento_id) === String(e.evento_id))
+          .map((l) => {
+            const aut = Number(l.aforo_autorizado);
+            const disp = aut - Number(l.aforo_reservado) - Number(l.aforo_vendido);
+            return {
+              localidadId: String(l.localidad_id),
+              nombre: String(l.nombre),
+              tipo: String(l.tipo),
+              precioCentavos: Number(l.precio_centavos),
+              aforoAutorizado: aut,
+              disponibles: disp,
+            };
+          }),
+      })),
+    };
+  });
+
   // --- Sala de espera / fila de admisión ------------------------------------
 
   app.post("/fila/entrar", async (peticion, respuesta) => {
