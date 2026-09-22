@@ -1,0 +1,223 @@
+{
+    "root_group": {
+        "checks": {
+            "entra a la fila": {
+                "name": "entra a la fila",
+                "path": "::entra a la fila",
+                "id": "b7bd12a2aa523a48b88548feee0b86c7",
+                "passes": 2160,
+                "fails": 0
+            },
+            "reserva confirmada": {
+                "id": "bef07e128d0e693eae7a33fbaf9c2715",
+                "passes": 182,
+                "fails": 0,
+                "name": "reserva confirmada",
+                "path": "::reserva confirmada"
+            },
+            "pago solicitado": {
+                "path": "::pago solicitado",
+                "id": "085e145ae3b8f2f896600b9f91d04730",
+                "passes": 155,
+                "fails": 0,
+                "name": "pago solicitado"
+            }
+        },
+        "name": "",
+        "path": "",
+        "id": "d41d8cd98f00b204e9800998ecf8427e",
+        "groups": {}
+    },
+    "metrics": {
+        "reservas_abandonadas": {
+            "count": 27,
+            "rate": 0.1472323260037104
+        },
+        "http_req_tls_handshaking": {
+            "max": 0,
+            "avg": 0,
+            "med": 0,
+            "p(90)": 0,
+            "p(95)": 0,
+            "p(99)": 0
+        },
+        "http_req_blocked": {
+            "avg": 0.04869809012731742,
+            "med": 0.0072835,
+            "p(90)": 0.018506999999999996,
+            "p(95)": 0.3738814000000003,
+            "p(99)": 0.6960366799999993,
+            "max": 7.565584
+        },
+        "iteration_duration": {
+            "avg": 3094.721205466667,
+            "med": 3063.773539,
+            "p(90)": 3575.9131955,
+            "p(95)": 3838.9346724499987,
+            "p(99)": 4478.8756982899995,
+            "max": 4765.296427
+        },
+        "fans_admitidos": {
+            "count": 2160,
+            "rate": 11.778586080296831
+        },
+        "http_req_failed": {
+            "passes": 0,
+            "fails": 8954,
+            "thresholds": {
+                "rate<0.001": false
+            },
+            "value": 0
+        },
+        "http_req_receiving": {
+            "p(99)": 0.2686108199999993,
+            "max": 1.247905,
+            "avg": 0.10689402144293048,
+            "med": 0.096779,
+            "p(90)": 0.16478289999999998,
+            "p(95)": 0.19326790000000005
+        },
+        "http_req_connecting": {
+            "avg": 0.02846311637257092,
+            "med": 0,
+            "p(90)": 0,
+            "p(95)": 0.24877480000000007,
+            "p(99)": 0.46447335999999934,
+            "max": 7.473413
+        },
+        "reservas_confirmadas": {
+            "count": 182,
+            "rate": 0.9924549382472331
+        },
+        "http_reqs": {
+            "rate": 48.826601742119365,
+            "count": 8954
+        },
+        "boletas_emitidas": {
+            "rate": 1.166952509807186,
+            "count": 214
+        },
+        "http_req_duration{operacion:fila_posicion}": {
+            "med": 2.0621995,
+            "p(90)": 3.0018770000000004,
+            "p(95)": 3.1765867499999993,
+            "p(99)": 3.8365269399999993,
+            "max": 16.738603,
+            "avg": 2.154807244444447,
+            "thresholds": {
+                "p(95)<1000": false
+            }
+        },
+        "http_req_sending": {
+            "p(90)": 0.0886759,
+            "p(95)": 0.0997732,
+            "p(99)": 0.1635394999999999,
+            "max": 2.556006,
+            "avg": 0.04903234755416579,
+            "med": 0.040365
+        },
+        "data_received": {
+            "count": 27784323,
+            "rate": 151509.27784179218
+        },
+        "http_req_waiting": {
+            "p(90)": 5.3886286000000005,
+            "p(95)": 7.460189950000001,
+            "p(99)": 14.00667787999991,
+            "max": 258.443737,
+            "avg": 3.1723797615590645,
+            "med": 2.4067635000000003
+        },
+        "checks": {
+            "passes": 2497,
+            "fails": 0,
+            "value": 1
+        },
+        "vus_max": {
+            "min": 720,
+            "max": 720,
+            "value": 720
+        },
+        "espera_en_fila": {
+            "avg": 3010.1453703703705,
+            "med": 3014,
+            "p(90)": 3475,
+            "p(95)": 3539,
+            "p(99)": 3588.41,
+            "max": 3603
+        },
+        "data_sent": {
+            "count": 3105215,
+            "rate": 16932.889895985612
+        },
+        "reservas_rechazadas_aforo": {
+            "count": 1978,
+            "rate": 10.786131142049598
+        },
+        "errores_tecnicos": {
+            "fails": 8950,
+            "passes": 0,
+            "value": 0
+        },
+        "pagos_finalizados": {
+            "passes": 155,
+            "fails": 0,
+            "thresholds": {
+                "rate>=0.99": false
+            },
+            "value": 1
+        },
+        "iterations": {
+            "count": 2160,
+            "rate": 11.778586080296831
+        },
+        "http_req_duration": {
+            "med": 2.585857,
+            "p(90)": 5.5863736,
+            "p(95)": 7.59813925,
+            "p(99)": 14.173911209999927,
+            "max": 258.587205,
+            "avg": 3.3283061305561747
+        },
+        "tiempo_hasta_boleta": {
+            "avg": 1019.8645161290323,
+            "med": 1012,
+            "p(90)": 1017,
+            "p(95)": 1067.8999999999992,
+            "p(99)": 1165.44,
+            "max": 1260
+        },
+        "http_req_duration{operacion:reserva}": {
+            "avg": 5.103112340740734,
+            "med": 4.0820799999999995,
+            "p(90)": 7.229358100000001,
+            "p(95)": 10.629676799999976,
+            "p(99)": 16.523710459999986,
+            "max": 176.676816,
+            "thresholds": {
+                "p(95)<2000": false
+            }
+        },
+        "errores_tecnicos{operacion:reserva}": {
+            "passes": 0,
+            "fails": 2160,
+            "thresholds": {
+                "rate<0.01": false
+            },
+            "value": 0
+        },
+        "http_req_duration{expected_response:true}": {
+            "p(99)": 14.173911209999927,
+            "max": 258.587205,
+            "avg": 3.3283061305561747,
+            "med": 2.585857,
+            "p(90)": 5.5863736,
+            "p(95)": 7.59813925
+        },
+        "vus": {
+            "max": 50,
+            "value": 4,
+            "min": 4
+        }
+    }
+}

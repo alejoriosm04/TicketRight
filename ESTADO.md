@@ -50,7 +50,7 @@ caso de uso principal, y encima de eso pruebas, carga, observabilidad y fallos.
 | 2 | Pruebas y coherencia | [Plan de pruebas](docs/proyecto/02-modelamiento/plan-de-pruebas.md): 21 casos UT sobre las reglas R1–R14 | ✅ Los 21 casos escritos y en verde (38 pruebas; cobertura ~77,7% sentencias), más 5 pruebas de integración contra PostgreSQL real (concurrencia sobre el aforo, webhooks simultáneos y turno de un solo uso), que el CI corre con PostgreSQL de servicio. El CI corre `test:coverage` y **anexa el reporte como artefacto** ([`verificacion.yml`](.github/workflows/verificacion.yml)) |
 | 3 | Observabilidad (20%) | [Observabilidad](docs/proyecto/02-modelamiento/observabilidad.md): métricas, tableros y alertas | 🟢 Implementada: plataforma completa (OTel + Alloy + Prometheus + Tempo + Loki + Grafana), las 14 métricas del diseño instrumentadas + complementos de ticketera, tablero de 5 secciones y 4 alertas. Ver [`observability/README.md`](observability/README.md). `PENDIENTE: capturas y video` |
 | 4 | Simulación de fallos (30%) | [Inyección de fallos](docs/proyecto/02-modelamiento/inyeccion-de-fallos.md): IF-01, IF-02, IF-03 e IF-05 elegidos | 🟢 Los 4 ejecutados y aprobados con el arnés de `chaos/`, y **repetidos el 22 sep** con la métrica de sobreventa real y webhooks simultáneos; bitácora en [`bitacora-de-fallos.md`](docs/proyecto/03-implementacion/bitacora-de-fallos.md). `PENDIENTE: capturas del tablero durante cada fallo para el video` |
-| 5 | Carga | [Volumetría](docs/proyecto/02-modelamiento/volumetria.md): nominal, pico, estrés y resistencia; 30.000 usuarios en 60 s contra 5.000 boletas | Corridas y resultados |
+| 5 | Carga | [Volumetría](docs/proyecto/02-modelamiento/volumetria.md): nominal, pico, estrés y resistencia; 30.000 usuarios en 60 s contra 5.000 boletas | 🟢 Arnés k6 en [`load/`](load/) y primera campaña local (22 sep): los 4 escenarios con umbrales cumplidos y **0 sobreventa**, a escala 0,05. Ver [`pruebas-de-carga.md`](docs/proyecto/03-implementacion/pruebas-de-carga.md). `PENDIENTE: campaña en Codespaces con Redis y Kafka, estrés ×2 y capturas` |
 | 6 | Patrones (10%) | [Patrones utilizados](docs/proyecto/03-implementacion/patrones.md) | Revisar contra la demo y añadir capturas |
 | 7 | Prototipo / plataforma web | [Prototipo](docs/proyecto/02-modelamiento/prototipo/index.html): 16 pantallas, tres roles | 🟢 Además del prototipo estático hay una **plataforma web funcional** en `/app` conectada a las APIs (catálogo, fila, reserva, pago, boleta, promotor, operación) |
 | 8 | Defensa y autoevaluación | [Los ADR](docs/proyecto/decisiones/README.md) · [tipos de deuda técnica](docs/curso/clase-05-06.md) | Repasar trazabilidad atributo → decisión → sacrificio; escribir la autoevaluación |
@@ -168,6 +168,15 @@ experimentos**, todos aprobados; IF-05 no corría desde que llegó el borde de s
 Detalle y evidencia en el
 [§7 de la auditoría de coherencia](docs/proyecto/03-implementacion/coherencia-implementacion.md#7-hallazgo-posterior-sobreventa-por-falta-de-transacciones)
 y en la [segunda campaña de la bitácora](docs/proyecto/03-implementacion/bitacora-de-fallos.md#segunda-campaña--22-de-septiembre).
+
+**Incremento 7 — pruebas de carga (22 de septiembre):** arnés k6 en [`load/`](load/) para
+los cuatro escenarios de la volumetría. Cada fan virtual recorre la venta real (fila, JWT,
+reserva, pago y boleta), con la carga escalada y la proporción de 6 fans por boleta. Al
+terminar se verifica en PostgreSQL que no hubo sobreventa ni turnos reutilizados. La primera
+campaña local cumplió todos los umbrales. En pico y estrés la fila admite 14,5 fans/s
+mientras llegan 25–37, y la reserva se mantiene en P95 ~35 ms. El primer síntoma de
+degradación es la consulta de posición de la fila en memoria (P99 1,02 s a ×1,5). Detalle en
+[`pruebas-de-carga.md`](docs/proyecto/03-implementacion/pruebas-de-carga.md).
 
 ## Tablero
 

@@ -42,9 +42,10 @@ sobre el clúster local o su equivalente).`
 
 **Herramientas compartidas por Quinnie, por evaluar:**
 
-- **k6 con `ramping-vus`** para las corridas de la [volumetría](../02-modelamiento/volumetria.md):
-  ese *executor* sube y baja usuarios virtuales por etapas, que es la forma exacta de los
-  escenarios nominal, pico y estrés. Se adopta como arnés de carga propuesto.
+- **k6** para las corridas de la [volumetría](../02-modelamiento/volumetria.md). Se propuso
+  `ramping-vus`; al implementarlo se usó `constant-arrival-rate`, porque la carga del diseño
+  es de llegadas (30.000 fans en 60 s) y no de usuarios que esperan su turno para pedir. El
+  arnés, los resultados y el porqué están en [`pruebas-de-carga.md`](pruebas-de-carga.md).
 - **Tailscale** (plan gratuito para ambientes compartidos) para dar acceso al ambiente local
   al equipo o al profesor y sostener las evidencias de «accesos» de la rúbrica, si no hay
   despliegue público.
