@@ -3,13 +3,6 @@
 // admite, reserva, paga y emite. Ctrl+C para detener.
 const base = process.env.API_URL ?? "http://127.0.0.1:3000";
 const fan = "88888888-8888-4888-8888-888888888888";
-// Las cuatro tribunas del recinto (Oriental, Occidental, Sur, Norte).
-const localidades = [
-  "22222222-2222-4222-8222-222222222201",
-  "22222222-2222-4222-8222-222222222202",
-  "22222222-2222-4222-8222-222222222203",
-  "22222222-2222-4222-8222-222222222204",
-];
 const alAzar = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
 async function pedir(metodo, ruta, cuerpo) {
@@ -24,6 +17,10 @@ async function pedir(metodo, ruta, cuerpo) {
   return { ok: r.ok, status: r.status, datos: t ? JSON.parse(t) : {} };
 }
 const dormir = (ms) => new Promise((r) => setTimeout(r, ms));
+
+// Localidades reales del catálogo (ids dinámicos por seed).
+const cat = await pedir("GET", "/catalogo");
+const localidades = cat.datos.eventos.flatMap((e) => e.localidades.map((l) => l.localidadId));
 
 let compras = 0;
 let rechazos = 0;

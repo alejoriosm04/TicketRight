@@ -59,7 +59,17 @@ export class SondaSintetica {
   }
 
   private async recorrido(): Promise<boolean> {
-    const { fanId, localidadId } = this.opciones;
+    const { fanId } = this.opciones;
+    // Resuelve una localidad con cupo desde el catálogo (los ids son dinámicos por seed).
+    let localidadId = this.opciones.localidadId;
+    try {
+      const catalogo = await this.pedir("GET", "/catalogo");
+      const loc = catalogo?.eventos?.[0]?.localidades?.find((l: any) => l.disponibles > 0);
+      if (loc) localidadId = loc.localidadId;
+    } catch {
+      /* usa el localidadId de config si el catálogo no responde */
+    }
+    if (!localidadId) return false;
     const entrada = await this.pedir("POST", "/fila/entrar", { fanId });
     let token: string | undefined;
     for (let i = 0; i < 12; i += 1) {

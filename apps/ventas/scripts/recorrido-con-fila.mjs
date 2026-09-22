@@ -1,7 +1,6 @@
 // Recorrido completo con sala de espera: entrar a la fila, esperar admisión,
 // reservar, pagar, confirmar y emitir. Genera métricas, trazas y logs.
 const base = process.env.API_URL ?? "http://127.0.0.1:3000";
-const general = process.env.LOCALIDAD_ID ?? "22222222-2222-4222-8222-222222222203"; // Sur
 const fan = "88888888-8888-4888-8888-888888888888";
 
 async function pedir(metodo, ruta, cuerpo) {
@@ -18,6 +17,12 @@ async function pedir(metodo, ruta, cuerpo) {
   return datos;
 }
 const dormir = (ms) => new Promise((r) => setTimeout(r, ms));
+
+console.log("0. resolver una localidad con cupo del catálogo");
+const catalogo = await pedir("GET", "/catalogo");
+const loc = catalogo.eventos.flatMap((e) => e.localidades).find((l) => l.disponibles > 0);
+const general = process.env.LOCALIDAD_ID ?? loc.localidadId;
+console.log("   localidad", loc.nombre, general);
 
 console.log("1. entrar a la fila");
 const entrada = await pedir("POST", "/fila/entrar", { fanId: fan });
