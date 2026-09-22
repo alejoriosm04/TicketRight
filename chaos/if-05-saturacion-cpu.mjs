@@ -7,15 +7,18 @@
 // limita la CPU del contenedor de PostgreSQL con `docker update --cpus` durante la fase
 // "durante" y la restaura antes de "recuperar". Este script genera la carga de compras y
 // mide latencia de reserva (P95) y finalización.
+import { randomUUID } from "node:crypto";
+
 import { api, comprar, dormir, fotoMetricas, imprimirFoto, prom, LOCALIDADES } from "./lib.mjs";
 
 const fase = process.argv[2] ?? "estable";
-const LOTE = 8; // compras concurrentes por fase
+const LOTE = 8; // compras concurrentes por fase, cada una de un fan distinto
 
 async function lote(nombre) {
   const t0 = Date.now();
   const resultados = await Promise.all(
-    Array.from({ length: LOTE }, () => comprar(LOCALIDADES.norte, 1)),
+    // Ocho fans distintos: con uno solo, el borde de seguridad (AD-004) lo reta como bot.
+    Array.from({ length: LOTE }, () => comprar(LOCALIDADES.norte, 1, randomUUID())),
   );
   const ms = Date.now() - t0;
   const emitidas = resultados.filter((r) => r.paso === "emitida").length;

@@ -11,7 +11,7 @@
 //   fase "verificar": tras reiniciar el proceso, confirma cada pago y comprueba que cada
 //                     compra llega a boleta emitida con sus boletas exactas, sin duplicar.
 import { writeFileSync, readFileSync } from "node:fs";
-import { api, dormir, fotoMetricas, imprimirFoto, LOCALIDADES, FAN } from "./lib.mjs";
+import { api, dormir, fotoMetricas, imprimirFoto, LOCALIDADES, FAN, fotoAsentada } from "./lib.mjs";
 
 const ARCHIVO = new URL("./estado-if02.json", import.meta.url);
 const fase = process.argv[2] ?? "preparar";
@@ -71,7 +71,7 @@ if (fase === "verificar") {
     console.log(`  compra ${compraId}: paso=${paso} boletas=${boletas} discrepancias=${disc} -> ${bien ? "OK" : "FALLO"}`);
     if (!bien) ok = false;
   }
-  const despues = await fotoMetricas();
+  const despues = await fotoAsentada();
   imprimirFoto("después del reinicio y la confirmación", despues);
   console.log(`  sobreventa global: ${despues.sobreventa} (esperado 0)`);
   if (despues.sobreventa !== 0) ok = false;

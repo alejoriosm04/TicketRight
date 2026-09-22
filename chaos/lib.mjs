@@ -2,24 +2,64 @@
 // Consultan la observabilidad ya montada (Prometheus) y la API de ventas para
 // medir el estado estable, la perturbación y la recuperación de cada experimento.
 
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import os from "node:os";
+import path from "node:path";
+
 const API = process.env.API_URL ?? "http://127.0.0.1:3000";
 const PROM = process.env.PROM_URL ?? "http://127.0.0.1:9090";
 
-// Cuatro tribunas del recinto de la demo.
-export const LOCALIDADES = {
-  oriental: "22222222-2222-4222-8222-222222222201",
-  occidental: "22222222-2222-4222-8222-222222222202",
-  sur: "22222222-2222-4222-8222-222222222203",
-  norte: "22222222-2222-4222-8222-222222222204",
-};
 export const FAN = "88888888-8888-4888-8888-888888888888";
+
+// Evento de la demo: el único cuyo token de admisión acepta ventas (EVENTO_DEMO en main.ts).
+const EVENTO_DEMO = "11111111-1111-4111-8111-111111111111";
+
+// Cuatro tribunas del evento de la demo. El seed genera ids nuevos en cada corrida, así que
+// se resuelven por nombre desde el catálogo al cargar el arnés.
+// Los ids resueltos se guardan en un archivo temporal: IF-03 carga el arnés con PostgreSQL
+// en pausa, cuando el catálogo no responde, y usa los ids que dejó la fase anterior.
+const CACHE_LOCALIDADES = path.join(os.tmpdir(), "ticketright-chaos-localidades.json");
+
+async function resolverLocalidades() {
+  // IF-02 carga el arnés mientras el proceso reinicia: se espera a la API hasta 60 s.
+  let r;
+  for (let intento = 0; intento < 60 && !r?.ok; intento += 1) {
+    r = await fetch(`${API}/catalogo`, {
+      headers: { "user-agent": "Mozilla/5.0 Chrome/120" },
+      signal: AbortSignal.timeout(3000),
+    }).catch(() => undefined);
+    if (!r?.ok && existsSync(CACHE_LOCALIDADES)) {
+      return JSON.parse(readFileSync(CACHE_LOCALIDADES, "utf8"));
+    }
+    if (!r?.ok) await new Promise((listo) => setTimeout(listo, 1000));
+  }
+  if (!r?.ok) throw new Error("no se pudo leer el catálogo en 60 s; ¿está arriba la app?");
+  const { eventos } = await r.json();
+  const evento = eventos.find((e) => e.eventoId === EVENTO_DEMO);
+  if (!evento) throw new Error(`el catálogo no trae el evento de la demo ${EVENTO_DEMO}; corre el seed`);
+  const porNombre = (nombre) => {
+    const localidad = evento.localidades.find((l) => l.nombre === nombre);
+    if (!localidad) throw new Error(`el evento de la demo no tiene la localidad «${nombre}»`);
+    return localidad.localidadId;
+  };
+  const localidades = {
+    oriental: porNombre("Tribuna Oriental"),
+    occidental: porNombre("Tribuna Occidental"),
+    sur: porNombre("Tribuna Sur"),
+    norte: porNombre("Tribuna Norte"),
+  };
+  writeFileSync(CACHE_LOCALIDADES, JSON.stringify(localidades));
+  return localidades;
+}
+
+export const LOCALIDADES = await resolverLocalidades();
 
 export const dormir = (ms) => new Promise((r) => setTimeout(r, ms));
 
-export async function api(metodo, ruta, cuerpo) {
+export async function api(metodo, ruta, cuerpo, fanId = FAN) {
   // Cabeceras de cliente legítimo: identidad (señal principal del borde) y UA de navegador,
   // para no ser tratado como bot por el borde de seguridad (AD-004).
-  const init = { method: metodo, headers: { "x-fan-id": FAN, "user-agent": "Mozilla/5.0 Chrome/120" } };
+  const init = { method: metodo, headers: { "x-fan-id": fanId, "user-agent": "Mozilla/5.0 Chrome/120" } };
   if (cuerpo !== undefined) {
     init.headers["content-type"] = "application/json";
     init.body = JSON.stringify(cuerpo);
@@ -61,33 +101,37 @@ export async function esperarApi(timeoutMs = 30000) {
   return false;
 }
 
-/** Recorrido completo de compra; devuelve el estado final de la compra. */
-export async function comprar(localidadId, cantidad = 1) {
-  const entrada = await api("POST", "/fila/entrar", { fanId: FAN });
+/**
+ * Recorrido completo de compra; devuelve el estado final de la compra. Las compras
+ * concurrentes deben usar fans distintos: el borde de seguridad (AD-004) trata como bot a
+ * una sola identidad que dispara varios recorridos a la vez.
+ */
+export async function comprar(localidadId, cantidad = 1, fanId = FAN) {
+  const entrada = await api("POST", "/fila/entrar", { fanId }, fanId);
   const turnoId = entrada.datos.turnoId;
   let token;
   for (let i = 0; i < 15; i += 1) {
-    const est = await api("GET", `/fila/${turnoId}`);
+    const est = await api("GET", `/fila/${turnoId}`, undefined, fanId);
     if (est.datos.estado === "admitido") { token = est.datos.token; break; }
     await dormir(700);
   }
   if (!token) return { paso: "sin_admision" };
   const compra = await api("POST", "/compras", {
-    fanId: FAN, tokenAdmision: token, localidadId, cantidad,
-  });
+    fanId, tokenAdmision: token, localidadId, cantidad,
+  }, fanId);
   if (!compra.ok) return { paso: "reserva_rechazada", status: compra.status, error: compra.datos };
-  await api("POST", `/compras/${compra.datos.compraId}/pago`, {});
+  await api("POST", `/compras/${compra.datos.compraId}/pago`, {}, fanId);
   for (let i = 0; i < 15; i += 1) {
     await dormir(600);
-    const est = await api("GET", `/compras/${compra.datos.compraId}`);
+    const est = await api("GET", `/compras/${compra.datos.compraId}`, undefined, fanId);
     if (est.datos.pago && est.datos.pago.estado !== "confirmado") {
-      await api("POST", `/demo/pasarela/confirmar/${est.datos.pago.pagoId}`);
+      await api("POST", `/demo/pasarela/confirmar/${est.datos.pago.pagoId}`, undefined, fanId);
     }
     if (est.datos.compra?.paso === "emitida" || est.datos.compra?.paso === "compensada") {
       return { paso: est.datos.compra.paso, compraId: compra.datos.compraId, estado: est.datos };
     }
   }
-  const final = await api("GET", `/compras/${compra.datos.compraId}`);
+  const final = await api("GET", `/compras/${compra.datos.compraId}`, undefined, fanId);
   return { paso: final.datos.compra?.paso ?? "desconocido", compraId: compra.datos.compraId, estado: final.datos };
 }
 
@@ -109,6 +153,16 @@ export async function fotoMetricas() {
     cpu_nucleos: await prom("rate(ticketright_process_cpu_seconds_total[1m])"),
     pg_conexiones: await prom('ticketright_pg_pool_connections{state="total"}'),
   };
+}
+
+/**
+ * Foto tomada después de dos ciclos de medición: el colector recalcula los gauges y la
+ * sobreventa cada 5 s y Prometheus raspa cada 5 s. Sin esta espera, la foto posterior a una
+ * perturbación puede leer el valor de antes.
+ */
+export async function fotoAsentada() {
+  await dormir(11000);
+  return fotoMetricas();
 }
 
 export function imprimirFoto(titulo, foto) {
