@@ -1,11 +1,16 @@
 const base = process.env.API_URL ?? "http://127.0.0.1:3000";
 const localidadId =
-  process.env.LOCALIDAD_ID ?? "22222222-2222-4222-8222-222222222222";
+  process.env.LOCALIDAD_ID ?? "22222222-2222-4222-8222-222222222203"; // Sur
 
 async function pedir(metodo, ruta, cuerpo) {
+  const headers = {
+    "x-fan-id": "88888888-8888-4888-8888-888888888888",
+    "user-agent": "Mozilla/5.0 Chrome/120",
+  };
+  if (cuerpo) headers["content-type"] = "application/json";
   const respuesta = await fetch(`${base}${ruta}`, {
     method: metodo,
-    headers: cuerpo ? { "content-type": "application/json" } : undefined,
+    headers,
     body: cuerpo ? JSON.stringify(cuerpo) : undefined,
   });
   const texto = await respuesta.text();

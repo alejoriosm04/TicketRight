@@ -5,6 +5,8 @@ export interface Config {
   pasarelaRetrasoMs: number;
   intervaloVencimientoMs: number;
   maxIntentosEmision: number;
+  redisUrl: string | undefined;
+  kafkaBrokers: string | undefined;
 }
 
 export function cargarConfig(): Config {
@@ -21,5 +23,7 @@ export function cargarConfig(): Config {
     pasarelaRetrasoMs: Number(process.env.PASARELA_RETRASO_MS ?? 500),
     intervaloVencimientoMs: Number(process.env.VENCIMIENTO_INTERVALO_MS ?? 30000),
     maxIntentosEmision: Number(process.env.MAX_INTENTOS_EMISION ?? 5),
+    redisUrl: process.env.REDIS_URL || undefined,
+    kafkaBrokers: process.env.KAFKA_BROKERS || undefined,
   };
 }
