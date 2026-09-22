@@ -24,9 +24,9 @@ La rúbrica completa llegó con las clases 5 y 6
 
 | # | Criterio | Peso | Estado |
 |---|---|---|---|
-| 1 | Aplicación funcionando | **40%** | 🟡 Dominio y SAGA en verde; faltan adaptadores reales y despliegue |
-| 2 | Observabilidad | **20%** | 🟡 Diseño completo; falta instrumentar 3 métricas de negocio + 3 técnicas |
-| 3 | Simulación y análisis de fallos | **30%** | 🟡 4 escenarios elegidos del catálogo; falta ejecutarlos y bitacorar |
+| 1 | Aplicación funcionando | **40%** | 🟢 Dominio, SAGA y app Fastify + PostgreSQL corriendo en local con sala de espera; falta despliegue en clúster y video |
+| 2 | Observabilidad | **20%** | 🟢 Plataforma implementada (OTel + Alloy + Prometheus + Tempo + Loki + Grafana); las 14 métricas del diseño instrumentadas, tablero y 4 alertas |
+| 3 | Simulación y análisis de fallos | **30%** | 🟢 Los 4 escenarios (IF-01, IF-02, IF-03, IF-05) ejecutados y aprobados; bitácora en [`bitacora-de-fallos.md`](docs/proyecto/03-implementacion/bitacora-de-fallos.md). IF-03 halló y corrigió una debilidad real |
 | 4 | Patrones utilizados | **10%** | ✅ Catálogo en [`patrones.md`](docs/proyecto/03-implementacion/patrones.md) |
 | 5 | Autoevaluación | **+10%** | ⚪ Por escribir al cierre |
 | 6 | Coherencia | **-10%** | 🟢 21 casos ejecutados y diagramas reconciliados; mantener al día |
@@ -46,10 +46,10 @@ caso de uso principal, y encima de eso pruebas, carga, observabilidad y fallos.
 
 | # | Criterio | Insumo ya escrito | Qué falta |
 |---|---|---|---|
-| 1 | Aplicación funcionando (40%) | [AD-007](docs/proyecto/decisiones/0007-stack-de-implementacion.md): TypeScript/Node · [arquitectura hexagonal](docs/proyecto/02-modelamiento/diagrama-de-clases.md) · [caso de uso](docs/proyecto/02-modelamiento/diagrama-de-secuencia.md) | 🟡 API Fastify + PostgreSQL + outbox + pasarela simulada en `apps/ventas`; compra completa, webhook repetido y rechazo verificados en local. `PENDIENTE: clúster k3d/minikube, más rutas y video demo` |
+| 1 | Aplicación funcionando (40%) | [AD-007](docs/proyecto/decisiones/0007-stack-de-implementacion.md): TypeScript/Node · [arquitectura hexagonal](docs/proyecto/02-modelamiento/diagrama-de-clases.md) · [caso de uso](docs/proyecto/02-modelamiento/diagrama-de-secuencia.md) | 🟢 API Fastify + PostgreSQL + outbox + pasarela simulada + sala de espera en `apps/ventas`; compra completa, webhook repetido y rechazo verificados en local. `PENDIENTE: clúster k3d/minikube y video demo` |
 | 2 | Pruebas y coherencia | [Plan de pruebas](docs/proyecto/02-modelamiento/plan-de-pruebas.md): 21 casos UT sobre las reglas R1–R14 | ✅ Los 21 casos están escritos y en verde (38 pruebas; cobertura 78,25% sentencias). `PENDIENTE: reporte por commit y corrida en CI` |
-| 3 | Observabilidad (20%) | [Observabilidad](docs/proyecto/02-modelamiento/observabilidad.md): las 6 métricas de la entrega, tableros y alertas | Instrumentar y demostrar con datos reales |
-| 4 | Simulación de fallos (30%) | [Inyección de fallos](docs/proyecto/02-modelamiento/inyeccion-de-fallos.md): IF-01, IF-02, IF-03 e IF-05 elegidos | Ejecutar los 4 escenarios y escribir la bitácora |
+| 3 | Observabilidad (20%) | [Observabilidad](docs/proyecto/02-modelamiento/observabilidad.md): métricas, tableros y alertas | 🟢 Implementada: plataforma completa (OTel + Alloy + Prometheus + Tempo + Loki + Grafana), las 14 métricas del diseño instrumentadas + complementos de ticketera, tablero de 5 secciones y 4 alertas. Ver [`observability/README.md`](observability/README.md). `PENDIENTE: capturas y video` |
+| 4 | Simulación de fallos (30%) | [Inyección de fallos](docs/proyecto/02-modelamiento/inyeccion-de-fallos.md): IF-01, IF-02, IF-03 e IF-05 elegidos | 🟢 Los 4 ejecutados y aprobados con el arnés de `chaos/`; bitácora en [`bitacora-de-fallos.md`](docs/proyecto/03-implementacion/bitacora-de-fallos.md). `PENDIENTE: capturas del tablero durante cada fallo para el video` |
 | 5 | Carga | [Volumetría](docs/proyecto/02-modelamiento/volumetria.md): nominal, pico, estrés y resistencia; 30.000 usuarios en 60 s contra 5.000 boletas | Corridas y resultados |
 | 6 | Patrones (10%) | [Patrones utilizados](docs/proyecto/03-implementacion/patrones.md) | Revisar contra la demo y añadir capturas |
 | 7 | Prototipo | [Prototipo](docs/proyecto/02-modelamiento/prototipo/index.html): 16 pantallas, tres roles | `PENDIENTE: redesplegar en Netlify con los cambios del 18 sep` |
@@ -103,6 +103,28 @@ PostgreSQL con los repositorios, el outbox transaccional y la pasarela simulada;
 `npm run e2e -w @ticketright/ventas` ejecuta la compra completa contra la base real, y los
 perfiles `repetida` (idempotencia) y `rechaza` (compensación) quedaron verificados. El puerto
 local de PostgreSQL es **5433** para no chocar con otros proyectos del equipo.
+
+**Incremento 2 — observabilidad y sala de espera (21 de septiembre):** se implementó la
+plataforma de observabilidad completa del diseño —OpenTelemetry, Grafana Alloy (puerta OTLP),
+Prometheus, Tempo, Loki y Grafana— con las tres señales correlacionadas por `trace_id`. La
+app expone las **14 métricas del catálogo de** [`observabilidad.md`](docs/proyecto/02-modelamiento/observabilidad.md)
+más complementos de ticketera (embudo, aforo por tribuna, reparto del dinero, HTTP RED,
+conexiones de PostgreSQL). Se añadió una **sala de espera** de demostración (fila de admisión,
+AD-006) con endpoints `/fila/entrar` y `/fila/:turnoId`, y el seed modela un recinto de cuatro
+tribunas con nombre (Oriental, Occidental, Sur, Norte; 5.000 boletas). El tablero de Grafana
+tiene cinco secciones y hay cuatro alertas ligadas a atributos. Detalle y catálogo en
+[`observability/README.md`](observability/README.md). Las métricas añadidas sobre el diseño
+quedan documentadas ahí como complemento, sin sustituir ninguna del entregable.
+
+**Incremento 3 — inyección de fallos (21 de septiembre):** se ejecutaron los cuatro
+experimentos del catálogo (IF-01 pasarela repetida, IF-02 reinicio del coordinador, IF-03
+PostgreSQL no disponible, IF-05 saturación de CPU) con un arnés en [`chaos/`](chaos/) y
+mecanismos equivalentes a Chaos Mesh sobre `docker compose`, midiendo con la observabilidad ya
+montada. Los cuatro quedaron **aprobados**; la bitácora está en
+[`bitacora-de-fallos.md`](docs/proyecto/03-implementacion/bitacora-de-fallos.md). IF-03 reveló
+una debilidad real —el servicio se colgaba y podía caerse ante una base congelada— que se
+corrigió con timeouts acotados en el pool (`query_timeout`), un relay de outbox tolerante a
+fallos y una red de seguridad `unhandledRejection`, y se verificó repitiendo el experimento.
 
 ## Tablero
 

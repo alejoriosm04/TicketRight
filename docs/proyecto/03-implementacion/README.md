@@ -12,7 +12,7 @@
 |---|---|---|---|---|
 | 1 | **Aplicación funcionando** | 40% | Operativa, desplegada y con evidencias (video/demo, accesos) | 🟡 Dominio y SAGA en verde; faltan adaptadores reales y despliegue |
 | 2 | **Observabilidad** | 20% | 3 métricas de negocio y 3 técnicas reales, con tableros y alertas | 🟡 Diseño completo; falta instrumentar y recolectar |
-| 3 | **Simulación de fallos** | 30% | 4 escenarios de tipos diferentes, analizados y documentados | 🟡 Catálogo y mecanismo diseñados; falta ejecutar y bitacorar |
+| 3 | **Simulación de fallos** | 30% | 4 escenarios de tipos diferentes, analizados y documentados | 🟢 Los 4 ejecutados y aprobados; bitácora en [`bitacora-de-fallos.md`](bitacora-de-fallos.md) |
 | 4 | **Patrones utilizados** | 10% | Identificados, justificados y relacionados con atributos | ✅ [`patrones.md`](patrones.md) mapea patrón → código → atributo |
 | 5 | **Autoevaluación** | +10% | Reflexión crítica con logros, dificultades y evolución | ⚪ Por escribir al cierre |
 | 6 | **Coherencia** | hasta -10% | Consistencia con ADR, supuestos, alcance y entregables del 2 | 🟢 Los 21 casos ejecutados y los diagramas reconciliados; mantener al día |
@@ -89,9 +89,13 @@ experimentos (IF-01 a IF-05), sus hipótesis, criterios de aborto, reversión y 
 
 IF-04 (pérdida de la proyección de Redis) queda como respaldo o quinto experimento.
 
-**Falta:** ejecutarlos con la aplicación desplegada y escribir la **bitácora** de cada uno
-(estado estable, perturbación, resultado, evidencia, aprendizaje), con el
-[ciclo de experimento](../02-modelamiento/inyeccion-de-fallos.md#ciclo-de-un-experimento).
+**Hecho:** los cuatro se ejecutaron sobre el ambiente local con el arnés de
+[`chaos/`](../../../chaos/) (mecanismos equivalentes a Chaos Mesh en `docker compose`) y
+quedaron **aprobados**, midiendo con la observabilidad instrumentada. La
+[bitácora de fallos](bitacora-de-fallos.md) recoge cada uno con el
+[ciclo de experimento](../02-modelamiento/inyeccion-de-fallos.md#ciclo-de-un-experimento):
+estado estable, perturbación, resultado, evidencia y aprendizaje. IF-03 encontró y corrigió
+una debilidad real de resiliencia. `PENDIENTE: capturas del tablero durante cada fallo para el video.`
 
 ## 4. Patrones utilizados — 10%
 
