@@ -46,6 +46,7 @@ Lo que cambia es el proveedor, no el patrón ni el contrato.
 | API Gateway (única entrada, cuotas por ruta) | Borde propio con token bucket por clase (catálogo/fila/checkout) | [`edge-gateway.ts`](../../../apps/ventas/src/security/edge-gateway.ts) |
 | WAF / Bot Control | Detección de automatización por heurística (UA, ráfagas); riesgo medio → reto, alto → bloqueo | `edge-gateway.ts` |
 | Cognito / OIDC + JWT de admisión firmado | JWT HS256 corto, con `jti` de uso único, `event_id`, `aud`, `exp` (3 min) | [`admission-token.ts`](../../../apps/ventas/src/security/admission-token.ts) |
+| Cognito (cuentas de fan + grupos/roles) | Registro/ingreso con clave por scrypt+sal, sesión JWT de 24 h, y **rol** (`cliente`/`promotor`/`operacion`) que autoriza las vistas internas | [`accounts.ts`](../../../apps/ventas/src/security/accounts.ts); `POST /operacion/perfil` exige rol staff |
 | Validación en el gateway y el núcleo | El checkout valida firma, emisor, audiencia, evento y expiración | [`jwt-admission.ts`](../../../apps/ventas/src/adapters/jwt-admission.ts) |
 | KMS (cifrado de PII) | Cifrado AES-256-GCM de campos personales | [`crypto-utils.ts`](../../../apps/ventas/src/security/crypto-utils.ts) |
 | CloudTrail (auditoría) | Registro append-only de accesos con rol y finalidad | [`audit-log.ts`](../../../apps/ventas/src/security/audit-log.ts) |

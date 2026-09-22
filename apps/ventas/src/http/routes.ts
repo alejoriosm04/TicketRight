@@ -247,6 +247,18 @@ export function registrarRutas(app: FastifyInstance, deps: DependenciasDeRutas):
   }));
 
   app.post("/operacion/perfil", async (peticion, respuesta) => {
+    // Autorización por rol (AD-004): solo operación o promotor cambian el perfil operativo.
+    const auth = (peticion.headers["authorization"] as string) ?? "";
+    const cuentaId = deps.cuentas.validarSesion(auth.replace(/^Bearer\s+/i, ""));
+    if (!cuentaId) {
+      respuesta.code(401);
+      return { mensaje: "Necesitas iniciar sesión" };
+    }
+    const perfilCuenta = await deps.cuentas.perfil(cuentaId);
+    if (perfilCuenta.rol !== "operacion" && perfilCuenta.rol !== "promotor") {
+      respuesta.code(403);
+      return { mensaje: "Tu cuenta no tiene permiso para cambiar el perfil operativo" };
+    }
     const cuerpo = peticion.body as { perfil?: PerfilOperativo };
     const validos: PerfilOperativo[] = [
       "cotidiano",
