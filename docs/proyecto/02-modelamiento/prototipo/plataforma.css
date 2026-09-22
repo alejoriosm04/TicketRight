@@ -54,12 +54,14 @@ img{ display:block; max-width:100%; }
 
 /* ============ Carrusel (banners reales) ============ */
 .tr-carrusel-wrap{ position:relative; margin:22px 0 6px; }
-.tr-carrusel{ position:relative; border-radius:18px; overflow:hidden; aspect-ratio:1728/620; background:#0a0a0a; }
-.tr-slide{ position:absolute; inset:0; opacity:0; transition:opacity .55s ease; }
-.tr-slide.on{ opacity:1; }
-/* Los banners son muy panorámicos: se muestran completos y centrados (contain), sin recortar. */
-.tr-slide-img{ width:100%; height:100%; object-fit:contain; object-position:center; background:#0a0a0a; }
-.tr-slide-grad{ width:100%; height:100%; display:grid; place-items:center; }
+/* El carrusel no fija altura: la define la imagen del slide activo (a ancho completo), así el
+   banner panorámico se ve SIEMPRE completo y centrado, sin recortes ni zoom. Los slides
+   inactivos se superponen en absoluto para el fundido. */
+.tr-carrusel{ position:relative; border-radius:18px; overflow:hidden; background:#0a0a0a; }
+.tr-slide{ position:absolute; inset:0; opacity:0; transition:opacity .5s ease; display:grid; place-items:center; }
+.tr-slide.on{ opacity:1; position:relative; }
+.tr-slide-img{ display:block; width:100%; height:auto; }
+.tr-slide-grad{ width:100%; aspect-ratio:2.9; display:grid; place-items:center; }
 .tr-slide-grad span{ font-size:120px; opacity:.6; }
 .tr-slide-cta{ position:absolute; left:0; right:0; bottom:0; padding:20px 26px; display:flex; align-items:flex-end; justify-content:space-between; gap:16px; background:linear-gradient(0deg,rgba(0,0,0,.72),transparent); }
 .tr-slide-cta .info h3{ color:#fff; font-size:22px; text-shadow:0 2px 14px rgba(0,0,0,.6); }
