@@ -72,6 +72,11 @@ export function registrarPortalEstatico(app: FastifyInstance, opciones: Opciones
     }
   }
 
-  app.get("/portal", servir);
+  // /portal (sin barra) redirige a /portal/ para que las rutas relativas del prototipo
+  // (estilos.css, nav.js, fan-*.html) resuelvan bajo /portal/ y no en la raíz del sitio.
+  app.get("/portal", async (_peticion, respuesta) => {
+    respuesta.redirect("/portal/", 301);
+  });
+  app.get("/portal/", servir);
   app.get("/portal/*", servir);
 }
