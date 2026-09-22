@@ -1,0 +1,18 @@
+# Namespaces del diseño (arquitectura de implementación §Unidades desplegables):
+# `ventas` (inventario, orquestador SAGA, relay de outbox) y `observabilidad`.
+# En producción existen además identidad, catalogo, admision, boletas, procesadores y
+# plataforma; aquí se agrupan para el piloto local.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ventas
+  labels:
+    parte-de: ticketright
+    chaos: permitido        # selección positiva para inyección de fallos (AD / IF)
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: observabilidad
+  labels:
+    parte-de: ticketright

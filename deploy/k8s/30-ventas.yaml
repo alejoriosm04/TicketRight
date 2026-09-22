@@ -1,0 +1,66 @@
+# Servicio de ventas: migración + semilla como Job, y el Deployment con probes de salud.
+# Imagen construida localmente (ticketright/ventas:local) y cargada en minikube.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: ventas-migrate-seed
+  namespace: ventas
+spec:
+  backoffLimit: 6
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: migrate-seed
+          image: ticketright/ventas:local
+          imagePullPolicy: IfNotPresent
+          command: ["sh", "-c", "node --import tsx apps/ventas/src/db/migrate.ts && node --import tsx apps/ventas/src/db/seed.ts"]
+          envFrom:
+            - configMapRef: { name: ventas-config }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ventas
+  namespace: ventas
+spec:
+  replicas: 1
+  selector: { matchLabels: { app: ventas } }
+  template:
+    metadata:
+      labels: { app: ventas, chaos: permitido }
+    spec:
+      containers:
+        - name: ventas
+          image: ticketright/ventas:local
+          imagePullPolicy: IfNotPresent
+          ports: [{ containerPort: 3000 }]
+          envFrom:
+            - configMapRef: { name: ventas-config }
+          env:
+            - name: ADMISION_SECRET
+              valueFrom: { secretKeyRef: { name: ventas-secrets, key: ADMISION_SECRET } }
+          # Sondas de salud (arquitectura de implementación §Configuración; observabilidad
+          # §Estado de los servicios): preparación retira del tráfico, vida reinicia.
+          startupProbe:
+            httpGet: { path: /health, port: 3000 }
+            failureThreshold: 30
+            periodSeconds: 3
+          readinessProbe:
+            httpGet: { path: /health, port: 3000 }
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: { path: /health, port: 3000 }
+            initialDelaySeconds: 15
+            periodSeconds: 15
+          resources:
+            requests: { cpu: "100m", memory: "192Mi" }
+            limits: { cpu: "1000m", memory: "512Mi" }
+---
+apiVersion: v1
+kind: Service
+metadata: { name: ventas, namespace: ventas }
+spec:
+  selector: { app: ventas }
+  ports: [{ port: 3000, targetPort: 3000 }]
