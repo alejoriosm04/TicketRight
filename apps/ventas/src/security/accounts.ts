@@ -10,11 +10,14 @@ import { CifradoDeCampos, createHmacSignature, timingSafeEqualStr } from "./cryp
  * - La sesión se representa con un JWT de sesión firmado (HS256).
  * El resto del sistema sigue usando un identificador opaco; la PII no sale de aquí.
  */
+export type RolDeCuenta = "cliente" | "promotor" | "operacion";
+
 export interface Perfil {
   cuentaId: string;
   correo: string;
   nombre: string;
   documento: string;
+  rol: RolDeCuenta;
 }
 
 function hashClave(clave: string, salHex?: string): string {
@@ -47,18 +50,21 @@ export class ServicioDeCuentas {
       throw new Error("Ya existe una cuenta con ese correo");
     }
     const cuentaId = randomUUID();
+    // El rol se deriva del correo para la demo (dominios internos → promotor/operación); en
+    // producción vendría de los grupos de Cognito. Nunca lo elige el cliente en el registro.
+    const rol = rolPorCorreo(correo.toLowerCase());
     await this.db.query(
-      `insert into cuentas (cuenta_id, correo, clave_hash, nombre_cifrado, documento_cifrado)
-       values ($1, $2, $3, $4, $5)`,
-      [cuentaId, correo.toLowerCase(), hashClave(clave), this.cifrado.cifrar(nombre), this.cifrado.cifrar(documento)],
+      `insert into cuentas (cuenta_id, correo, clave_hash, nombre_cifrado, documento_cifrado, rol)
+       values ($1, $2, $3, $4, $5, $6)`,
+      [cuentaId, correo.toLowerCase(), hashClave(clave), this.cifrado.cifrar(nombre), this.cifrado.cifrar(documento), rol],
     );
-    const perfil: Perfil = { cuentaId, correo: correo.toLowerCase(), nombre, documento };
+    const perfil: Perfil = { cuentaId, correo: correo.toLowerCase(), nombre, documento, rol };
     return { token: this.firmarSesion(cuentaId, correo.toLowerCase()), perfil };
   }
 
   async ingresar(correo: string, clave: string): Promise<{ token: string; perfil: Perfil }> {
     const { rows } = await this.db.query(
-      "select cuenta_id, correo, clave_hash, nombre_cifrado, documento_cifrado from cuentas where correo = $1",
+      "select cuenta_id, correo, clave_hash, nombre_cifrado, documento_cifrado, rol from cuentas where correo = $1",
       [correo.toLowerCase()],
     );
     const fila = rows[0];
@@ -71,7 +77,7 @@ export class ServicioDeCuentas {
 
   async perfil(cuentaId: string): Promise<Perfil> {
     const { rows } = await this.db.query(
-      "select cuenta_id, correo, nombre_cifrado, documento_cifrado from cuentas where cuenta_id = $1",
+      "select cuenta_id, correo, nombre_cifrado, documento_cifrado, rol from cuentas where cuenta_id = $1",
       [cuentaId],
     );
     if (!rows[0]) throw new Error("Cuenta no encontrada");
@@ -115,6 +121,7 @@ export class ServicioDeCuentas {
       correo: String(fila.correo),
       nombre: fila.nombre_cifrado ? this.cifrado.descifrar(String(fila.nombre_cifrado)) : "",
       documento: fila.documento_cifrado ? this.cifrado.descifrar(String(fila.documento_cifrado)) : "",
+      rol: (fila.rol ? String(fila.rol) : "cliente") as RolDeCuenta,
     };
   }
 
@@ -126,8 +133,23 @@ export class ServicioDeCuentas {
          clave_hash text not null,
          nombre_cifrado text,
          documento_cifrado text,
+         rol text not null default 'cliente' check (rol in ('cliente','promotor','operacion')),
          creada_en timestamptz not null default now()
        )`,
     );
+    // Compatibilidad si la tabla ya existía sin la columna rol.
+    await this.db.query("alter table cuentas add column if not exists rol text not null default 'cliente'");
   }
+}
+
+/**
+ * Rol derivado del correo, solo para la demo: los correos internos del staff obtienen roles
+ * privilegiados; cualquier otro correo es cliente. En producción esto lo daría el proveedor de
+ * identidad (grupos de Cognito, AD-004), nunca un campo elegido por el usuario.
+ */
+export function rolPorCorreo(correo: string): RolDeCuenta {
+  const c = correo.toLowerCase();
+  if (c.endsWith("@promotor.ticketright.co") || c === "promotor@ticketright.co") return "promotor";
+  if (c.endsWith("@operacion.ticketright.co") || c === "operacion@ticketright.co") return "operacion";
+  return "cliente";
 }

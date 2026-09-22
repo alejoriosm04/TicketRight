@@ -16,12 +16,7 @@
 <header class="tr-top">
   <div class="tr-top-in">
     <div class="tr-logo" onclick="location.hash='#/inicio'">Ticket<span>Right</span></div>
-    <nav class="tr-nav">
-      <a href="#/inicio" data-ruta="inicio">Inicio</a>
-      <a href="#/eventos" data-ruta="eventos">Eventos</a>
-      <a href="#/promotor" data-ruta="promotor">Promotor</a>
-      <a href="#/operacion" data-ruta="operacion">Operación</a>
-    </nav>
+    <nav class="tr-nav" id="nav"></nav>
     <div class="tr-cuenta" id="cuenta"></div>
   </div>
 </header>
@@ -32,7 +27,7 @@
   <div class="tr-footer-in">
     <div class="tr-footer-col tr-footer-marca">
       <div class="tr-logo">Ticket<span>Right</span></div>
-      <div class="tr-social">📘 📸 🎵 ▶️</div>
+      <div class="tr-social" aria-hidden="true">📘 📸 🎵 ▶️</div>
       <p class="tr-mini">#AhoraEnVivo · Al continuar aceptas nuestros términos de uso.</p>
     </div>
     <div class="tr-footer-col"><h4>Enlaces útiles</h4><a>Mis entradas</a><a>Mi cuenta</a><a>Soporte</a><a>Comunicados</a></div>
@@ -45,7 +40,7 @@
 <!-- Modal de autenticación -->
 <div class="tr-modal-bg" id="modal-auth">
   <div class="tr-modal-auth">
-    <button class="tr-x" id="auth-cerrar">×</button>
+    <button class="tr-x" id="auth-cerrar" aria-label="Cerrar">×</button>
     <h2 id="auth-titulo">Ingresar en tu cuenta</h2>
     <p class="tr-mut" id="auth-sub">¿No tienes cuenta? <a class="tr-link" id="auth-toggle">Regístrate ahora</a></p>
     <div id="auth-campos"></div>
@@ -55,6 +50,7 @@
     </div>
     <button class="btn btn-primario btn-ancho" id="auth-enviar">Ingresar</button>
     <p class="tr-mini tr-err" id="auth-error"></p>
+    <p class="tr-mini tr-demo-cuentas" id="auth-demo"></p>
   </div>
 </div>
 
