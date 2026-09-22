@@ -68,7 +68,7 @@ const emisorToken = new EmisorDeTokenAdmision(secretoAdmision);
 const validadorToken = new ValidadorDeTokenAdmision(secretoAdmision);
 
 const orquestador = new OrquestadorDeCompra({
-  admision: new ValidadorJwtDeAdmision(validadorToken, EVENTO_DEMO),
+  admision: new ValidadorJwtDeAdmision(validadorToken, EVENTO_DEMO, db),
   localidades,
   reservas,
   pagos,

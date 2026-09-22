@@ -315,6 +315,9 @@ export function registrarRutas(app: FastifyInstance, deps: DependenciasDeRutas):
       localidad: exigir(cuerpo.localidadId, "localidadId"),
     });
     const reserva = await deps.reservas.obtener(compra.reservaId);
+    // El turno quedó gastado en PostgreSQL; la fila lo refleja para que deje de contar como
+    // admitido pendiente (Turno → usado, modelo de dominio).
+    await deps.sala.marcarUsado(reserva.turnoId);
     respuesta.code(201);
     return {
       compraId: compra.compraId,

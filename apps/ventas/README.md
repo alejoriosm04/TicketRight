@@ -35,8 +35,10 @@ curl -s localhost:3000/catalogo | jq '.eventos[0].localidades[] | {nombre, local
 ```
 
 El token de admisión **solo** lo emite la sala de espera: `POST /fila/entrar` y luego
-`GET /fila/:turnoId` hasta quedar `admitido`; la respuesta trae el JWT firmado (AD-004). Un
-token inventado se rechaza.
+`GET /fila/:turnoId` hasta quedar `admitido`; la respuesta trae el JWT firmado (AD-004). El
+token es del fan que entró a la fila y sirve para **una** reserva: si la reserva se confirma,
+para otra hay que volver a la fila (si se rechaza por aforo, el turno sigue sirviendo). Un
+token inventado, ajeno o ya usado responde `401`.
 
 ```bash
 FAN=88888888-8888-4888-8888-888888888888

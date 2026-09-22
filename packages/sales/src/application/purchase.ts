@@ -121,9 +121,10 @@ export class OrquestadorDeCompra {
   }
 
   async reservar(cmd: CrearReserva, ahora: FechaHora): Promise<CompraEnCurso> {
-    const turnoId = await this.deps.admision.validar(cmd.tokenAdmision, cmd.fanId);
-    // 1.2–1.5: el bloqueo de la localidad dura hasta el COMMIT (R1, R2).
+    // 1.1–1.5: validar el turno y bloquear la localidad hasta el COMMIT (R1, R2). El turno se
+    // gasta en la misma transacción: si la reserva se rechaza, vuelve a quedar disponible.
     return this.transaccion.ejecutar(async () => {
+      const turnoId = await this.deps.admision.validar(cmd.tokenAdmision, cmd.fanId);
       const localidad = await this.deps.localidades.obtenerParaActualizar(cmd.localidadId);
       localidad.reservar(cmd.cantidad, cmd.sillaIds);
       const items = this.armarItems(localidad, cmd);
