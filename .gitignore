@@ -25,3 +25,11 @@ venv/
 
 # Evidencia temporal de validaciones de diagramas
 *.visual-check.*
+
+# Logs de la aplicación (recogidos por Alloy → Loki)
+observability/logs/*.log
+**/observability/logs/*.log
+apps/ventas/observability/
+
+# Estado efímero del arnés de caos
+chaos/estado-*.json

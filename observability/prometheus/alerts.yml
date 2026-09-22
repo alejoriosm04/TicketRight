@@ -1,0 +1,47 @@
+groups:
+  - name: ticketright-negocio
+    rules:
+      # A-1: no debe haber dinero confirmado sin boleta al cierre. Una discrepancia
+      # abierta por más de un minuto ya merece atención en la demo (la meta de
+      # conciliación es ≤ 15 min; aquí se acorta para hacerla visible en vivo).
+      - alert: DiscrepanciaAbiertaProlongada
+        expr: ticketright_oldest_discrepancy_age_seconds > 60
+        for: 10s
+        labels:
+          severity: critical
+          atributo: A-1
+        annotations:
+          summary: "Discrepancia entre pago y boleta sin resolver"
+          description: "La discrepancia más antigua lleva {{ $value | humanizeDuration }} abierta; la meta de conciliación es 15 minutos."
+
+      - alert: DiscrepanciasAbiertas
+        expr: ticketright_open_discrepancies > 0
+        for: 10s
+        labels:
+          severity: warning
+          atributo: A-1
+        annotations:
+          summary: "Hay pagos confirmados sin derecho de entrada resuelto"
+          description: "{{ $value }} discrepancia(s) abierta(s) entre dinero y boleta."
+
+      # A-2: el aforo es una restricción legal; una sola sobreventa es crítica.
+      - alert: SobreventaDetectada
+        expr: increase(ticketright_oversell_total[1m]) > 0
+        for: 0s
+        labels:
+          severity: critical
+          atributo: A-2
+        annotations:
+          summary: "Se detectó un intento de emitir por encima del aforo"
+          description: "El contador de sobreventa creció en la última ventana; el aforo no admite compensación posterior."
+
+      # A-5: una reserva vencida que sigue reteniendo inventario reduce la conversión.
+      - alert: ReservasVencidasSinLiberar
+        expr: ticketright_overdue_reservations > 0
+        for: 30s
+        labels:
+          severity: warning
+          atributo: A-5
+        annotations:
+          summary: "Reservas vencidas retienen inventario"
+          description: "{{ $value }} reserva(s) vencida(s) siguen sin liberarse."
