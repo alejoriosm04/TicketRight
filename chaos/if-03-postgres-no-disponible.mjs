@@ -6,7 +6,7 @@
 // Mecanismo (equivalente docker-compose a NetworkChaos): el orquestador de PowerShell
 // hace `docker pause` del contenedor de PostgreSQL antes de la fase "durante" y
 // `docker unpause` antes de "recuperar". Este script hace los intentos de compra y mide.
-import { api, comprar, dormir, fotoMetricas, imprimirFoto, LOCALIDADES, FAN } from "./lib.mjs";
+import { api, comprar, dormir, fotoMetricas, imprimirFoto, LOCALIDADES, FAN, fotoAsentada } from "./lib.mjs";
 
 const fase = process.argv[2] ?? "estable";
 
@@ -58,7 +58,7 @@ if (fase === "recuperar") {
   // Tras restaurar, una compra nueva debe volver a completarse: el sistema se recupera.
   const compra = await comprar(LOCALIDADES.sur, 2);
   console.log(`  compra post-recuperación: paso=${compra.paso} (esperado emitida)`);
-  const foto = await fotoMetricas();
+  const foto = await fotoAsentada();
   imprimirFoto("después de recuperar", foto);
   const ok = compra.paso === "emitida" && foto.sobreventa === 0;
   console.log(`\nRESULTADO IF-03: ${ok ? "APROBADO" : "FALLIDO"}`);

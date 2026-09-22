@@ -69,10 +69,14 @@ export const edadDiscrepanciaMasAntigua = new Gauge({
   registers: [registro],
 });
 
-/** Sobreventas detectadas: boletas válidas por encima del aforo autorizado. Meta cero. A-2. */
+/**
+ * Sobreventas detectadas: unidades comprometidas (reservas vivas + boletas válidas) por
+ * encima del aforo autorizado. Lo alimenta el colector desde las tablas, no desde el
+ * contador de la localidad. Meta cero. A-2.
+ */
 export const sobreventas = new Counter({
   name: "ticketright_oversell_total",
-  help: "Ocasiones en que las boletas emitidas superarían el aforo autorizado de una localidad",
+  help: "Unidades comprometidas (reservas vivas + boletas válidas) por encima del aforo autorizado",
   labelNames: ["localidad"] as const,
   registers: [registro],
 });

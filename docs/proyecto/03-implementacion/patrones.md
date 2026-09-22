@@ -27,6 +27,7 @@ Estados: ✅ implementado y probado · 🟡 diseñado, pendiente en los adaptado
 
 | Patrón | Para qué | Dónde está la evidencia | Atributos | Estado |
 |---|---|---|---|---|
+| **Unidad de trabajo** | Que cada paso de la SAGA confirme junto o no confirme: el bloqueo de la localidad dura hasta el `COMMIT` y el evento del outbox sale con su estado | Puerto [`UnidadDeTrabajo`](../../../packages/sales/src/ports/services.ts) · adaptador [`BaseTransaccional`](../../../apps/ventas/src/db/connection.ts) · [`concurrencia-aforo.test.ts`](../../../apps/ventas/tests/concurrencia-aforo.test.ts) · [AD-003](../decisiones/0003-consistencia-por-tipo-de-inventario.md) | A-2 · A-1 · consistencia | ✅ (22 sep) |
 | **Repository** | Ocultar la persistencia detrás de un puerto por agregado y poder probar el dominio sin base de datos | [`repositories.ts`](../../../packages/sales/src/ports/repositories.ts) · dobles en `packages/sales/tests/doubles/` | testeabilidad · A-12 | ✅ |
 | **Idempotencia** | Un webhook repetido produce el mismo resultado: un solo cobro, una sola boleta | [`Pago.registrarConfirmacion`](../../../packages/sales/src/domain/payment.ts) · UT-09 en el [plan de pruebas](../02-modelamiento/plan-de-pruebas.md) | A-1 · confiabilidad | ✅ |
 | **Domain Events (Observer)** | Publicar hechos confirmados para que emisión, proyecciones y auditoría reaccionen sin acoplar al emisor | [`events.ts`](../../../packages/sales/src/domain/events.ts) · [`PublicadorDeEventos`](../../../packages/sales/src/ports/services.ts) | desacoplamiento · A-1 | ✅ |

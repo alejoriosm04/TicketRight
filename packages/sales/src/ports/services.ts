@@ -18,4 +18,14 @@ export interface PasarelaDePago {
   verificarFirma(cmd: ConfirmarPago): Promise<boolean>;
 }
 
+/**
+ * Límite transaccional de un paso de la SAGA: lo que corre dentro de `ejecutar` se confirma
+ * junto o no se confirma (cada `[COMMIT]` del diagrama de secuencia, AD-003). El adaptador
+ * PostgreSQL lo realiza con `BEGIN`/`COMMIT`; sin él, el bloqueo `FOR UPDATE` de la
+ * localidad se suelta al terminar la consulta y dos reservas simultáneas pisan el aforo.
+ */
+export interface UnidadDeTrabajo {
+  ejecutar<T>(trabajo: () => Promise<T>): Promise<T>;
+}
+
 export type { EmisorDeBoletas };

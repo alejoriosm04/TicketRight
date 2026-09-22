@@ -539,6 +539,8 @@
     var btn = document.getElementById("btn-reservar"); btn.disabled = true; btn.textContent = "Reservando…";
     try {
       var c = await api("POST", "/compras", { fanId: FAN, tokenAdmision: S.token, localidadId: S.localidad.localidadId, cantidad: S.cantidad });
+      // El turno es de un solo uso (Turno → Reserva 1:0..1): para otra reserva hay que volver a la fila.
+      S.token = null;
       S.compraId = c.compraId; S.reservaId = c.reservaId; S.total = c.totalCentavos; S.venceEn = c.venceEn; ir("reserva");
     } catch (err) { toast(err.message); if (btn) { btn.disabled = false; btn.textContent = "Reservar"; } }
   }
