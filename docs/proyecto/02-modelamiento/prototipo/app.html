@@ -3,287 +3,120 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>TicketRight — Compra tus boletas</title>
+<title>TicketRight — Plataforma de venta de boletas</title>
 <link rel="stylesheet" href="estilos.css">
 <script>(function(){try{document.documentElement.setAttribute('data-tema', localStorage.getItem('tr-tema')||'dark');}catch(e){}})();</script>
 <style>
-  .tr-topbar { position:sticky; top:0; z-index:20; display:flex; align-items:center; gap:16px; padding:14px 24px; background:var(--color-surface); border-bottom:1px solid var(--color-border); }
-  .tr-logo { font-family:var(--font-heading); font-weight:800; font-size:20px; letter-spacing:-.02em; }
+  .tr-top { position:sticky; top:0; z-index:30; display:flex; align-items:center; gap:22px; padding:14px 28px; background:var(--color-surface); border-bottom:1px solid var(--color-border); }
+  .tr-logo { font-family:var(--font-heading); font-weight:800; font-size:21px; letter-spacing:-.02em; cursor:pointer; }
   .tr-logo span { color:var(--color-primary); }
+  .tr-nav { display:flex; gap:6px; }
+  .tr-nav a { padding:8px 14px; border-radius:8px; color:var(--color-text-muted); font-size:14px; text-decoration:none; }
+  .tr-nav a.on, .tr-nav a:hover { background:var(--color-surface-overlay); color:var(--color-text); }
   .tr-cuenta { margin-left:auto; display:flex; align-items:center; gap:10px; color:var(--color-text-muted); font-size:14px; }
-  .tr-avatar { width:32px; height:32px; border-radius:50%; background:var(--color-primary); color:var(--color-primary-text-on); display:grid; place-items:center; font-weight:700; }
-  .tr-wrap { max-width:1040px; margin:0 auto; padding:0 24px 64px; }
-  .tr-hero { padding:40px 0 24px; }
-  .tr-hero h1 { font-size:34px; line-height:1.1; margin:8px 0 16px; }
-  .tr-buscador { display:flex; gap:8px; max-width:520px; }
-  .tr-buscador input { flex:1; background:var(--color-surface-overlay); border:1px solid var(--color-border); color:var(--color-text); border-radius:10px; padding:12px 14px; font-size:15px; }
-  .tr-cats { display:flex; gap:10px; flex-wrap:wrap; margin:20px 0 28px; }
-  .tr-cat { padding:7px 14px; border-radius:999px; border:1px solid var(--color-border); color:var(--color-text-muted); font-size:14px; cursor:pointer; }
+  .tr-avatar { width:34px; height:34px; border-radius:50%; background:var(--color-primary); color:var(--color-primary-text-on); display:grid; place-items:center; font-weight:700; }
+  #app { max-width:1080px; margin:0 auto; padding:0 28px 72px; }
+
+  .tr-hero { padding:44px 0 26px; }
+  .tr-hero h1 { font-size:36px; line-height:1.08; margin:8px 0 18px; }
+  .tr-buscador { display:flex; gap:8px; max-width:540px; }
+  .tr-buscador input { flex:1; background:var(--color-surface-overlay); border:1px solid var(--color-border); color:var(--color-text); border-radius:10px; padding:13px 15px; font-size:15px; }
+  .tr-cats { display:flex; gap:10px; flex-wrap:wrap; margin:22px 0 4px; }
+  .tr-cat { padding:7px 15px; border-radius:999px; border:1px solid var(--color-border); color:var(--color-text-muted); font-size:14px; cursor:pointer; }
   .tr-cat.on { background:var(--color-primary); color:var(--color-primary-text-on); border-color:transparent; }
-  .tr-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:20px; }
+  .tr-h2 { font-size:20px; margin:28px 0 16px; }
+  .tr-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(310px,1fr)); gap:20px; }
   .tr-card { border:1px solid var(--color-border); border-radius:16px; overflow:hidden; background:var(--color-surface); cursor:pointer; transition:transform .15s, border-color .15s; }
   .tr-card:hover { transform:translateY(-3px); border-color:var(--color-primary); }
-  .tr-portada { height:150px; background:linear-gradient(135deg,var(--color-primary),var(--color-accent-text,#7c5cff)); position:relative; display:grid; place-items:center; }
-  .tr-portada .emoji { font-size:52px; filter:drop-shadow(0 4px 12px rgba(0,0,0,.3)); }
+  .tr-portada { height:150px; background:linear-gradient(135deg,var(--color-primary),#7c5cff); position:relative; display:grid; place-items:center; }
+  .tr-portada .emoji { font-size:54px; filter:drop-shadow(0 4px 12px rgba(0,0,0,.35)); }
   .tr-portada .insignia { position:absolute; top:12px; left:12px; }
   .tr-card .cuerpo { padding:16px; }
   .tr-card h3 { font-size:17px; margin-bottom:6px; }
-  .tr-card .lugar { color:var(--color-text-muted); font-size:13px; margin-bottom:12px; }
+  .tr-card .lugar { color:var(--color-text-muted); font-size:13px; margin-bottom:8px; }
+  .tr-demanda { color:var(--color-warning,#d97706); font-size:13px; font-weight:600; margin-bottom:12px; }
+  .tr-card .pie { display:flex; justify-content:space-between; align-items:center; }
   .tr-card .precio { font-weight:700; }
-  .tr-modal-bg { position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:40; display:none; align-items:flex-start; justify-content:center; overflow:auto; padding:40px 16px; }
-  .tr-modal-bg.on { display:flex; }
-  .tr-modal { background:var(--color-surface); border:1px solid var(--color-border); border-radius:18px; width:100%; max-width:560px; overflow:hidden; }
-  .tr-modal-cab { padding:20px 24px; border-bottom:1px solid var(--color-border); display:flex; align-items:center; }
-  .tr-modal-cab h2 { font-size:20px; }
-  .tr-x { margin-left:auto; background:none; border:none; color:var(--color-text-muted); font-size:22px; cursor:pointer; }
-  .tr-modal-body { padding:24px; }
-  .tr-pasos { display:flex; gap:6px; margin-bottom:22px; }
-  .tr-pasos .s { flex:1; text-align:center; font-size:11px; color:var(--color-text-muted); }
-  .tr-pasos .s .n { width:26px; height:26px; border-radius:50%; border:1px solid var(--color-border); display:grid; place-items:center; margin:0 auto 5px; }
-  .tr-pasos .s.on .n { background:var(--color-primary); color:var(--color-primary-text-on); border-color:transparent; }
-  .tr-pasos .s.ok .n { background:var(--color-success,#16a34a); color:#fff; border-color:transparent; }
-  .oculto { display:none !important; }
-  .tr-loc { display:flex; justify-content:space-between; align-items:center; padding:14px 16px; border:1px solid var(--color-border); border-radius:12px; margin-bottom:10px; cursor:pointer; }
-  .tr-loc:hover { border-color:var(--color-primary); }
-  .tr-loc.sel { border-color:var(--color-primary); box-shadow:0 0 0 2px var(--color-primary) inset; }
-  .tr-loc .disp { font-size:12px; color:var(--color-text-muted); }
-  .tr-loc .agotado { color:var(--color-danger,#dc2626); }
-  .tr-fila-anim { text-align:center; padding:20px 0; }
-  .tr-spinner { width:44px; height:44px; border:4px solid var(--color-border); border-top-color:var(--color-primary); border-radius:50%; animation:tr-giro 1s linear infinite; margin:0 auto 16px; }
-  @keyframes tr-giro { to { transform:rotate(360deg); } }
-  .tr-campo { margin-bottom:14px; }
-  .tr-campo label { display:block; font-size:13px; color:var(--color-text-muted); margin-bottom:6px; }
-  .tr-campo input, .tr-campo select { width:100%; background:var(--color-surface-overlay); border:1px solid var(--color-border); color:var(--color-text); border-radius:10px; padding:11px 13px; font-size:15px; }
-  .tr-boleta { border:1px dashed var(--color-primary); border-radius:14px; padding:18px; margin-bottom:10px; background:var(--color-surface-overlay); }
-  .tr-boleta .cod { font-family:monospace; font-size:15px; font-weight:700; letter-spacing:1px; }
-  .tr-mini { font-size:12px; color:var(--color-text-muted); margin-top:8px; }
-  .tr-toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%); background:var(--color-danger,#dc2626); color:#fff; padding:12px 18px; border-radius:10px; z-index:60; display:none; }
+  .btn-sm { padding:6px 12px; font-size:13px; }
+
+  .tr-volver { display:inline-block; margin:20px 0 8px; color:var(--color-text-muted); text-decoration:none; font-size:14px; }
+  .tr-detalle { display:grid; grid-template-columns:1fr 1fr; gap:28px; margin-top:8px; }
+  .tr-detalle-portada { height:280px; border-radius:18px; background:linear-gradient(135deg,var(--color-primary),#7c5cff); display:grid; place-items:center; }
+  .tr-detalle-portada .emoji { font-size:90px; }
+  .tr-detalle-info h1 { font-size:30px; margin:6px 0 10px; }
+  .tr-mut { color:var(--color-text-muted); }
+  .tr-mini { font-size:12px; color:var(--color-text-muted); }
+  .tr-mt { margin-top:16px; }
+
+  .tr-centro { max-width:520px; margin:40px auto 0; }
+  .tr-centro-1 { max-width:460px; margin:0 auto; }
+  .tr-centro-2 { display:grid; grid-template-columns:1fr 1fr; gap:20px; align-items:start; }
+  .tr-txt-centro { text-align:center; }
+
+  .tr-fila-card { text-align:center; }
+  .tr-spinner { width:46px; height:46px; border:4px solid var(--color-border); border-top-color:var(--color-primary); border-radius:50%; animation:trg 1s linear infinite; margin:6px auto 16px; }
+  @keyframes trg { to { transform:rotate(360deg); } }
+  .tr-pista { position:relative; height:8px; background:var(--color-surface-overlay); border-radius:8px; margin:20px 0; }
+  .tr-avance { position:absolute; left:0; top:0; bottom:0; background:var(--color-primary); border-radius:8px; transition:width .5s; }
+  .tr-icono { position:absolute; top:-9px; transition:left .5s; }
+  .tr-meta { position:absolute; right:-4px; top:-9px; }
+
+  .tr-sel-layout { display:grid; grid-template-columns:1.4fr 1fr; gap:20px; align-items:start; }
+  .tr-leyenda { display:flex; gap:18px; margin-top:12px; font-size:13px; color:var(--color-text-muted); }
+  .tr-muestra { display:inline-block; width:12px; height:12px; border-radius:3px; margin-right:6px; vertical-align:middle; }
+  .tr-m-ok { background:var(--color-primary); } .tr-m-warn { background:var(--color-warning,#d97706); } .tr-m-off { background:var(--color-danger,#dc2626); }
+  .tr-zona.sel rect { stroke-width:3.5; }
+  .tr-disp { margin:14px 0; }
+  .tr-disp-rot { display:flex; justify-content:space-between; font-size:13px; margin-bottom:5px; }
+  .tr-disp-pista { height:8px; background:var(--color-surface-overlay); border-radius:6px; overflow:hidden; }
+  .tr-disp-fill { height:100%; background:var(--color-primary); } .tr-disp-fill.peligro { background:var(--color-danger,#dc2626); }
+  .tr-lbl { display:block; font-size:13px; font-weight:600; color:var(--color-text-muted); margin:16px 0 6px; }
+  .tr-contador { display:flex; align-items:center; gap:14px; }
+  .tr-contador button { width:40px; height:40px; border-radius:10px; border:1px solid var(--color-border); background:var(--color-surface-overlay); color:var(--color-text); font-size:20px; cursor:pointer; }
+  .tr-contador #cifra { font-size:20px; font-weight:700; min-width:24px; text-align:center; }
+  .tr-barra-total { position:sticky; bottom:0; display:flex; align-items:center; justify-content:space-between; gap:16px; background:var(--color-surface); border:1px solid var(--color-border); border-radius:14px; padding:14px 20px; margin-top:20px; box-shadow:0 -4px 20px rgba(0,0,0,.15); }
+  .tr-bt-info { display:flex; flex-direction:column; } .tr-bt-cifra { font-size:22px; font-weight:800; }
+
+  .tr-anillo { display:flex; justify-content:center; margin:10px 0; } .tr-anillo svg { width:160px; height:160px; }
+  .tr-cancelar { display:block; text-align:center; margin-top:12px; color:var(--color-text-muted); font-size:13px; cursor:pointer; }
+
+  .tr-campo { margin-bottom:14px; } .tr-campo label { display:block; font-size:13px; color:var(--color-text-muted); margin-bottom:6px; }
+  .tr-campo input, .tr-campo select { width:100%; background:var(--color-surface-overlay); border:1px solid var(--color-border); color:var(--color-text); border-radius:10px; padding:12px 14px; font-size:15px; }
+  .tr-nota { font-size:13px; border:1px solid var(--color-border); border-radius:10px; padding:11px 13px; margin-bottom:14px; color:var(--color-text-muted); }
+
+  .tr-boleta { border:1px dashed var(--color-primary); border-radius:14px; padding:18px; margin-bottom:12px; background:var(--color-surface-overlay); text-align:center; }
+  .tr-boleta-cab { display:flex; justify-content:space-between; align-items:center; }
+  .tr-qr { font-size:64px; line-height:1; margin:12px 0; letter-spacing:-6px; }
+  .tr-cod { font-family:monospace; font-weight:700; letter-spacing:1px; font-size:14px; word-break:break-all; }
+
+  .tr-kpis { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:16px; }
+  .tr-kpi { border:1px solid var(--color-border); border-radius:14px; padding:18px; }
+  .tr-kpi-v { font-size:28px; font-weight:800; } .tr-kpi-t { font-size:13px; color:var(--color-text-muted); margin-top:4px; }
+  .tr-kpi-green .tr-kpi-v { color:var(--color-success,#16a34a); } .tr-kpi-blue .tr-kpi-v { color:#3b82f6; }
+  .tr-kpi-purple .tr-kpi-v { color:#8b5cf6; } .tr-kpi-orange .tr-kpi-v { color:var(--color-warning,#d97706); }
+  .tr-kpi-red .tr-kpi-v { color:var(--color-danger,#dc2626); }
+
+  .tr-toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%); background:var(--color-danger,#dc2626); color:#fff; padding:12px 20px; border-radius:10px; z-index:60; opacity:0; pointer-events:none; transition:opacity .2s; }
+  .tr-toast.on { opacity:1; }
+
+  @media (max-width:760px){ .tr-detalle,.tr-centro-2,.tr-sel-layout{grid-template-columns:1fr} .tr-nav a{padding:8px 9px} }
 </style>
 </head>
 <body>
 
-<div class="tr-topbar">
-  <div class="tr-logo">Ticket<span>Right</span></div>
-  <div class="tr-cuenta">
-    <span>Bogotá</span>
-    <div class="tr-avatar">Q</div>
-  </div>
+<div class="tr-top">
+  <div class="tr-logo" onclick="location.hash='#/eventos'">Ticket<span>Right</span></div>
+  <nav class="tr-nav">
+    <a href="#/eventos" data-ruta="eventos">Eventos</a>
+    <a href="#/promotor" data-ruta="promotor">Promotor</a>
+    <a href="#/operacion" data-ruta="operacion">Operación</a>
+  </nav>
+  <div class="tr-cuenta"><span>Bogotá</span><div class="tr-avatar">Q</div></div>
 </div>
 
-<div class="tr-wrap">
-  <section class="tr-hero">
-    <span class="etiqueta">Los eventos más esperados</span>
-    <h1>Vive lo que no te quieres perder</h1>
-    <div class="tr-buscador">
-      <input type="text" id="q" placeholder="Busca un evento, artista o lugar">
-      <button class="btn btn-primario">Buscar</button>
-    </div>
-    <div class="tr-cats">
-      <span class="tr-cat on">Todos</span><span class="tr-cat">Conciertos</span>
-      <span class="tr-cat">Festivales</span><span class="tr-cat">Teatro</span>
-      <span class="tr-cat">Deporte</span>
-    </div>
-  </section>
-
-  <h2 style="font-size:20px;margin-bottom:16px">Eventos disponibles</h2>
-  <div class="tr-grid" id="grid"></div>
-</div>
-
-<!-- Modal de compra -->
-<div class="tr-modal-bg" id="modal">
-  <div class="tr-modal">
-    <div class="tr-modal-cab">
-      <h2 id="m-titulo">Comprar boletas</h2>
-      <button class="tr-x" id="cerrar">×</button>
-    </div>
-    <div class="tr-modal-body">
-      <div class="tr-pasos">
-        <div class="s on" data-s="1"><div class="n">1</div>Lugar</div>
-        <div class="s" data-s="2"><div class="n">2</div>Datos</div>
-        <div class="s" data-s="3"><div class="n">3</div>Pago</div>
-        <div class="s" data-s="4"><div class="n">4</div>Boleta</div>
-      </div>
-
-      <!-- Paso 1: elegir localidad (con espera transparente) -->
-      <div id="v-fila" class="tr-fila-anim oculto">
-        <div class="tr-spinner"></div>
-        <h3 id="fila-msg">Asegurando tu lugar…</h3>
-        <p class="tr-mini" id="fila-sub">Hay mucha gente comprando. Te damos acceso en orden justo.</p>
-      </div>
-
-      <div id="v-localidad">
-        <p style="color:var(--color-text-muted);margin-bottom:14px">Elige tu zona. La disponibilidad se actualiza en tiempo real.</p>
-        <div id="locs"></div>
-        <div class="tr-campo" style="margin-top:14px">
-          <label>¿Cuántas boletas?</label>
-          <select id="cantidad"><option>1</option><option selected>2</option><option>3</option><option>4</option></select>
-        </div>
-        <button class="btn btn-primario btn-ancho" id="btn-continuar" disabled>Continuar</button>
-      </div>
-
-      <!-- Paso 2: datos del titular -->
-      <div id="v-datos" class="oculto">
-        <div class="tr-campo"><label>Nombre completo</label><input id="d-nombre" value="Quinnie Villa"></div>
-        <div class="tr-campo"><label>Correo</label><input id="d-correo" value="quinn.villa@ejemplo.com"></div>
-        <div class="tr-campo"><label>Documento</label><input id="d-doc" value="1.020.304.050"></div>
-        <div class="tr-mini" style="border:1px solid var(--color-border);border-radius:10px;padding:10px 12px;margin-bottom:12px">🔒 Tus datos se cifran y solo se usan para emitir tu boleta nominal.</div>
-        <button class="btn btn-primario btn-ancho" id="btn-datos" style="margin-top:8px">Ir a pagar</button>
-      </div>
-
-      <!-- Paso 3: pago -->
-      <div id="v-pago" class="oculto">
-        <div class="fila-datos"><span class="k">Zona</span><span class="v" id="p-zona">—</span></div>
-        <div class="fila-datos"><span class="k">Boletas</span><span class="v" id="p-cant">—</span></div>
-        <div class="fila-datos"><span class="k">Total a pagar</span><span class="v" id="p-total">—</span></div>
-        <div class="tr-campo" style="margin-top:14px"><label>Medio de pago</label>
-          <select id="p-medio"><option value="tarjeta">Tarjeta de crédito</option><option value="pse">PSE</option><option value="billetera">Billetera digital</option></select>
-        </div>
-        <div class="tr-campo"><label>Número de tarjeta</label><input id="p-tarjeta" value="4242 4242 4242 4242"></div>
-        <button class="btn btn-primario btn-ancho" id="btn-pagar">Pagar <span id="p-monto"></span></button>
-        <p class="tr-mini" id="p-estado"></p>
-      </div>
-
-      <!-- Paso 4: boleta -->
-      <div id="v-boleta" class="oculto">
-        <div class="alerta alerta-exito"><strong>¡Listo! Tus boletas están emitidas.</strong>Te enviamos una copia a tu correo.</div>
-        <div id="boletas"></div>
-        <button class="btn btn-secundario btn-ancho" id="btn-fin">Volver a los eventos</button>
-      </div>
-    </div>
-  </div>
-</div>
-
+<main id="app"></main>
 <div class="tr-toast" id="toast"></div>
 
-<script>
-const FAN = "88888888-8888-4888-8888-888888888888";
-const H = { "content-type": "application/json", "x-fan-id": FAN, "user-agent": "Mozilla/5.0 TicketRight" };
-const $ = (id) => document.getElementById(id);
-
-// Portadas por nombre (emoji ilustrativo) — solo estética.
-const EMOJI = { "Concierto de demostración": "🎸", "default": "🎫" };
-
-let CAT = null;       // catálogo cargado
-let sel = { evento:null, localidad:null, cantidad:2, token:null, compraId:null, pagoId:null, total:0 };
-
-function toast(msg) { const t=$("toast"); t.textContent=msg; t.style.display="block"; setTimeout(()=>t.style.display="none", 3500); }
-function money(cent) { return "$" + (cent/100).toLocaleString("es-CO"); }
-function paso(n) { document.querySelectorAll(".tr-pasos .s").forEach(s=>{ const k=Number(s.dataset.s); s.classList.toggle("on",k===n); s.classList.toggle("ok",k<n); }); }
-function ver(id) { ["v-fila","v-localidad","v-datos","v-pago","v-boleta"].forEach(v=>$(v).classList.toggle("oculto", v!==id)); }
-
-async function api(m, ruta, cuerpo) {
-  const r = await fetch(ruta, { method:m, headers:H, body: cuerpo?JSON.stringify(cuerpo):undefined });
-  const t = await r.text(); const d = t?JSON.parse(t):{};
-  if (!r.ok) throw new Error((d&&d.mensaje)||(m+" "+ruta+" → "+r.status));
-  return d;
-}
-
-// 1) Cargar catálogo real y pintar tarjetas de eventos
-async function cargarEventos() {
-  CAT = await api("GET", "/catalogo");
-  const grid = $("grid");
-  grid.innerHTML = CAT.eventos.map((e) => {
-    const desde = Math.min(...e.localidades.map(l=>l.precioCentavos));
-    const emoji = EMOJI[e.nombre] || EMOJI.default;
-    return `<div class="tr-card" data-ev="${e.eventoId}">
-      <div class="tr-portada"><span class="insignia insignia-exito">Venta abierta</span><span class="emoji">${emoji}</span></div>
-      <div class="cuerpo">
-        <h3>${e.nombre}</h3>
-        <p class="lugar">Movistar Arena, Bogotá · sáb. 21 de marzo</p>
-        <div class="pie"><span class="precio">Desde ${money(desde)}</span></div>
-      </div></div>`;
-  }).join("");
-  document.querySelectorAll(".tr-card").forEach(c => c.addEventListener("click", () => abrirCompra(c.dataset.ev)));
-}
-
-// 2) Abrir el flujo de compra: entra a la fila de forma transparente
-async function abrirCompra(eventoId) {
-  sel = { evento: CAT.eventos.find(e=>e.eventoId===eventoId), localidad:null, cantidad:2, token:null, compraId:null, pagoId:null, total:0 };
-  $("m-titulo").textContent = sel.evento.nombre;
-  $("modal").classList.add("on");
-  paso(1); ver("v-fila");
-  $("fila-msg").textContent = "Asegurando tu lugar…";
-  try {
-    const e = await api("POST", "/fila/entrar", { fanId: FAN });
-    for (let i=0;i<40;i++) {
-      const s = await api("GET", "/fila/"+e.turnoId);
-      if (s.estado === "admitido") { sel.token = s.token; pintarLocalidades(); ver("v-localidad"); return; }
-      $("fila-sub").textContent = "Estás en la fila · adelante hay " + (s.personasDelante||0) + " personas";
-      await new Promise(r=>setTimeout(r,700));
-    }
-    toast("La fila está muy llena, intenta de nuevo"); cerrar();
-  } catch (err) { toast(err.message); cerrar(); }
-}
-
-function pintarLocalidades() {
-  $("locs").innerHTML = sel.evento.localidades.map(l => {
-    const agotado = l.disponibles <= 0;
-    return `<div class="tr-loc ${agotado?'':''}" data-loc="${l.localidadId}" data-precio="${l.precioCentavos}" ${agotado?'style="opacity:.5;pointer-events:none"':''}>
-      <div><strong>${l.nombre}</strong><div class="disp ${agotado?'agotado':''}">${agotado?'Agotado':(l.disponibles.toLocaleString('es-CO')+' disponibles')}</div></div>
-      <div class="precio">${money(l.precioCentavos)}</div>
-    </div>`;
-  }).join("");
-  document.querySelectorAll(".tr-loc").forEach(el => el.addEventListener("click", () => {
-    document.querySelectorAll(".tr-loc").forEach(o=>o.classList.remove("sel"));
-    el.classList.add("sel");
-    sel.localidad = el.dataset.loc; sel.precio = Number(el.dataset.precio);
-    $("btn-continuar").disabled = false;
-  }));
-}
-
-$("btn-continuar").addEventListener("click", () => {
-  sel.cantidad = Number($("cantidad").value);
-  paso(2); ver("v-datos");
-});
-
-$("btn-datos").addEventListener("click", async () => {
-  // Reserva real contra el backend (crea la reserva con el token de admisión firmado).
-  $("btn-datos").disabled = true;
-  try {
-    const c = await api("POST", "/compras", { fanId: FAN, tokenAdmision: sel.token, localidadId: sel.localidad, cantidad: sel.cantidad });
-    sel.compraId = c.compraId; sel.total = c.totalCentavos;
-    const loc = sel.evento.localidades.find(l=>l.localidadId===sel.localidad);
-    $("p-zona").textContent = loc.nombre;
-    $("p-cant").textContent = sel.cantidad;
-    $("p-total").textContent = money(c.totalCentavos);
-    $("p-monto").textContent = money(c.totalCentavos);
-    paso(3); ver("v-pago");
-  } catch (err) { toast(err.message); }
-  $("btn-datos").disabled = false;
-});
-
-$("btn-pagar").addEventListener("click", async () => {
-  $("btn-pagar").disabled = true;
-  $("p-estado").textContent = "Procesando tu pago de forma segura…";
-  try {
-    const p = await api("POST", "/compras/"+sel.compraId+"/pago", { medio: $("p-medio").value });
-    sel.pagoId = p.pagoId;
-    for (let i=0;i<25;i++) {
-      await new Promise(r=>setTimeout(r,700));
-      const est = await api("GET", "/compras/"+sel.compraId);
-      if (est.pago && est.pago.estado !== "confirmado") { await api("POST","/demo/pasarela/confirmar/"+est.pago.pagoId,{}).catch(()=>{}); }
-      if (est.compra.paso === "emitida") {
-        $("boletas").innerHTML = est.boletas.map((b,i)=>`
-          <div class="tr-boleta">
-            <div style="display:flex;justify-content:space-between;align-items:center">
-              <strong>${sel.evento.nombre}</strong><span class="insignia insignia-exito">${b.estado}</span>
-            </div>
-            <div class="tr-mini">Boleta ${i+1} de ${est.boletas.length}</div>
-            <div class="cod" style="margin-top:10px">${b.codigo}</div>
-          </div>`).join("");
-        paso(4); ver("v-boleta"); return;
-      }
-    }
-    $("p-estado").textContent = "";
-    toast("El pago está tardando; revisa tus boletas en unos minutos");
-  } catch (err) { toast(err.message); $("p-estado").textContent=""; $("btn-pagar").disabled=false; }
-});
-
-function cerrar() { $("modal").classList.remove("on"); }
-$("cerrar").addEventListener("click", cerrar);
-$("btn-fin").addEventListener("click", () => { cerrar(); cargarEventos(); });
-
-cargarEventos().catch(e => toast("No se pudo cargar el catálogo: " + e.message));
-</script>
+<script src="plataforma.js"></script>
 </body>
 </html>
