@@ -12,10 +12,19 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@opentelemetry/auto-instrumentations-node": "^0.80.0",
+    "@opentelemetry/exporter-trace-otlp-http": "^0.222.0",
+    "@opentelemetry/resources": "^2.11.0",
+    "@opentelemetry/sdk-node": "^0.222.0",
+    "@opentelemetry/semantic-conventions": "^1.43.0",
     "@ticketright/entitlements": "0.0.0",
     "@ticketright/sales": "0.0.0",
     "@ticketright/shared-kernel": "0.0.0",
     "fastify": "^5.0.0",
-    "pg": "^8.13.0"
+    "ioredis": "^6.0.0",
+    "kafkajs": "^2.2.4",
+    "pg": "^8.13.0",
+    "pino": "^10.3.1",
+    "prom-client": "^15.1.3"
   }
 }

@@ -1,0 +1,64 @@
+// Grafana Alloy — puerta OTLP y recolector de logs de TicketRight.
+// Implementa el rol de Alloy descrito en el diseño de observabilidad: recibe la
+// telemetría por OTLP, aplica lotes y la reparte a Tempo (trazas) y Loki (logs).
+
+// --- Trazas: recibe OTLP de la app y las reenvía a Tempo --------------------
+
+otelcol.receiver.otlp "entrada" {
+  http { endpoint = "0.0.0.0:4318" }
+  grpc { endpoint = "0.0.0.0:4317" }
+
+  output {
+    traces = [otelcol.processor.batch.lotes.input]
+  }
+}
+
+otelcol.processor.batch "lotes" {
+  output {
+    traces = [otelcol.exporter.otlp.tempo.input]
+  }
+}
+
+otelcol.exporter.otlp "tempo" {
+  client {
+    endpoint = "tempo:4317"
+    tls { insecure = true }
+  }
+}
+
+// --- Logs: lee el archivo JSON de la app y los envía a Loki -----------------
+
+local.file_match "logs_ventas" {
+  path_targets = [{ __path__ = "/var/log/ticketright/ventas.log", service = "ventas" }]
+}
+
+loki.source.file "ventas" {
+  targets    = local.file_match.logs_ventas.targets
+  forward_to = [loki.process.etiquetas.receiver]
+}
+
+loki.process "etiquetas" {
+  // Los logs vienen en JSON; extrae campos estables como etiquetas de Loki.
+  stage.json {
+    expressions = {
+      level      = "level",
+      operation  = "operation",
+      event_type = "event_type",
+      outcome    = "outcome",
+    }
+  }
+  stage.labels {
+    values = {
+      level      = "",
+      event_type = "",
+    }
+  }
+  forward_to = [loki.write.destino.receiver]
+}
+
+loki.write "destino" {
+  endpoint {
+    url = "http://loki:3100/loki/api/v1/push"
+  }
+  external_labels = { service = "ventas", environment = "demo" }
+}

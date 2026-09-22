@@ -1,0 +1,31 @@
+{
+  "name": "TicketRight",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu-24.04",
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": { "version": "24" },
+    "ghcr.io/devcontainers/features/docker-in-docker:2": { "version": "latest" },
+    "ghcr.io/devcontainers/features/kubectl-helm-minikube:1": {
+      "minikube": "latest",
+      "helm": "latest",
+      "kubectl": "latest"
+    }
+  },
+  "hostRequirements": {
+    "cpus": 4,
+    "memory": "16gb",
+    "storage": "32gb"
+  },
+  "forwardPorts": [3000, 3001, 9090, 9092, 6379, 5433, 3100, 3200],
+  "portsAttributes": {
+    "3000": { "label": "API ventas" },
+    "3001": { "label": "Grafana" },
+    "9090": { "label": "Prometheus" }
+  },
+  "postCreateCommand": "npm install",
+  "customizations": {
+    "vscode": {
+      "extensions": ["dbaeumer.vscode-eslint", "esbenp.prettier-vscode"]
+    }
+  },
+  "remoteUser": "vscode"
+}

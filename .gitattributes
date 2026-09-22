@@ -1,0 +1,6 @@
+# Los scripts de shell y YAML deben usar saltos de línea LF para correr en Linux (Codespaces).
+*.sh text eol=lf
+*.mjs text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+Dockerfile text eol=lf

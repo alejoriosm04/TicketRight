@@ -27,21 +27,24 @@ puerto local es **5433** para no chocar con otros proyectos que usen el 5432.
 
 ## Probarlo a mano
 
-Con la semilla cargada, estos son los identificadores de la demo:
+Con la semilla cargada, el recinto tiene cuatro tribunas con 5.000 boletas en total:
 
-| Qué | Valor |
-|---|---|
-| Localidad general ($100.000, aforo 50) | `22222222-2222-4222-8222-222222222222` |
-| Localidad numerada ($200.000, 4 sillas) | `33333333-3333-4333-8333-333333333333` |
-| Sillas de la numerada | `44444444-4444-4444-8444-44444444440{1..4}` |
-| Fan de ejemplo | `88888888-8888-4888-8888-888888888888` |
-| Turno admitido (demo) | `turno:99999999-9999-4999-8999-999999999999` |
+| Tribuna | Id | Precio · aforo |
+|---|---|---|
+| Oriental | `22222222-2222-4222-8222-222222222201` | $320.000 · 800 |
+| Occidental | `22222222-2222-4222-8222-222222222202` | $280.000 · 900 |
+| Sur | `22222222-2222-4222-8222-222222222203` | $150.000 · 1650 |
+| Norte | `22222222-2222-4222-8222-222222222204` | $150.000 · 1650 |
+| Fan de ejemplo | `88888888-8888-4888-8888-888888888888` | — |
+
+El token de admisión sale de la sala de espera (`POST /fila/entrar` → `GET /fila/:turnoId`
+hasta quedar `admitido`); en la demo también sirve cualquier `turno:<uuid>`.
 
 ```bash
 curl -s localhost:3000/compras -H 'content-type: application/json' -d '{
   "fanId": "88888888-8888-4888-8888-888888888888",
   "tokenAdmision": "turno:99999999-9999-4999-8999-999999999999",
-  "localidadId": "22222222-2222-4222-8222-222222222222",
+  "localidadId": "22222222-2222-4222-8222-222222222203",
   "cantidad": 2
 }'
 ```
@@ -62,6 +65,9 @@ docker compose down                                           # apagar PostgreSQ
 | Método y ruta | Qué hace |
 |---|---|
 | `GET /health` | Estado del servicio |
+| `GET /metrics` | Métricas en formato Prometheus |
+| `POST /fila/entrar` | Entra a la sala de espera (`fanId`); devuelve un turno |
+| `GET /fila/:turnoId` | Posición y estado en la fila; cuando queda `admitido` trae el token |
 | `POST /compras` | Crea la reserva (`fanId`, `tokenAdmision`, `localidadId`, `cantidad` o `sillaIds`) |
 | `POST /compras/:compraId/pago` | Inicia el pago con la pasarela simulada |
 | `POST /pagos/webhook` | Recibe la confirmación de la pasarela (`pagoId`, `aprobado`) |

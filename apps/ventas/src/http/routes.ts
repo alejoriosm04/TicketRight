@@ -10,9 +10,29 @@ import {
   type RepositorioDeReservas,
 } from "@ticketright/sales";
 
+import type { GestorDePerfiles, PerfilOperativo } from "../adapters/operational-profiles.js";
 import type { PasarelaSimulada } from "../adapters/simulated-gateway.js";
+import type { Fila } from "../adapters/waiting-room.js";
 import { boletasPorPago } from "../adapters/postgres/ticket-issuer.js";
 import type { Consultable } from "../db/pool.js";
+import { registrarHecho } from "../observability/logger.js";
+import {
+  boletasVendidas,
+  desgloseDeVentas,
+  duracionConsultaFila,
+  duracionEmision,
+  duracionHttp,
+  duracionReserva,
+  erroresReserva,
+  ingresosAFila,
+  pagosIniciados,
+  pagosPorEstado,
+  registro,
+  reservasCreadas,
+  solicitudesHttp,
+  transicionesDeBoleta,
+  ventasConfirmadas,
+} from "../observability/metrics.js";
 
 export class ErrorDeSolicitud extends Error {}
 
@@ -25,6 +45,9 @@ export interface DependenciasDeRutas {
   discrepancias: RepositorioDeDiscrepancias;
   pasarela: PasarelaSimulada;
   consultas: Consultable;
+  sala: Fila;
+  eventoId: string;
+  perfiles: GestorDePerfiles;
 }
 
 interface CuerpoDeCompra {
@@ -57,23 +80,121 @@ function exigir<T>(valor: T | undefined, campo: string): T {
 }
 
 export function registrarRutas(app: FastifyInstance, deps: DependenciasDeRutas): void {
+  // Método RED: mide tasa, errores y duración de cada solicitud HTTP por método y ruta.
+  // Se usa el patrón de la ruta (no la URL con ids) para no explotar la cardinalidad.
+  app.addHook("onRequest", async (peticion) => {
+    (peticion as { inicioMetrica?: [number, number] }).inicioMetrica = process.hrtime();
+  });
+  app.addHook("onResponse", async (peticion, respuesta) => {
+    const ruta = peticion.routeOptions?.url ?? peticion.url;
+    if (ruta === "/metrics") {
+      return;
+    }
+    const inicio = (peticion as { inicioMetrica?: [number, number] }).inicioMetrica;
+    if (inicio) {
+      const [segundos, nanos] = process.hrtime(inicio);
+      duracionHttp.observe({ method: peticion.method, route: ruta }, segundos + nanos / 1e9);
+    }
+    solicitudesHttp.inc({
+      method: peticion.method,
+      route: ruta,
+      status: String(respuesta.statusCode),
+    });
+  });
+
   app.get("/health", async () => ({ ok: true }));
+
+  app.get("/metrics", async (_peticion, respuesta) => {
+    respuesta.header("content-type", registro.contentType);
+    return registro.metrics();
+  });
+
+  // --- Sala de espera / fila de admisión ------------------------------------
+
+  app.post("/fila/entrar", async (peticion, respuesta) => {
+    const cuerpo = peticion.body as { fanId?: string };
+    const fanId = exigir(cuerpo.fanId, "fanId");
+    const turno = await deps.sala.entrar(fanId);
+    ingresosAFila.inc({ evento: deps.eventoId });
+    registrarHecho("entrar_fila", "ingreso_a_fila", "ok", { turno_id: turno.turnoId });
+    respuesta.code(201);
+    return { turnoId: turno.turnoId, estado: turno.estado };
+  });
+
+  app.get("/fila/:turnoId", async (peticion, respuesta) => {
+    const parametros = peticion.params as { turnoId: string };
+    const finReloj = duracionConsultaFila.startTimer();
+    const estado = await deps.sala.estado(parametros.turnoId);
+    finReloj();
+    if (!estado) {
+      respuesta.code(404);
+      return { mensaje: `No existe el turno ${parametros.turnoId} en la fila` };
+    }
+    return estado;
+  });
+
+  // --- Perfil operativo (AD-006, homólogo EventBridge Scheduler) ------------
+
+  app.get("/operacion/perfil", async () => ({
+    perfil: deps.perfiles.actual,
+    ajustes: deps.perfiles.ajustes,
+  }));
+
+  app.post("/operacion/perfil", async (peticion, respuesta) => {
+    const cuerpo = peticion.body as { perfil?: PerfilOperativo };
+    const validos: PerfilOperativo[] = [
+      "cotidiano",
+      "preparacion",
+      "pico",
+      "recuperacion",
+      "emergencia",
+    ];
+    if (!cuerpo.perfil || !validos.includes(cuerpo.perfil)) {
+      respuesta.code(400);
+      return { mensaje: `perfil inválido; use uno de: ${validos.join(", ")}` };
+    }
+    deps.perfiles.cambiarA(cuerpo.perfil);
+    registrarHecho("cambiar_perfil", "perfil_operativo_cambiado", "ok", { perfil: cuerpo.perfil });
+    return { perfil: deps.perfiles.actual, ajustes: deps.perfiles.ajustes };
+  });
 
   app.post("/compras", async (peticion, respuesta) => {
     const cuerpo = peticion.body as CuerpoDeCompra;
     const fanId = exigir(cuerpo.fanId, "fanId");
     const sillaIds = cuerpo.sillaIds ?? [];
-    const compra = await deps.orquestador.reservar(
-      {
-        fanId,
-        identidadRef: cuerpo.identidadRef ?? `ref-${fanId}`,
-        tokenAdmision: exigir(cuerpo.tokenAdmision, "tokenAdmision"),
-        localidadId: exigir(cuerpo.localidadId, "localidadId"),
-        cantidad: cuerpo.cantidad ?? (sillaIds.length > 0 ? sillaIds.length : 1),
-        sillaIds,
-      },
-      new Date(),
-    );
+    // Histograma del tiempo de confirmación de la reserva (A-10, meta P95 ≤ 2 s).
+    const finReloj = duracionReserva.startTimer();
+    let compra;
+    try {
+      compra = await deps.orquestador.reservar(
+        {
+          fanId,
+          identidadRef: cuerpo.identidadRef ?? `ref-${fanId}`,
+          tokenAdmision: exigir(cuerpo.tokenAdmision, "tokenAdmision"),
+          localidadId: exigir(cuerpo.localidadId, "localidadId"),
+          cantidad: cuerpo.cantidad ?? (sillaIds.length > 0 ? sillaIds.length : 1),
+          sillaIds,
+        },
+        new Date(),
+      );
+    } catch (error) {
+      finReloj({ result: "error" });
+      reservasCreadas.inc({ result: "rechazada" });
+      if (error instanceof ExcepcionDeDominio) {
+        erroresReserva.inc({ kind: "dominio" });
+      } else if (error instanceof ErrorDeSolicitud) {
+        erroresReserva.inc({ kind: "solicitud" });
+      } else {
+        erroresReserva.inc({ kind: "tecnico" });
+      }
+      throw error;
+    }
+    finReloj({ result: "ok" });
+    reservasCreadas.inc({ result: "ok" });
+    registrarHecho("crear_reserva", "reserva_creada", "ok", {
+      compra_id: compra.compraId,
+      localidad: exigir(cuerpo.localidadId, "localidadId"),
+    });
     const reserva = await deps.reservas.obtener(compra.reservaId);
     respuesta.code(201);
     return {
@@ -97,21 +218,35 @@ export function registrarRutas(app: FastifyInstance, deps: DependenciasDeRutas):
       },
       new Date(),
     );
+    pagosIniciados.inc();
+    registrarHecho("iniciar_pago", "pago_solicitado", "pendiente", {
+      pago_id: pago.id,
+      monto_centavos: pago.monto.valorCentavos,
+    });
     respuesta.code(202);
     return { pagoId: pago.id, estado: pago.estado, montoCentavos: pago.monto.valorCentavos };
   });
 
   app.post("/pagos/webhook", async (peticion) => {
     const cuerpo = peticion.body as CuerpoDeWebhook;
+    const pagoId = exigir(cuerpo.pagoId, "pagoId");
+    // Estado antes de confirmar: distinguir una confirmación nueva de un webhook repetido.
+    const estadoPrevio = (await deps.pagos.obtener(pagoId)).estado;
+    const finEmision = duracionEmision.startTimer();
     await deps.orquestador.confirmarPago(
       {
-        pagoId: exigir(cuerpo.pagoId, "pagoId"),
+        pagoId,
         referenciaExterna: cuerpo.referenciaExterna ?? `manual-${Date.now()}`,
         aprobado: cuerpo.aprobado ?? true,
         firma: cuerpo.firma ?? "simulada",
       },
       new Date(),
     );
+    const emitio = await medirResultadoDePago(deps, pagoId, estadoPrevio);
+    // Solo cronometramos la emisión cuando efectivamente se emitieron boletas nuevas.
+    if (emitio) {
+      finEmision({ result: "emitida" });
+    }
     return { ok: true };
   });
 
@@ -155,6 +290,64 @@ export function registrarRutas(app: FastifyInstance, deps: DependenciasDeRutas):
     respuesta.code(202);
     return { ok: true };
   });
+
+  async function medirResultadoDePago(
+    dependencias: DependenciasDeRutas,
+    pagoId: string,
+    estadoPrevio: string,
+  ): Promise<boolean> {
+    const pago = await dependencias.pagos.obtener(pagoId);
+    // Contamos el pago por su estado solo cuando hubo una transición real; un webhook
+    // repetido llega con el pago ya en el mismo estado y no debe volver a sumarse (idempotencia).
+    if (pago.estado === estadoPrevio) {
+      return false;
+    }
+    pagosPorEstado.inc({ state: pago.estado });
+    if (pago.estado === "confirmado") {
+      // Solo el dinero efectivamente confirmado entra al acumulado de ventas (A-1 · OKR-3).
+      ventasConfirmadas.inc(
+        { currency: pago.monto.moneda },
+        pago.monto.valorCentavos,
+      );
+      const boletas = await boletasPorPago(dependencias.consultas, pago.id);
+      transicionesDeBoleta.inc({ state: "emitida" }, boletas.length);
+      await medirDesgloseYBoletas(dependencias, pago.id);
+      registrarHecho("confirmar_pago", "pago_confirmado", "ok", {
+        pago_id: pago.id,
+        boletas_emitidas: boletas.length,
+        monto_centavos: pago.monto.valorCentavos,
+      });
+      return boletas.length > 0;
+    }
+    if (pago.estado === "rechazado") {
+      registrarHecho("confirmar_pago", "pago_rechazado", "compensado", { pago_id: pago.id });
+    }
+    return false;
+  }
+
+  async function medirDesgloseYBoletas(
+    dependencias: DependenciasDeRutas,
+    pagoId: string,
+  ): Promise<void> {
+    const compra = await dependencias.compras.porPago(pagoId);
+    if (!compra) {
+      return;
+    }
+    const reserva = await dependencias.reservas.obtener(compra.reservaId);
+    // Nombre legible de cada localidad, para etiquetar las boletas vendidas.
+    const { rows } = await dependencias.consultas.query(
+      "select localidad_id, coalesce(nombre, localidad_id::text) as nombre from localidades",
+    );
+    const nombrePorId = new Map(rows.map((f) => [String(f.localidad_id), String(f.nombre)]));
+    for (const item of reserva.items) {
+      // Desglose del dinero: nominal a la promotora, servicio a la ticketera, parafiscal impuesto.
+      desgloseDeVentas.inc({ component: "nominal" }, item.precio.valorNominal.valorCentavos);
+      desgloseDeVentas.inc({ component: "cargo_servicio" }, item.precio.cargoServicio.valorCentavos);
+      desgloseDeVentas.inc({ component: "parafiscal" }, item.precio.contribucionParafiscal.valorCentavos);
+      const localidad = nombrePorId.get(item.localidadId) ?? item.localidadId;
+      boletasVendidas.inc({ localidad }, item.cantidad);
+    }
+  }
 
   app.setErrorHandler((error, _peticion, respuesta) => {
     if (error instanceof ErrorDeSolicitud) {

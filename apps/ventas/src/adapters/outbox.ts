@@ -31,7 +31,12 @@ export class RelayDeOutbox {
 
   iniciar(): void {
     this.temporizador = setInterval(() => {
-      void this.despachar();
+      // Si PostgreSQL no responde, el despacho falla; se registra y se reintenta en el
+      // siguiente tic. Un fallo transitorio de la base no debe tumbar el proceso: el
+      // outbox es durable y reintentar es seguro (IF-03).
+      this.despachar().catch((error) => {
+        console.error("relay de outbox: no pudo despachar (se reintenta)", error?.message ?? error);
+      });
     }, this.intervaloMs);
   }
 

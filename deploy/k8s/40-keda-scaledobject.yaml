@@ -1,0 +1,28 @@
+# Autoescalado por lag de Kafka con KEDA (AD-006: "KEDA ajustará consumidores a partir del
+# lag de Kafka o del trabajo pendiente"). El escalador de Kafka mira el retraso del grupo
+# consumidor `ventas-proyecciones` sobre el topic `ventas.v1.eventos` y ajusta réplicas.
+#
+# Requiere KEDA instalado (helm install keda kedacore/keda -n keda). En producción esto
+# escala workers async dedicados; en el piloto se aplica al Deployment de ventas, que hospeda
+# el consumidor. El máximo respeta un techo (AD-006: el autoescalado no debe volverse una
+# avalancha contra PostgreSQL/pasarela).
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: ventas-por-lag
+  namespace: ventas
+spec:
+  scaleTargetRef:
+    name: ventas
+  minReplicaCount: 1
+  maxReplicaCount: 5          # techo de seguridad (AD-006)
+  pollingInterval: 15
+  cooldownPeriod: 60
+  triggers:
+    - type: kafka
+      metadata:
+        bootstrapServers: kafka.ventas:9092
+        consumerGroup: ventas-proyecciones
+        topic: ventas.v1.eventos
+        lagThreshold: "50"     # ~50 mensajes pendientes por réplica
+        offsetResetPolicy: earliest
