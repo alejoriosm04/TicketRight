@@ -66,11 +66,23 @@
   }
   // ¿La imagen del catálogo es un archivo (banner) o un gradiente CSS de respaldo?
   function esImagen(src) { return src && /\.(png|jpe?g|webp|gif|avif)$/i.test(src); }
-  // Portada de tarjeta/detalle: <img> si hay banner, si no un bloque con gradiente + emoji.
+  // Un gradiente estable por evento (para tarjetas/detalle), aunque el catálogo traiga un banner.
+  var GRADIENTES = [
+    "linear-gradient(135deg,#7c3aed,#ec4899)", "linear-gradient(135deg,#e11d48,#f59e0b)",
+    "linear-gradient(135deg,#0ea5e9,#8b5cf6)", "linear-gradient(135deg,#b91c1c,#7c2d12)",
+    "linear-gradient(135deg,#0891b2,#4f46e5)", "linear-gradient(135deg,#15803d,#65a30d)",
+    "linear-gradient(135deg,#334155,#0f766e)", "linear-gradient(135deg,#1d4ed8,#065f46)",
+  ];
+  function gradienteEvento(e) {
+    if (e.imagen && e.imagen.indexOf("gradient") >= 0) return e.imagen;      // gradiente del catálogo
+    var h = 0, s = (e.eventoId || e.nombre || "");                            // hash simple estable
+    for (var i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+    return GRADIENTES[h % GRADIENTES.length];
+  }
+  // Portada de tarjeta/detalle: SIEMPRE gradiente + emoji (los banners solo van en el carrusel,
+  // porque son muy panorámicos y se ven recortados en formatos cuadrados).
   function portadaHtml(e, claseEmoji) {
-    if (esImagen(e.imagen)) return '<img src="' + esc(e.imagen) + '" alt="' + esc(e.artista || e.nombre) + '" loading="lazy">';
-    var grad = e.imagen && e.imagen.indexOf("gradient") >= 0 ? e.imagen : "linear-gradient(135deg,#7c3aed,#ec4899)";
-    return '<div class="tr-portada-grad" style="width:100%;height:100%;display:grid;place-items:center;background:' + esc(grad) + '"><span class="' + (claseEmoji || "emoji") + '">' + emojiEvento(e) + '</span></div>';
+    return '<div class="tr-portada-grad" style="width:100%;height:100%;display:grid;place-items:center;background:' + esc(gradienteEvento(e)) + '"><span class="' + (claseEmoji || "emoji") + '">' + emojiEvento(e) + '</span></div>';
   }
   function fechaLarga(iso) {
     if (!iso) return "Fecha por confirmar";
