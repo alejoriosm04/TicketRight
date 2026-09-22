@@ -1,7 +1,7 @@
 # Estado del repositorio — TicketRight
 
 > Archivo vivo. Quien avance algo, lo actualiza.
-> Última actualización: **2026-09-19**. Este archivo registra el estado del **repositorio de
+> Última actualización: **2026-09-22**. Este archivo registra el estado del **repositorio de
 > código** y de la **Entrega 3**. La bitácora del proyecto y del curso hasta la Entrega 2
 > está en [`docs/ESTADO.md`](docs/ESTADO.md).
 
@@ -29,7 +29,7 @@ La rúbrica completa llegó con las clases 5 y 6
 | 3 | Simulación y análisis de fallos | **30%** | 🟢 Los 4 escenarios (IF-01, IF-02, IF-03, IF-05) ejecutados y aprobados; bitácora en [`bitacora-de-fallos.md`](docs/proyecto/03-implementacion/bitacora-de-fallos.md). IF-03 halló y corrigió una debilidad real |
 | 4 | Patrones utilizados | **10%** | ✅ Catálogo en [`patrones.md`](docs/proyecto/03-implementacion/patrones.md), con Outbox/CQRS/Space-Based/KEDA/seguridad implementados |
 | 5 | Autoevaluación | **+10%** | ⚪ Por escribir al cierre |
-| 6 | Coherencia | **-10%** | 🟢 Mapeo ADR→implementación en [`fidelidad-arquitectonica.md`](docs/proyecto/03-implementacion/fidelidad-arquitectonica.md); 21 casos y diagramas al día |
+| 6 | Coherencia | **-10%** | 🟢 Mapeo ADR→implementación en [`fidelidad-arquitectonica.md`](docs/proyecto/03-implementacion/fidelidad-arquitectonica.md); 21 casos, cobertura en CI y diagramas al día. Auditoría de coherencia 22 sep: ver [`coherencia-implementacion.md`](docs/proyecto/03-implementacion/coherencia-implementacion.md) |
 
 La **defensa** se apoya en los ADR: para cada decisión visible en la demo hay que responder
 qué atributo de calidad la justifica y qué se sacrificó a cambio
@@ -47,12 +47,12 @@ caso de uso principal, y encima de eso pruebas, carga, observabilidad y fallos.
 | # | Criterio | Insumo ya escrito | Qué falta |
 |---|---|---|---|
 | 1 | Aplicación funcionando (40%) | [AD-007](docs/proyecto/decisiones/0007-stack-de-implementacion.md): TypeScript/Node · [arquitectura hexagonal](docs/proyecto/02-modelamiento/diagrama-de-clases.md) · [caso de uso](docs/proyecto/02-modelamiento/diagrama-de-secuencia.md) | 🟢 API Fastify + PostgreSQL + outbox + pasarela simulada + sala de espera en `apps/ventas`; compra completa, webhook repetido y rechazo verificados en local. `PENDIENTE: clúster k3d/minikube y video demo` |
-| 2 | Pruebas y coherencia | [Plan de pruebas](docs/proyecto/02-modelamiento/plan-de-pruebas.md): 21 casos UT sobre las reglas R1–R14 | ✅ Los 21 casos están escritos y en verde (38 pruebas; cobertura 78,25% sentencias). `PENDIENTE: reporte por commit y corrida en CI` |
+| 2 | Pruebas y coherencia | [Plan de pruebas](docs/proyecto/02-modelamiento/plan-de-pruebas.md): 21 casos UT sobre las reglas R1–R14 | ✅ Los 21 casos escritos y en verde (38 pruebas; cobertura ~77,7% sentencias). El CI corre `test:coverage` y **anexa el reporte como artefacto** ([`verificacion.yml`](.github/workflows/verificacion.yml)) |
 | 3 | Observabilidad (20%) | [Observabilidad](docs/proyecto/02-modelamiento/observabilidad.md): métricas, tableros y alertas | 🟢 Implementada: plataforma completa (OTel + Alloy + Prometheus + Tempo + Loki + Grafana), las 14 métricas del diseño instrumentadas + complementos de ticketera, tablero de 5 secciones y 4 alertas. Ver [`observability/README.md`](observability/README.md). `PENDIENTE: capturas y video` |
 | 4 | Simulación de fallos (30%) | [Inyección de fallos](docs/proyecto/02-modelamiento/inyeccion-de-fallos.md): IF-01, IF-02, IF-03 e IF-05 elegidos | 🟢 Los 4 ejecutados y aprobados con el arnés de `chaos/`; bitácora en [`bitacora-de-fallos.md`](docs/proyecto/03-implementacion/bitacora-de-fallos.md). `PENDIENTE: capturas del tablero durante cada fallo para el video` |
 | 5 | Carga | [Volumetría](docs/proyecto/02-modelamiento/volumetria.md): nominal, pico, estrés y resistencia; 30.000 usuarios en 60 s contra 5.000 boletas | Corridas y resultados |
 | 6 | Patrones (10%) | [Patrones utilizados](docs/proyecto/03-implementacion/patrones.md) | Revisar contra la demo y añadir capturas |
-| 7 | Prototipo | [Prototipo](docs/proyecto/02-modelamiento/prototipo/index.html): 16 pantallas, tres roles | `PENDIENTE: redesplegar en Netlify con los cambios del 18 sep` |
+| 7 | Prototipo / plataforma web | [Prototipo](docs/proyecto/02-modelamiento/prototipo/index.html): 16 pantallas, tres roles | 🟢 Además del prototipo estático hay una **plataforma web funcional** en `/app` conectada a las APIs (catálogo, fila, reserva, pago, boleta, promotor, operación) |
 | 8 | Defensa y autoevaluación | [Los ADR](docs/proyecto/decisiones/README.md) · [tipos de deuda técnica](docs/curso/clase-05-06.md) | Repasar trazabilidad atributo → decisión → sacrificio; escribir la autoevaluación |
 
 ## Pendientes y preguntas abiertas
@@ -65,6 +65,18 @@ caso de uso principal, y encima de eso pruebas, carga, observabilidad y fallos.
 - `PENDIENTE: verificar disponibilidad de dominio y marca de «TicketRight».`
 
 ## Organización del repositorio
+
+**Incremento 5 — plataforma web funcional (22 de septiembre):** sobre el prototipo se
+construyó una plataforma tipo ticketera en `/app` (SPA en
+[`prototipo/`](docs/proyecto/02-modelamiento/prototipo/)) conectada a las APIs reales:
+catálogo con búsqueda en tiempo real (`/catalogo?q=`), fila (Redis), reserva con temporizador,
+pago (SAGA) y emisión de boleta, más las vistas de Promotor y Operación. Se añadió el contexto
+de **cuentas de fan** (homólogo de Cognito, AD-004) con registro/ingreso, PII cifrada
+(AES-256-GCM), sesión JWT y **rol** (`cliente`/`promotor`/`operacion`) que autoriza las vistas
+internas; el catálogo se resembró con ocho eventos de entretenimiento en recintos con
+distribución de localidades propia (estadio, arena, coliseo, teatro, festival), en admisión
+general. El detalle está en
+[`fidelidad-arquitectonica.md`](docs/proyecto/03-implementacion/fidelidad-arquitectonica.md).
 
 El **19 de septiembre de 2026** la documentación del repositorio `aas` se importó a
 [`docs/`](docs/README.md) y se publicó como
@@ -110,8 +122,7 @@ Prometheus, Tempo, Loki y Grafana— con las tres señales correlacionadas por `
 app expone las **14 métricas del catálogo de** [`observabilidad.md`](docs/proyecto/02-modelamiento/observabilidad.md)
 más complementos de ticketera (embudo, aforo por tribuna, reparto del dinero, HTTP RED,
 conexiones de PostgreSQL). Se añadió una **sala de espera** de demostración (fila de admisión,
-AD-006) con endpoints `/fila/entrar` y `/fila/:turnoId`, y el seed modela un recinto de cuatro
-tribunas con nombre (Oriental, Occidental, Sur, Norte; 5.000 boletas). El tablero de Grafana
+AD-006) con endpoints `/fila/entrar` y `/fila/:turnoId`. El tablero de Grafana
 tiene cinco secciones y hay cuatro alertas ligadas a atributos. Detalle y catálogo en
 [`observability/README.md`](observability/README.md). Las métricas añadidas sobre el diseño
 quedan documentadas ahí como complemento, sin sustituir ninguna del entregable.
@@ -148,4 +159,4 @@ suficiente para todo el stack.
 |---|---|---|---|---|
 | 1 | Caso de negocio | 20% | sáb 12 sep 2026 | ✅ Entregada. Falta la nota |
 | 2 | Modelamiento de la solución | 30% | sáb 19 sep 2026, 3 p.m. | ✅ **Entregada** por Teams. Falta la nota |
-| 3 | Implementación, sustentación y defensa | 30% | **sáb 26 sep 2026** | ⚪ **Activa.** Sin empezar el código |
+| 3 | Implementación, sustentación y defensa | 30% | **sáb 26 sep 2026** | 🟢 **En curso.** App funcional (Fastify + PostgreSQL + Redis + Kafka + seguridad de borde + plataforma web `/app`), observabilidad y 4 fallos ejecutados; faltan video, cobertura en CI y autoevaluación |
