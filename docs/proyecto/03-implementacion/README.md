@@ -113,9 +113,13 @@ asumió de forma deliberada y cuál es el plan para pagarla (insumo: diapositiva
 
 ## 6. Coherencia — hasta -10%
 
+La trazabilidad decisión → implementación → evidencia está en
+[`fidelidad-arquitectonica.md`](fidelidad-arquitectonica.md), con el mapeo AWS → equivalente
+local y lo que quedó fuera de alcance.
+
 Checklist antes de entregar:
 
-- [ ] Cada decisión visible en la demo se rastrea hasta un ADR y un atributo de calidad
+- [x] Cada decisión visible en la demo se rastrea hasta un ADR y un atributo de calidad ([`fidelidad-arquitectonica.md`](fidelidad-arquitectonica.md))
 - [ ] Los 21 casos del plan de pruebas corren en CI y el reporte de cobertura está anexo
 - [ ] Los diagramas y el modelo viven en las versiones regeneradas ([AD-008](../decisiones/0008-boleta-en-derecho-de-asistencia.md))
 - [ ] La observabilidad ejecutada corresponde a las métricas diseñadas

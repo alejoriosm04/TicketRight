@@ -24,12 +24,12 @@ La rúbrica completa llegó con las clases 5 y 6
 
 | # | Criterio | Peso | Estado |
 |---|---|---|---|
-| 1 | Aplicación funcionando | **40%** | 🟢 Dominio, SAGA y app Fastify + PostgreSQL corriendo en local con sala de espera; falta despliegue en clúster y video |
+| 1 | Aplicación funcionando | **40%** | 🟢 App Fastify + PostgreSQL + Redis (fila) + Kafka (bus) + seguridad de borde, corriendo en Codespaces; despliegue k8s/KEDA en `deploy/`. Falta video |
 | 2 | Observabilidad | **20%** | 🟢 Plataforma implementada (OTel + Alloy + Prometheus + Tempo + Loki + Grafana); las 14 métricas del diseño instrumentadas, tablero y 4 alertas |
 | 3 | Simulación y análisis de fallos | **30%** | 🟢 Los 4 escenarios (IF-01, IF-02, IF-03, IF-05) ejecutados y aprobados; bitácora en [`bitacora-de-fallos.md`](docs/proyecto/03-implementacion/bitacora-de-fallos.md). IF-03 halló y corrigió una debilidad real |
-| 4 | Patrones utilizados | **10%** | ✅ Catálogo en [`patrones.md`](docs/proyecto/03-implementacion/patrones.md) |
+| 4 | Patrones utilizados | **10%** | ✅ Catálogo en [`patrones.md`](docs/proyecto/03-implementacion/patrones.md), con Outbox/CQRS/Space-Based/KEDA/seguridad implementados |
 | 5 | Autoevaluación | **+10%** | ⚪ Por escribir al cierre |
-| 6 | Coherencia | **-10%** | 🟢 21 casos ejecutados y diagramas reconciliados; mantener al día |
+| 6 | Coherencia | **-10%** | 🟢 Mapeo ADR→implementación en [`fidelidad-arquitectonica.md`](docs/proyecto/03-implementacion/fidelidad-arquitectonica.md); 21 casos y diagramas al día |
 
 La **defensa** se apoya en los ADR: para cada decisión visible en la demo hay que responder
 qué atributo de calidad la justifica y qué se sacrificó a cambio
@@ -125,6 +125,22 @@ montada. Los cuatro quedaron **aprobados**; la bitácora está en
 una debilidad real —el servicio se colgaba y podía caerse ante una base congelada— que se
 corrigió con timeouts acotados en el pool (`query_timeout`), un relay de outbox tolerante a
 fallos y una red de seguridad `unhandledRejection`, y se verificó repitiendo el experimento.
+
+**Incremento 4 — fidelidad a la arquitectura (22 de septiembre):** para acercar la
+implementación a los ADR y a la arquitectura de referencia/implementación se conectaron las
+dependencias reales y los homólogos locales de los servicios AWS: **Redis** para la fila
+Space-Based (AD-006, llaves `fila:{evento}:{turno}`), **Kafka** para el bus de eventos
+(AD-002, relay de outbox → `ventas.v1.eventos`, consumidor idempotente con DLQ), el **borde de
+seguridad** (AD-004: token bucket + detección de bots, JWT de admisión firmado, cifrado
+AES-GCM de PII, auditoría append-only), el **portal estático** en `/portal` (homólogo
+S3+CloudFront) y el **gestor de perfiles operativos** (homólogo EventBridge Scheduler). El
+despliegue de fidelidad vive en [`deploy/`](deploy/README.md): **minikube + KEDA** (escala por
+lag de Kafka) y un devcontainer para **GitHub Codespaces**, donde el arranque completo quedó
+verificado (Redis, Kafka, observabilidad, recorrido con JWT firmado y tráfico visible en
+Grafana). El mapeo completo ADR→implementación y lo que quedó fuera de alcance está en
+[`fidelidad-arquitectonica.md`](docs/proyecto/03-implementacion/fidelidad-arquitectonica.md).
+El piloto se corre en Codespaces porque las máquinas locales del equipo no tienen RAM
+suficiente para todo el stack.
 
 ## Tablero
 
