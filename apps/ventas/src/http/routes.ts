@@ -13,6 +13,7 @@ import {
 import type { GestorDePerfiles, PerfilOperativo } from "../adapters/operational-profiles.js";
 import type { PasarelaSimulada } from "../adapters/simulated-gateway.js";
 import type { Fila } from "../adapters/waiting-room.js";
+import type { ServicioDeCuentas } from "../security/accounts.js";
 import { boletasPorPago } from "../adapters/postgres/ticket-issuer.js";
 import type { Consultable } from "../db/pool.js";
 import { registrarHecho } from "../observability/logger.js";
@@ -48,6 +49,7 @@ export interface DependenciasDeRutas {
   sala: Fila;
   eventoId: string;
   perfiles: GestorDePerfiles;
+  cuentas: ServicioDeCuentas;
 }
 
 interface CuerpoDeCompra {
@@ -112,35 +114,105 @@ export function registrarRutas(app: FastifyInstance, deps: DependenciasDeRutas):
   // --- Catálogo (lectura CQRS): eventos y tribunas con disponibilidad en vivo ---
   // Alimenta la plataforma web. Es una consulta de lectura sobre PostgreSQL (la
   // autoridad); no toca el camino de escritura.
-  app.get("/catalogo", async () => {
+  app.get("/catalogo", async (peticion) => {
+    const q = ((peticion.query as { q?: string }).q ?? "").trim().toLowerCase();
     const { rows: eventos } = await deps.consultas.query(
-      "select evento_id, nombre from eventos order by nombre",
+      `select evento_id, nombre, artista, recinto, ciudad, fecha, categoria,
+              descripcion, imagen, destacado
+       from eventos order by destacado desc, fecha asc nulls last, nombre`,
     );
     const { rows: locs } = await deps.consultas.query(
       `select localidad_id, coalesce(nombre, localidad_id::text) as nombre, tipo,
               precio_centavos, aforo_autorizado, aforo_reservado, aforo_vendido, evento_id
        from localidades order by precio_centavos desc`,
     );
-    return {
-      eventos: eventos.map((e) => ({
-        eventoId: String(e.evento_id),
-        nombre: String(e.nombre),
-        localidades: locs
-          .filter((l) => String(l.evento_id) === String(e.evento_id))
-          .map((l) => {
-            const aut = Number(l.aforo_autorizado);
-            const disp = aut - Number(l.aforo_reservado) - Number(l.aforo_vendido);
-            return {
-              localidadId: String(l.localidad_id),
-              nombre: String(l.nombre),
-              tipo: String(l.tipo),
-              precioCentavos: Number(l.precio_centavos),
-              aforoAutorizado: aut,
-              disponibles: disp,
-            };
-          }),
-      })),
-    };
+    const catalogo = eventos.map((e) => ({
+      eventoId: String(e.evento_id),
+      nombre: String(e.nombre),
+      artista: e.artista ? String(e.artista) : "",
+      recinto: e.recinto ? String(e.recinto) : "",
+      ciudad: e.ciudad ? String(e.ciudad) : "",
+      fecha: e.fecha ? new Date(e.fecha as string).toISOString() : null,
+      categoria: e.categoria ? String(e.categoria) : "General",
+      descripcion: e.descripcion ? String(e.descripcion) : "",
+      imagen: e.imagen ? String(e.imagen) : "",
+      destacado: Boolean(e.destacado),
+      localidades: locs
+        .filter((l) => String(l.evento_id) === String(e.evento_id))
+        .map((l) => {
+          const aut = Number(l.aforo_autorizado);
+          const disp = aut - Number(l.aforo_reservado) - Number(l.aforo_vendido);
+          return {
+            localidadId: String(l.localidad_id),
+            nombre: String(l.nombre),
+            tipo: String(l.tipo),
+            precioCentavos: Number(l.precio_centavos),
+            aforoAutorizado: aut,
+            disponibles: disp,
+          };
+        }),
+    }));
+    // Búsqueda por nombre, artista, recinto o ciudad (búsqueda en tiempo real del front).
+    const filtrados = q
+      ? catalogo.filter((e) =>
+          [e.nombre, e.artista, e.recinto, e.ciudad, e.categoria]
+            .join(" ")
+            .toLowerCase()
+            .includes(q),
+        )
+      : catalogo;
+    return { eventos: filtrados };
+  });
+
+  // --- Cuentas de fan (identidad; homólogo local de Cognito, AD-004) --------
+
+  app.post("/auth/registro", async (peticion, respuesta) => {
+    const c = peticion.body as { correo?: string; clave?: string; nombre?: string; documento?: string };
+    try {
+      const r = await deps.cuentas.registrar(
+        exigir(c.correo, "correo"),
+        exigir(c.clave, "clave"),
+        c.nombre ?? "",
+        c.documento ?? "",
+      );
+      respuesta.code(201);
+      return r;
+    } catch (error) {
+      respuesta.code(409);
+      return { mensaje: (error as Error).message };
+    }
+  });
+
+  app.post("/auth/ingreso", async (peticion, respuesta) => {
+    const c = peticion.body as { correo?: string; clave?: string };
+    try {
+      return await deps.cuentas.ingresar(exigir(c.correo, "correo"), exigir(c.clave, "clave"));
+    } catch (error) {
+      respuesta.code(401);
+      return { mensaje: (error as Error).message };
+    }
+  });
+
+  app.get("/auth/perfil", async (peticion, respuesta) => {
+    const auth = (peticion.headers["authorization"] as string) ?? "";
+    const token = auth.replace(/^Bearer\s+/i, "");
+    const cuentaId = deps.cuentas.validarSesion(token);
+    if (!cuentaId) {
+      respuesta.code(401);
+      return { mensaje: "Sesión inválida" };
+    }
+    return { perfil: await deps.cuentas.perfil(cuentaId) };
+  });
+
+  app.put("/auth/perfil", async (peticion, respuesta) => {
+    const auth = (peticion.headers["authorization"] as string) ?? "";
+    const cuentaId = deps.cuentas.validarSesion(auth.replace(/^Bearer\s+/i, ""));
+    if (!cuentaId) {
+      respuesta.code(401);
+      return { mensaje: "Sesión inválida" };
+    }
+    const c = peticion.body as { nombre?: string; documento?: string };
+    return { perfil: await deps.cuentas.actualizar(cuentaId, c.nombre ?? "", c.documento ?? "") };
   });
 
   // --- Sala de espera / fila de admisión ------------------------------------

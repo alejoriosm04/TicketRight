@@ -14,6 +14,7 @@ import { registrarPortalEstatico } from "./http/static-portal.js";
 import { EmisorDeTokenAdmision, ValidadorDeTokenAdmision } from "./security/admission-token.js";
 import { BordeDeSeguridad } from "./security/edge-gateway.js";
 import { RegistroDeAuditoria } from "./security/audit-log.js";
+import { ServicioDeCuentas } from "./security/accounts.js";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 import {
@@ -99,13 +100,17 @@ const app = Fastify({ logger: opcionesDeLog });
 // Borde de seguridad (AD-004): rate limiting + detección de bots antes de las rutas.
 // Salud, métricas y el webhook interno de la pasarela quedan exentos.
 const borde = new BordeDeSeguridad({
-  exentas: ["/health", "/metrics", "/pagos/webhook", "/demo", "/portal", "/operacion"],
+  exentas: ["/health", "/metrics", "/pagos/webhook", "/demo", "/portal", "/operacion", "/catalogo", "/auth"],
 });
 borde.registrar(app);
 
 // Registro de auditoría (AD-004 / A-8), homólogo de CloudTrail.
 const auditoria = new RegistroDeAuditoria(pool);
 await auditoria.inicializar();
+
+// Cuentas de fan (identidad; homólogo de Cognito). PII cifrada, sesión con JWT.
+const cuentas = new ServicioDeCuentas(pool, process.env.SESION_SECRET ?? "demo-secreto-sesion", secretoAdmision);
+await cuentas.inicializar();
 
 // Portal estático (homólogo S3 + CloudFront): sirve el prototipo navegable en /portal.
 const raizPrototipo = path.resolve(
@@ -126,6 +131,7 @@ registrarRutas(app, {
   sala,
   eventoId: EVENTO_DEMO,
   perfiles,
+  cuentas,
 });
 
 // Bus de eventos (AD-002): con Kafka, el relay del outbox publica al bus y un consumidor
