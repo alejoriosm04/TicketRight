@@ -391,13 +391,13 @@
           var poco = l.disponibles > 0 && l.disponibles < l.aforoAutorizado * 0.15;
           return '<div class="tr-loc-item"><div><strong>' + esc(l.nombre) + '</strong><small>' + (l.disponibles > 0 ? l.disponibles.toLocaleString("es-CO") + " disponibles" : "Agotado") + (poco ? " · ¡pocas!" : "") + '</small></div><span class="precio">' + money(l.precioCentavos) + '</span></div>';
         }).join("") + '</div></section>';
-    document.getElementById("ver-entradas").addEventListener("click", function () { conSesion(function () { ir("fila"); }); });
+    // Ver entradas y elegir localidad no exige cuenta; la sesión se pide al reservar (checkout).
+    document.getElementById("ver-entradas").addEventListener("click", function () { ir("fila"); });
   }
 
   // ============================ VISTA: FILA (Redis) ============================
   async function vistaFila() {
     if (!S.evento) return ir("eventos");
-    if (!(S.sesion && S.sesion.token)) return conSesion(function () { ir("fila"); });
     app.innerHTML =
       '<div class="tr-centro"><div class="tarjeta tr-fila-card"><div class="tr-spinner"></div>' +
       '<h2 id="fila-titulo">Estás en la fila</h2><p class="tr-mut" id="fila-sub">Asegurando tu lugar de forma justa…</p>' +
@@ -533,11 +533,14 @@
     document.getElementById("btn-reservar").addEventListener("click", reservar);
   }
   async function reservar() {
+    // Checkout: aquí sí se exige la cuenta. Si no hay sesión, se abre el modal y al ingresar
+    // se retoma la reserva con el turno de admisión aún vigente.
+    if (!(S.sesion && S.sesion.token)) return conSesion(reservar);
     var btn = document.getElementById("btn-reservar"); btn.disabled = true; btn.textContent = "Reservando…";
     try {
       var c = await api("POST", "/compras", { fanId: FAN, tokenAdmision: S.token, localidadId: S.localidad.localidadId, cantidad: S.cantidad });
       S.compraId = c.compraId; S.reservaId = c.reservaId; S.total = c.totalCentavos; S.venceEn = c.venceEn; ir("reserva");
-    } catch (err) { toast(err.message); btn.disabled = false; btn.textContent = "Reservar"; }
+    } catch (err) { toast(err.message); if (btn) { btn.disabled = false; btn.textContent = "Reservar"; } }
   }
 
   // ============================ VISTA: RESERVA (temporizador real) ============================
