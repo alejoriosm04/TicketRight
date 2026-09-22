@@ -79,4 +79,10 @@ export function registrarPortalEstatico(app: FastifyInstance, opciones: Opciones
   });
   app.get("/portal/", servir);
   app.get("/portal/*", servir);
+
+  // /app y /app/ → la interfaz funcional de compra (recorrido real contra las APIs).
+  // Redirige a /portal/app.html para que herede los estilos del prototipo por ruta relativa.
+  app.get("/app", async (_peticion, respuesta) => {
+    respuesta.redirect("/portal/app.html", 302);
+  });
 }

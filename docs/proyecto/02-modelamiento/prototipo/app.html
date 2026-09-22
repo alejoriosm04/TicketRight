@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TicketRight — Comprar (funcional)</title>
+<link rel="stylesheet" href="estilos.css">
+<script>(function(){try{document.documentElement.setAttribute('data-tema', localStorage.getItem('tr-tema')||'dark');}catch(e){}})();</script>
+<style>
+  .contenedor { max-width: 640px; margin: 0 auto; padding: var(--space-6) var(--space-5); }
+  .paso-oculto { display: none; }
+  .localidad-op { display:flex; justify-content:space-between; align-items:center; padding:var(--space-3) var(--space-4); border:1px solid var(--color-border); border-radius:12px; margin-bottom:8px; cursor:pointer; }
+  .localidad-op:hover { border-color: var(--color-primary); }
+  .localidad-op.sel { border-color: var(--color-primary); box-shadow: 0 0 0 2px var(--color-primary) inset; }
+  .log { font-family: var(--font-mono, monospace); font-size: 12px; color: var(--color-text-muted); white-space: pre-wrap; margin-top: var(--space-4); border-top:1px solid var(--color-border); padding-top: var(--space-3); max-height: 180px; overflow:auto; }
+  .barra-progreso { display:flex; gap:6px; margin-bottom: var(--space-5); }
+  .barra-progreso .p { flex:1; height:4px; border-radius:4px; background: var(--color-border); }
+  .barra-progreso .p.on { background: var(--color-primary); }
+</style>
+</head>
+<body>
+<div class="app-layout">
+  <main class="contenido-principal">
+    <div class="contenedor">
+
+      <div class="encabezado-pagina">
+        <span class="etiqueta">TicketRight · Compra funcional</span>
+        <h1>Cardio Fest — Estéreo Picnic</h1>
+        <p style="color:var(--color-text-muted)">Esta pantalla ejecuta el recorrido real contra el backend: fila (Redis) → reserva → pago (SAGA) → emisión, con el token de admisión firmado.</p>
+      </div>
+
+      <div class="barra-progreso">
+        <div class="p" data-p="1"></div><div class="p" data-p="2"></div>
+        <div class="p" data-p="3"></div><div class="p" data-p="4"></div>
+      </div>
+
+      <!-- Paso 1: entrar a la fila -->
+      <div class="tarjeta" id="paso-fila">
+        <h3>1. Entrar a la fila</h3>
+        <p style="color:var(--color-text-muted)">La sala de espera Space-Based te asigna un turno; cuando el admisor te deja pasar, recibes un token de admisión firmado.</p>
+        <div class="fila-datos"><span class="k">Estado</span><span class="v"><span class="insignia insignia-neutro" id="estado-fila">sin entrar</span></span></div>
+        <div class="fila-datos" id="fila-pos-row" style="display:none"><span class="k">Posición</span><span class="v" id="fila-pos">—</span></div>
+        <button class="btn btn-primario btn-ancho" id="btn-fila" style="margin-top:12px">Entrar a la fila</button>
+      </div>
+
+      <!-- Paso 2: elegir localidad -->
+      <div class="tarjeta paso-oculto" id="paso-localidad">
+        <h3>2. Elegir tribuna</h3>
+        <div id="localidades"></div>
+        <div class="fila-datos"><span class="k">Cantidad</span><span class="v"><input id="cantidad" type="number" min="1" max="4" value="2" style="width:64px;background:var(--color-surface-overlay);border:1px solid var(--color-border);color:var(--color-text);border-radius:8px;padding:4px 8px"></span></div>
+        <button class="btn btn-primario btn-ancho" id="btn-reservar" style="margin-top:12px" disabled>Reservar</button>
+      </div>
+
+      <!-- Paso 3: pagar -->
+      <div class="tarjeta paso-oculto" id="paso-pago">
+        <h3>3. Pagar</h3>
+        <div class="fila-datos"><span class="k">Reserva</span><span class="v" id="pago-reserva">—</span></div>
+        <div class="fila-datos"><span class="k">Total</span><span class="v" id="pago-total">—</span></div>
+        <p style="color:var(--color-text-muted);margin-top:8px">La pasarela es simulada; el pago se confirma por webhook y la SAGA emite la boleta.</p>
+        <button class="btn btn-primario btn-ancho" id="btn-pagar" style="margin-top:12px">Pagar ahora</button>
+      </div>
+
+      <!-- Paso 4: boleta -->
+      <div class="tarjeta paso-oculto" id="paso-boleta">
+        <div class="alerta alerta-exito"><strong>¡Boleta emitida!</strong>Tu compra quedó confirmada y la boleta fue emitida por el contexto de derecho de asistencia.</div>
+        <div id="boletas"></div>
+        <button class="btn btn-secundario btn-ancho" id="btn-otra" style="margin-top:12px">Comprar otra</button>
+      </div>
+
+      <div class="log" id="log"></div>
+    </div>
+  </main>
+</div>
+
+<script>
+const FAN = "88888888-8888-4888-8888-888888888888";
+// Cabeceras de cliente legítimo para pasar el borde de seguridad (AD-004).
+const H = { "content-type": "application/json", "x-fan-id": FAN };
+
+const TRIBUNAS = [
+  { id: "22222222-2222-4222-8222-222222222201", nombre: "Oriental", precio: "$320.000" },
+  { id: "22222222-2222-4222-8222-222222222202", nombre: "Occidental", precio: "$280.000" },
+  { id: "22222222-2222-4222-8222-222222222203", nombre: "Sur", precio: "$150.000" },
+  { id: "22222222-2222-4222-8222-222222222204", nombre: "Norte", precio: "$150.000" },
+];
+
+let token = null, localidadSel = null, compraId = null, pagoId = null;
+
+const $ = (id) => document.getElementById(id);
+function log(msg) { const el = $("log"); el.textContent += msg + "\n"; el.scrollTop = el.scrollHeight; }
+function progreso(n) { document.querySelectorAll(".barra-progreso .p").forEach((p) => p.classList.toggle("on", Number(p.dataset.p) <= n)); }
+function mostrar(id) { $(id).classList.remove("paso-oculto"); }
+
+async function api(metodo, ruta, cuerpo) {
+  const r = await fetch(ruta, { method: metodo, headers: H, body: cuerpo ? JSON.stringify(cuerpo) : undefined });
+  const t = await r.text();
+  const d = t ? JSON.parse(t) : {};
+  if (!r.ok) throw new Error((d && d.mensaje) || (metodo + " " + ruta + " → " + r.status));
+  return d;
+}
+
+// Pinta las tribunas
+$("localidades").innerHTML = TRIBUNAS.map((t) =>
+  `<div class="localidad-op" data-id="${t.id}"><span><strong>${t.nombre}</strong></span><span>${t.precio}</span></div>`
+).join("");
+document.querySelectorAll(".localidad-op").forEach((el) => el.addEventListener("click", () => {
+  document.querySelectorAll(".localidad-op").forEach((o) => o.classList.remove("sel"));
+  el.classList.add("sel");
+  localidadSel = el.dataset.id;
+  $("btn-reservar").disabled = false;
+}));
+
+// Paso 1: entrar a la fila y esperar admisión
+$("btn-fila").addEventListener("click", async () => {
+  $("btn-fila").disabled = true;
+  progreso(1);
+  try {
+    const e = await api("POST", "/fila/entrar", { fanId: FAN });
+    log("→ ingreso a la fila; turno " + e.turnoId.slice(0, 8));
+    $("estado-fila").textContent = "en espera";
+    $("estado-fila").className = "insignia insignia-alerta";
+    $("fila-pos-row").style.display = "flex";
+    for (let i = 0; i < 30; i++) {
+      const s = await api("GET", "/fila/" + e.turnoId);
+      $("fila-pos").textContent = s.estado === "admitido" ? "¡admitido!" : ("#" + s.posicion);
+      if (s.estado === "admitido") {
+        token = s.token;
+        $("estado-fila").textContent = "admitido";
+        $("estado-fila").className = "insignia insignia-exito";
+        log("→ admitido; token de admisión firmado recibido");
+        mostrar("paso-localidad"); progreso(2);
+        return;
+      }
+      await new Promise((r) => setTimeout(r, 800));
+    }
+    log("✗ no fui admitido a tiempo");
+    $("btn-fila").disabled = false;
+  } catch (err) { log("✗ " + err.message); $("btn-fila").disabled = false; }
+});
+
+// Paso 2: reservar
+$("btn-reservar").addEventListener("click", async () => {
+  $("btn-reservar").disabled = true;
+  try {
+    const cantidad = Number($("cantidad").value) || 1;
+    const c = await api("POST", "/compras", { fanId: FAN, tokenAdmision: token, localidadId: localidadSel, cantidad });
+    compraId = c.compraId;
+    log("→ reserva creada; compra " + compraId.slice(0, 8) + "; vence " + new Date(c.venceEn).toLocaleTimeString("es-CO"));
+    $("pago-reserva").textContent = c.reservaId.slice(0, 8);
+    $("pago-total").textContent = "$" + (c.totalCentavos / 100).toLocaleString("es-CO");
+    mostrar("paso-pago"); progreso(3);
+  } catch (err) { log("✗ " + err.message); $("btn-reservar").disabled = false; }
+});
+
+// Paso 3: pagar y esperar emisión
+$("btn-pagar").addEventListener("click", async () => {
+  $("btn-pagar").disabled = true;
+  try {
+    const p = await api("POST", "/compras/" + compraId + "/pago", {});
+    pagoId = p.pagoId;
+    log("→ pago iniciado (" + p.estado + "); esperando confirmación de la pasarela…");
+    for (let i = 0; i < 20; i++) {
+      await new Promise((r) => setTimeout(r, 700));
+      const est = await api("GET", "/compras/" + compraId);
+      if (est.pago && est.pago.estado !== "confirmado") {
+        await api("POST", "/demo/pasarela/confirmar/" + est.pago.pagoId, {}).catch(() => {});
+      }
+      if (est.compra.paso === "emitida") {
+        log("→ pago confirmado y boletas emitidas (SAGA completa)");
+        $("boletas").innerHTML = est.boletas.map((b, i) =>
+          `<div class="fila-datos"><span class="k">Boleta ${i + 1}</span><span class="v">${b.codigo.slice(0, 13)}… <span class="insignia insignia-exito">${b.estado}</span></span></div>`
+        ).join("");
+        mostrar("paso-boleta"); progreso(4);
+        return;
+      }
+    }
+    log("✗ la emisión no completó a tiempo");
+    $("btn-pagar").disabled = false;
+  } catch (err) { log("✗ " + err.message); $("btn-pagar").disabled = false; }
+});
+
+$("btn-otra").addEventListener("click", () => location.reload());
+</script>
+</body>
+</html>
