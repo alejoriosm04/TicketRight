@@ -111,3 +111,13 @@ Ninguna cambia el comportamiento verificado por las pruebas; se registran por ho
 - **`ESTADO.md` sincronizado.** Se corrigió la inconsistencia del tablero (decía «sin empezar
   el código») y se registró el incremento de la plataforma web. La documentación ahora refleja
   el estado real (evita el descuento del criterio 6 por documentación desfasada).
+- **Reserva vencida en la UI (R3).** El backend ya rechaza el pago de una reserva vencida
+  (`Reserva.marcarEnPago` → `ReservaVencida` → 409) y el worker libera el inventario. Se
+  alineó el front: al llegar el temporizador a 0 —o si el backend responde 409— la plataforma
+  bloquea el pago, avisa y libera la reserva, en vez de dejar «Pagar».
+- **Datos del titular según AD-004.** El checkout captura **nombre, documento, correo y
+  teléfono** —el mínimo que AD-004 fija para la boleta nominal—. No se pide **dirección**:
+  AD-004 prohíbe PII sin finalidad documentada, y el agregado `Identidad` del
+  [modelo de dominio](../02-modelamiento/modelo-de-dominio.md) solo modela nombre, documento y
+  correo; el teléfono se usa como contacto de la boleta nominal (AD-004), no se añade como
+  campo persistente del agregado. Se quitó de la UI el texto sobre el cifrado AES-256-GCM.

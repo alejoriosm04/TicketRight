@@ -561,8 +561,11 @@
         (para > 0 ? '<div class="fila-datos"><span class="k">Contribución parafiscal</span><span class="v">' + money(para) + '</span></div>' : '') +
         '<div class="fila-datos"><span class="k"><strong>Total</strong></span><span class="v"><strong>' + money(S.total) + '</strong></span></div>' +
         '<button class="btn btn-primario btn-ancho tr-mt" id="btn-continuar">Continuar</button><a class="tr-cancelar" id="btn-cancelar">Cancelar reserva</a></div></div>';
-    document.getElementById("btn-continuar").addEventListener("click", function () { ir("datos"); });
-    document.getElementById("btn-cancelar").addEventListener("click", function () { S.compraId = null; ir("eventos"); });
+    document.getElementById("btn-continuar").addEventListener("click", function () {
+      if (reservaVencida()) return expirarReserva();  // no dejar avanzar si ya venció (R3)
+      ir("datos");
+    });
+    document.getElementById("btn-cancelar").addEventListener("click", function () { liberarReserva(); ir("eventos"); });
     if (relojInterval) clearInterval(relojInterval);
     var anillo = document.getElementById("anillo"), reloj = document.getElementById("reloj"), total = 600, circ = 439.8;
     relojInterval = setInterval(function () {
@@ -571,31 +574,53 @@
       reloj.textContent = String(Math.floor(rest / 60)).padStart(2, "0") + ":" + String(rest % 60).padStart(2, "0");
       var frac = rest / total; anillo.setAttribute("stroke-dashoffset", String(circ * (1 - frac)));
       anillo.style.stroke = frac < 0.34 ? "var(--color-danger,#f87171)" : frac < 0.6 ? "var(--color-warning,#fbbf24)" : "var(--color-primary,#a78bfa)";
-      if (rest <= 0) clearInterval(relojInterval);
+      // Al llegar a 0 la reserva ya no está vigente (R3): el backend rechazaría el pago con
+      // ReservaVencida y el worker libera el inventario. Lo reflejamos en la UI.
+      if (rest <= 0) { clearInterval(relojInterval); expirarReserva(); }
     }, 1000);
   }
 
+  // ¿La reserva actual ya venció según venceEn? (mismo criterio que el backend, R3).
+  function reservaVencida() { return !S.venceEn || Date.now() >= new Date(S.venceEn).getTime(); }
+  function liberarReserva() { S.compraId = null; S.reservaId = null; S.venceEn = null; if (relojInterval) clearInterval(relojInterval); }
+  function expirarReserva() {
+    liberarReserva();
+    toast("Se acabó el tiempo de tu reserva. El inventario volvió a quedar disponible.");
+    ir("evento");
+  }
+
   // ============================ VISTA: DATOS DEL TITULAR ============================
+  // Datos mínimos de la boleta nominal según AD-004: nombre, documento, correo y teléfono.
   function vistaDatos() {
     if (!S.compraId) return ir("eventos");
+    if (reservaVencida()) return expirarReserva();
     var perfil = (S.sesion && S.sesion.perfil) || {};
     app.innerHTML =
       '<a class="tr-volver" href="#/reserva">← Volver a la reserva</a>' +
       '<div class="encabezado-pagina"><span class="etiqueta">Confirma al titular</span><h1>¿A nombre de quién van las boletas?</h1></div>' +
       '<div class="tr-centro-1"><div class="tarjeta">' +
         '<div class="tr-campo"><label>Nombre completo</label><input id="d-nombre" value="' + esc(perfil.nombre || "") + '" placeholder="Tu nombre"></div>' +
-        '<div class="tr-campo"><label>Correo electrónico</label><input id="d-correo" value="' + esc(perfil.correo || "") + '" placeholder="tucorreo@ejemplo.com"></div>' +
         '<div class="tr-campo"><label>Documento</label><input id="d-doc" value="' + esc(perfil.documento || "") + '" placeholder="C.C. / pasaporte"></div>' +
-        '<div class="tr-nota">🔒 Tus datos se cifran (AES-256) y solo se usan para emitir tu boleta nominal. No se comparten sin tu consentimiento.</div>' +
+        '<div class="tr-campo"><label>Correo electrónico</label><input id="d-correo" type="email" value="' + esc(perfil.correo || "") + '" placeholder="tucorreo@ejemplo.com"></div>' +
+        '<div class="tr-campo"><label>Teléfono</label><input id="d-tel" type="tel" value="' + esc(perfil.telefono || "") + '" placeholder="Celular de contacto"></div>' +
+        '<p class="tr-mini tr-err" id="d-error"></p>' +
         '<button class="btn btn-primario btn-ancho" id="btn-datos">Ir a pagar</button></div></div>';
     document.getElementById("btn-datos").addEventListener("click", function () {
-      S.titular = { nombre: document.getElementById("d-nombre").value, correo: document.getElementById("d-correo").value }; ir("pago");
+      if (reservaVencida()) return expirarReserva();
+      var nombre = document.getElementById("d-nombre").value.trim();
+      var doc = document.getElementById("d-doc").value.trim();
+      var correo = document.getElementById("d-correo").value.trim();
+      var tel = document.getElementById("d-tel").value.trim();
+      if (!nombre || !doc || !correo || !tel) { document.getElementById("d-error").textContent = "Completa nombre, documento, correo y teléfono para tu boleta nominal."; return; }
+      S.titular = { nombre: nombre, documento: doc, correo: correo, telefono: tel };
+      ir("pago");
     });
   }
 
   // ============================ VISTA: PAGO (SAGA) ============================
   function vistaPago() {
     if (!S.compraId) return ir("eventos");
+    if (reservaVencida()) return expirarReserva();  // R3: sin reserva vigente no se paga
     app.innerHTML =
       '<div class="encabezado-pagina"><span class="etiqueta">Pago · ' + money(S.total) + '</span><h1>Completa tu pago</h1></div>' +
       '<div class="tr-centro-1"><div class="tarjeta" id="pago-form">' +
@@ -607,10 +632,12 @@
     document.getElementById("btn-pagar").addEventListener("click", pagar);
   }
   async function pagar() {
+    if (reservaVencida()) return expirarReserva();  // última verificación antes de cobrar
     var cont = document.getElementById("pago-form");
+    var medio = document.getElementById("p-medio") ? document.getElementById("p-medio").value : "tarjeta";
     cont.innerHTML = '<div class="tr-txt-centro"><div class="tr-spinner"></div><h3>Procesando tu pago…</h3><p class="tr-mut">Esperando la confirmación de la pasarela. No cierres esta ventana.</p></div>';
     try {
-      var p = await api("POST", "/compras/" + S.compraId + "/pago", { medio: document.getElementById("p-medio") ? document.getElementById("p-medio").value : "tarjeta" });
+      var p = await api("POST", "/compras/" + S.compraId + "/pago", { medio: medio });
       S.pagoId = p.pagoId;
       for (var i = 0; i < 25; i++) {
         await sleep(700);
@@ -620,7 +647,11 @@
         if (est.compra.paso === "enConciliacion") { return pintarConciliacion(); }
       }
       pintarConciliacion();
-    } catch (err) { toast(err.message); ir("pago"); }
+    } catch (err) {
+      // El backend rechaza el pago si la reserva ya venció (R3): lo reflejamos como expiración.
+      if (err.status === 409 || /vencid/i.test(err.message)) return expirarReserva();
+      toast(err.message); ir("pago");
+    }
   }
   function pintarConciliacion() {
     document.getElementById("pago-form").innerHTML =
@@ -656,7 +687,6 @@
           '<div class="tr-campo"><label>Nombre completo</label><input id="pf-nombre" value="' + esc(p.nombre || "") + '"></div>' +
           '<div class="tr-campo"><label>Documento</label><input id="pf-doc" value="' + esc(p.documento || "") + '"></div>' +
           '<div class="tr-campo"><label>Correo (no editable)</label><input value="' + esc(p.correo) + '" disabled></div>' +
-          '<div class="tr-nota">🔒 Tu nombre y documento se guardan cifrados con AES-256-GCM. Nadie más los ve en claro.</div>' +
           '<button class="btn btn-primario btn-ancho" id="pf-guardar">Guardar cambios</button></div></div>';
       document.getElementById("pf-guardar").addEventListener("click", async function () {
         var btn = document.getElementById("pf-guardar"); btn.disabled = true; btn.textContent = "Guardando…";
