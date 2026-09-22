@@ -47,9 +47,9 @@ caso de uso principal, y encima de eso pruebas, carga, observabilidad y fallos.
 | # | Criterio | Insumo ya escrito | Qué falta |
 |---|---|---|---|
 | 1 | Aplicación funcionando (40%) | [AD-007](docs/proyecto/decisiones/0007-stack-de-implementacion.md): TypeScript/Node · [arquitectura hexagonal](docs/proyecto/02-modelamiento/diagrama-de-clases.md) · [caso de uso](docs/proyecto/02-modelamiento/diagrama-de-secuencia.md) | 🟢 API Fastify + PostgreSQL + outbox + pasarela simulada + sala de espera en `apps/ventas`; compra completa, webhook repetido y rechazo verificados en local. `PENDIENTE: clúster k3d/minikube y video demo` |
-| 2 | Pruebas y coherencia | [Plan de pruebas](docs/proyecto/02-modelamiento/plan-de-pruebas.md): 21 casos UT sobre las reglas R1–R14 | ✅ Los 21 casos escritos y en verde (38 pruebas; cobertura ~77,7% sentencias), más 2 pruebas de integración de concurrencia contra PostgreSQL real, que el CI corre con PostgreSQL de servicio. El CI corre `test:coverage` y **anexa el reporte como artefacto** ([`verificacion.yml`](.github/workflows/verificacion.yml)) |
+| 2 | Pruebas y coherencia | [Plan de pruebas](docs/proyecto/02-modelamiento/plan-de-pruebas.md): 21 casos UT sobre las reglas R1–R14 | ✅ Los 21 casos escritos y en verde (38 pruebas; cobertura ~77,7% sentencias), más 5 pruebas de integración contra PostgreSQL real (concurrencia sobre el aforo, webhooks simultáneos y turno de un solo uso), que el CI corre con PostgreSQL de servicio. El CI corre `test:coverage` y **anexa el reporte como artefacto** ([`verificacion.yml`](.github/workflows/verificacion.yml)) |
 | 3 | Observabilidad (20%) | [Observabilidad](docs/proyecto/02-modelamiento/observabilidad.md): métricas, tableros y alertas | 🟢 Implementada: plataforma completa (OTel + Alloy + Prometheus + Tempo + Loki + Grafana), las 14 métricas del diseño instrumentadas + complementos de ticketera, tablero de 5 secciones y 4 alertas. Ver [`observability/README.md`](observability/README.md). `PENDIENTE: capturas y video` |
-| 4 | Simulación de fallos (30%) | [Inyección de fallos](docs/proyecto/02-modelamiento/inyeccion-de-fallos.md): IF-01, IF-02, IF-03 e IF-05 elegidos | 🟢 Los 4 ejecutados y aprobados con el arnés de `chaos/`; bitácora en [`bitacora-de-fallos.md`](docs/proyecto/03-implementacion/bitacora-de-fallos.md). `PENDIENTE: capturas del tablero durante cada fallo para el video` |
+| 4 | Simulación de fallos (30%) | [Inyección de fallos](docs/proyecto/02-modelamiento/inyeccion-de-fallos.md): IF-01, IF-02, IF-03 e IF-05 elegidos | 🟢 Los 4 ejecutados y aprobados con el arnés de `chaos/`, y **repetidos el 22 sep** con la métrica de sobreventa real y webhooks simultáneos; bitácora en [`bitacora-de-fallos.md`](docs/proyecto/03-implementacion/bitacora-de-fallos.md). `PENDIENTE: capturas del tablero durante cada fallo para el video` |
 | 5 | Carga | [Volumetría](docs/proyecto/02-modelamiento/volumetria.md): nominal, pico, estrés y resistencia; 30.000 usuarios en 60 s contra 5.000 boletas | Corridas y resultados |
 | 6 | Patrones (10%) | [Patrones utilizados](docs/proyecto/03-implementacion/patrones.md) | Revisar contra la demo y añadir capturas |
 | 7 | Prototipo / plataforma web | [Prototipo](docs/proyecto/02-modelamiento/prototipo/index.html): 16 pantallas, tres roles | 🟢 Además del prototipo estático hay una **plataforma web funcional** en `/app` conectada a las APIs (catálogo, fila, reserva, pago, boleta, promotor, operación) |
@@ -161,11 +161,13 @@ lo había detectado: UT-04 corre en memoria, IF-01 reenvía webhooks en serie y 
 `ticketright_oversell_total` nunca se incrementaba. Se corrigió con una **unidad de trabajo**
 por cada `[COMMIT]` del diagrama de secuencia (puerto `UnidadDeTrabajo`, adaptador
 `BaseTransaccional`), bloqueo de pagos y reservas, admisión solo con el JWT de la fila (el
-token `turno:<uuid>` inventado ya no compra) y la métrica de sobreventa calculada desde las
-tablas. Lo verifican dos pruebas de integración contra PostgreSQL en el CI. Detalle, evidencia
-y pendientes en el
-[§7 de la auditoría de coherencia](docs/proyecto/03-implementacion/coherencia-implementacion.md#7-hallazgo-posterior-sobreventa-por-falta-de-transacciones).
-`PENDIENTE: repetir IF-01, IF-02 e IF-03 con la métrica de sobreventa real.`
+token `turno:<uuid>` inventado ya no compra), **turno de un solo uso y ligado al fan** y la
+métrica de sobreventa calculada desde las tablas. Lo verifican cinco pruebas de integración
+contra PostgreSQL en el CI. Con el arnés de `chaos/` al día se **repitieron los cuatro
+experimentos**, todos aprobados; IF-05 no corría desde que llegó el borde de seguridad.
+Detalle y evidencia en el
+[§7 de la auditoría de coherencia](docs/proyecto/03-implementacion/coherencia-implementacion.md#7-hallazgo-posterior-sobreventa-por-falta-de-transacciones)
+y en la [segunda campaña de la bitácora](docs/proyecto/03-implementacion/bitacora-de-fallos.md#segunda-campaña--22-de-septiembre).
 
 ## Tablero
 

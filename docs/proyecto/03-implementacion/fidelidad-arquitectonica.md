@@ -45,9 +45,9 @@ Lo que cambia es el proveedor, no el patrón ni el contrato.
 |---|---|---|
 | API Gateway (única entrada, cuotas por ruta) | Borde propio con token bucket por clase (catálogo/fila/checkout) | [`edge-gateway.ts`](../../../apps/ventas/src/security/edge-gateway.ts) |
 | WAF / Bot Control | Detección de automatización por heurística (UA, ráfagas); riesgo medio → reto, alto → bloqueo | `edge-gateway.ts` |
-| Cognito / OIDC + JWT de admisión firmado | JWT HS256 corto, con `jti` de uso único, `event_id`, `aud`, `exp` (3 min) | [`admission-token.ts`](../../../apps/ventas/src/security/admission-token.ts) |
+| Cognito / OIDC + JWT de admisión firmado | JWT HS256 corto, con `jti`, `event_id`, `aud`, `exp` (3 min). Desde el 22 sep el `jti` es **de uso único de verdad** (tabla `turnos_usados`, en la transacción de la reserva) y el `sub` debe ser el fan que reserva; antes el mismo token servía para varias reservas y para otro fan | [`admission-token.ts`](../../../apps/ventas/src/security/admission-token.ts), [`jwt-admission.ts`](../../../apps/ventas/src/adapters/jwt-admission.ts) |
 | Cognito (cuentas de fan + grupos/roles) | Registro/ingreso con clave por scrypt+sal, sesión JWT de 24 h, y **rol** (`cliente`/`promotor`/`operacion`) que autoriza las vistas internas | [`accounts.ts`](../../../apps/ventas/src/security/accounts.ts); `POST /operacion/perfil` exige rol staff |
-| Validación en el gateway y el núcleo | El checkout valida firma, emisor, audiencia, evento y expiración | [`jwt-admission.ts`](../../../apps/ventas/src/adapters/jwt-admission.ts) |
+| Validación en el gateway y el núcleo | El checkout valida firma, emisor, audiencia, evento, expiración, fan y uso único; un token inválido responde 401 | [`jwt-admission.ts`](../../../apps/ventas/src/adapters/jwt-admission.ts) |
 | KMS (cifrado de PII) | Cifrado AES-256-GCM de campos personales | [`crypto-utils.ts`](../../../apps/ventas/src/security/crypto-utils.ts) |
 | CloudTrail (auditoría) | Registro append-only de accesos con rol y finalidad | [`audit-log.ts`](../../../apps/ventas/src/security/audit-log.ts) |
 | Identificadores opacos en eventos/métricas/logs | El núcleo usa `fanId`/`identidadRef` opacos; no hay PII en Kafka, Prometheus ni Loki | convención en todo el código |
@@ -74,8 +74,8 @@ Lo que cambia es el proveedor, no el patrón ni el contrato.
 
 ### AD-007 — Stack (TypeScript/Node 24, monorepo, Vitest)
 
-Implementado tal cual: monorepo npm workspaces, TypeScript estricto, 40 pruebas Vitest (38
-unitarias y 2 de integración contra PostgreSQL), CI en GitHub Actions con PostgreSQL de
+Implementado tal cual: monorepo npm workspaces, TypeScript estricto, 43 pruebas Vitest (38
+unitarias y 5 de integración contra PostgreSQL), CI en GitHub Actions con PostgreSQL de
 servicio. La app corre con `tsx` y se empaqueta en `Dockerfile`.
 
 ### AD-008 — Boleta en el contexto de derecho de asistencia

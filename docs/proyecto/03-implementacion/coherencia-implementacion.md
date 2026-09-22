@@ -177,6 +177,9 @@ pasaba lo mismo: varios webhooks leían el pago como pendiente y cada uno emití
 | Recorrido real: 100 fans admitidos por la fila con JWT, reservando a la vez | — | 50 `201`, 50 `409` |
 | Token `turno:<uuid>` inventado | 201 (compraba) | 401 |
 | Sobreventa forzada a mano (aforo 40 con 50 reservadas) | métrica en 0 | `ticketright_oversell_total{localidad="Repro"} 10` |
+| El mismo JWT de la fila usado 5 veces a la vez (misma prueba) | 5 reservas | 1 reserva, 4 rechazos |
+| El JWT de un fan usado por otro (misma prueba) | reservaba | rechazado |
+| Reserva rechazada por aforo, y luego otra localidad con el mismo turno | — | el rechazo no gasta el turno |
 
 La prueba de integración corre en el CI contra un PostgreSQL de servicio. Sin la corrección,
 falla: se comprobó quitando la unidad de trabajo.
@@ -187,8 +190,20 @@ de carga van a medir. Iniciar el pago sostiene la transacción mientras se llama
 pasarela; con la pasarela simulada es inmediato, pero con una real habría que partir ese paso
 en dos.
 
-**Pendientes que deja el hallazgo.**
+IF-03 cambió un número: con PostgreSQL congelado, la reserva ahora se rechaza en **~4 s**
+en vez de ~2 s, porque la transacción espera primero una conexión del pool
+(`PG_CONNECT_TIMEOUT_MS`, 4 s). Sigue siendo un rechazo acotado.
 
-- `PENDIENTE: repetir IF-01, IF-02 e IF-03 con la métrica de sobreventa ya real, y agregar a IF-01 el reenvío simultáneo de webhooks.`
-- `PENDIENTE: chaos/lib.mjs usa ids de localidad fijos (2222…) que el seed actual ya no crea; hay que resolverlos del catálogo antes de repetir la campaña.`
-- `PENDIENTE: el JWT de admisión no se ata al fan ni se marca como usado (marcarUsado no se llama), así que un token admitido sirve para varias reservas y para otro fan.`
+**Cerrado en el mismo cambio.**
+
+- **Turno de un solo uso y ligado al fan**, como piden AD-004, AD-006 y la relación
+  Turno → Reserva `1:0..1` del modelo de dominio. El validador registra el `jti` en
+  `turnos_usados` dentro de la transacción de la reserva: si la reserva se rechaza por aforo,
+  el rollback devuelve el turno. El `sub` del JWT debe ser el fan que reserva. La fila marca
+  el turno como `usado` y la plataforma web olvida el token al reservar.
+- **Arnés de fallos al día.** `chaos/lib.mjs` resuelve las tribunas por nombre desde el
+  catálogo (y las guarda para la fase con PostgreSQL en pausa). IF-01 agrega los webhooks
+  simultáneos. IF-05 usa ocho fans distintos: con uno solo, el borde de seguridad lo retaba
+  como bot desde el incremento 4 y el experimento ya no pasaba.
+- **Campaña repetida** el 22 de septiembre: los cuatro experimentos aprobados con la métrica
+  de sobreventa real ([bitácora](bitacora-de-fallos.md#segunda-campaña--22-de-septiembre)).

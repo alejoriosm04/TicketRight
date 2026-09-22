@@ -34,8 +34,8 @@ de métricas antes, durante y después, y decide **aprobado/fallido** según la 
 > pasara lo que pasara. Además, IF-01 reenvió los webhooks uno tras otro; enviados **a la
 > vez**, un pago de una boleta emitía siete. Ambas cosas quedaron corregidas y documentadas en
 > el [hallazgo de sobreventa](coherencia-implementacion.md#7-hallazgo-posterior-sobreventa-por-falta-de-transacciones);
-> los demás criterios de cada experimento se sostienen.
-> `PENDIENTE: repetir IF-01, IF-02 e IF-03 con la métrica real y agregar a IF-01 el reenvío simultáneo.`
+> los demás criterios de cada experimento se sostienen. La campaña se repitió completa ese
+> mismo día: ver la [segunda campaña](#segunda-campaña--22-de-septiembre).
 
 ---
 
@@ -98,6 +98,30 @@ de métricas antes, durante y después, y decide **aprobado/fallido** según la 
 | **Repetición** | Reproducible; resultado estable tras restaurar la CPU. |
 
 ---
+
+## Segunda campaña — 22 de septiembre
+
+Se repitieron los cuatro experimentos sobre la versión con **unidad de trabajo**, **turno de
+un solo uso** y **métrica de sobreventa calculada desde las tablas**. Ambiente: `docker
+compose` local con PostgreSQL y Prometheus, fila en memoria. Cambios al arnés:
+
+- `lib.mjs` resuelve las tribunas por nombre desde el catálogo; el seed del incremento 5 ya
+  no crea los ids fijos `2222…` y el arnés no corría.
+- La foto final de cada experimento espera dos ciclos de medición (11 s): el colector y
+  Prometheus tardan hasta 10 s en reflejar la sobreventa.
+- IF-01 agrega una **fase 2**: el mismo webhook cinco veces **a la vez**.
+- IF-05 usa ocho fans distintos. Con un solo fan, el borde de seguridad del incremento 4 lo
+  retaba como bot (429) y el lote terminaba **0/8 incluso en la línea base**: el experimento
+  dejó de funcionar el día que se agregó el borde y nadie lo había vuelto a correr.
+
+| Experimento | Resultado | Lo medido |
+|---|---|---|
+| IF-01 | ✅ Aprobado | Fase 1 (3 webhooks en serie): 2 boletas, 0 discrepancias. Fase 2 (5 webhooks simultáneos, cinco `200`): 2 boletas, 0 discrepancias. Sobreventa 0. Antes de la corrección, la fase 2 emitía de más (1 boleta pedida → 7 emitidas en la prueba de integración) |
+| IF-02 | ✅ Aprobado | 5 pagos en curso; tras el reinicio las 5 compras terminaron en `emitida` con 2 boletas cada una, 0 discrepancias, sobreventa 0 |
+| IF-03 | ✅ Aprobado | Con PostgreSQL en pausa: 4/4 reservas rechazadas (`500` en **~4,0 s**, antes ~2 s: la transacción espera primero una conexión del pool), 0 confirmadas, sobreventa 0. Al reanudar, la compra de control termina en `emitida` |
+| IF-05 | ✅ Aprobado | Línea base 8/8 en 1,4 s (P95 de reserva 0,09 s); con la CPU de PostgreSQL en 0,1: 8/8 en 4,8 s (P95 0,38 s); al restaurar, 8/8 en 2,1 s. Sobreventa 0, discrepancias 0 |
+
+`PENDIENTE: capturas del tablero de Grafana durante cada fallo para el video; esta campaña corrió sin Grafana por la memoria de la máquina local.`
 
 ## Resumen de la campaña
 
