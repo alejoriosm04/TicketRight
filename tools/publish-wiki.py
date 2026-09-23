@@ -78,6 +78,10 @@ PAGES = [
     ("docs/proyecto/03-implementacion/README.md", "Entrega-3", "Entrega 3 · Implementación", "Implementación, sustentación y defensa"),
     ("docs/proyecto/03-implementacion/rubrica.md", "Entrega-3-Rubrica", "Entrega 3 · Implementación", "Rúbrica del entregable"),
     ("docs/proyecto/03-implementacion/patrones.md", "Entrega-3-Patrones", "Entrega 3 · Implementación", "Patrones utilizados"),
+    ("docs/proyecto/03-implementacion/fidelidad-arquitectonica.md", "Entrega-3-Fidelidad-arquitectonica", "Entrega 3 · Implementación", "Fidelidad a los ADR"),
+    ("docs/proyecto/03-implementacion/coherencia-implementacion.md", "Entrega-3-Coherencia", "Entrega 3 · Implementación", "Coherencia diseño–código"),
+    ("docs/proyecto/03-implementacion/bitacora-de-fallos.md", "Entrega-3-Bitacora-de-fallos", "Entrega 3 · Implementación", "Bitácora de fallos"),
+    ("docs/proyecto/03-implementacion/pruebas-de-carga.md", "Entrega-3-Pruebas-de-carga", "Entrega 3 · Implementación", "Pruebas de carga"),
 
     ("docs/proyecto/decisiones/README.md", "ADR", "Decisiones · ADR", "Índice y formato"),
     ("docs/proyecto/decisiones/0001-idea-de-negocio.md", "ADR-001-Idea-de-negocio", "Decisiones · ADR", "AD-001 Idea de negocio"),
