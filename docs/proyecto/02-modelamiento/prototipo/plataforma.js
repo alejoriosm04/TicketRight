@@ -82,7 +82,7 @@
   // Portada de tarjeta/detalle: SIEMPRE gradiente + emoji (los banners solo van en el carrusel,
   // porque son muy panorámicos y se ven recortados en formatos cuadrados).
   function portadaHtml(e, claseEmoji) {
-    return '<div class="tr-portada-grad" style="width:100%;height:100%;display:grid;place-items:center;background:' + esc(gradienteEvento(e)) + '"><span class="' + (claseEmoji || "emoji") + '">' + emojiEvento(e) + '</span></div>';
+    return '<div class="tr-portada-grad" style="width:100%;height:100%;display:grid;place-items:center;background:' + esc(gradienteEvento(e)) + '"><span class="' + (claseEmoji || "emoji") + '" aria-hidden="true">' + emojiEvento(e) + '</span></div>';
   }
   function fechaLarga(iso) {
     if (!iso) return "Fecha por confirmar";
@@ -136,25 +136,36 @@
       var etqRol = p.rol === "promotor" ? "Promotor" : p.rol === "operacion" ? "Operación" : "Cliente";
       c.innerHTML =
         '<div class="tr-cuenta-menu">' +
-          '<button class="tr-avatar" id="btn-avatar" title="' + esc(nombre) + '">' + esc(ini) + '</button>' +
+          '<button type="button" class="tr-avatar" id="btn-avatar" title="' + esc(nombre) + '" aria-label="' + esc("Cuenta de " + nombre) + '" aria-haspopup="true" aria-expanded="false" aria-controls="drop">' + esc(ini) + '</button>' +
           '<div class="tr-drop" id="drop">' +
             '<div class="tr-drop-cab">Hola,<strong>' + esc((nombre + "").split(" ")[0]) + '</strong><span class="tr-rol-chip">' + etqRol + '</span></div>' +
-            '<a data-r="perfil">Mi perfil</a>' +
-            (p.rol === "promotor" ? '<a data-r="promotor">Panel de promotor</a>' : "") +
-            (p.rol === "operacion" ? '<a data-r="operacion">Centro de operaciones</a>' : "") +
-            '<a class="tr-drop-salir" id="btn-salir">Cerrar sesión</a>' +
+            '<a href="#/perfil" data-r="perfil">Mi perfil</a>' +
+            (p.rol === "promotor" ? '<a href="#/promotor" data-r="promotor">Panel de promotor</a>' : "") +
+            (p.rol === "operacion" ? '<a href="#/operacion" data-r="operacion">Centro de operaciones</a>' : "") +
+            '<a href="#" role="button" class="tr-drop-salir" id="btn-salir">Cerrar sesión</a>' +
           '</div></div>';
-      var drop = c.querySelector("#drop");
-      c.querySelector("#btn-avatar").addEventListener("click", function (ev) { ev.stopPropagation(); drop.classList.toggle("on"); });
-      c.querySelectorAll(".tr-drop a[data-r]").forEach(function (a) { a.addEventListener("click", function () { drop.classList.remove("on"); ir(a.dataset.r); }); });
-      c.querySelector("#btn-salir").addEventListener("click", cerrarSesion);
+      var drop = c.querySelector("#drop"), avatar = c.querySelector("#btn-avatar");
+      avatar.addEventListener("click", function (ev) {
+        ev.stopPropagation();
+        var abierto = drop.classList.toggle("on");
+        avatar.setAttribute("aria-expanded", String(abierto));
+        if (abierto) drop.querySelector("a").focus();
+      });
+      drop.addEventListener("keydown", function (ev) { if (ev.key === "Escape") { cerrarMenuCuenta(); avatar.focus(); } });
+      c.querySelectorAll(".tr-drop a[data-r]").forEach(function (a) { a.addEventListener("click", function () { cerrarMenuCuenta(); }); });
+      c.querySelector("#btn-salir").addEventListener("click", function (ev) { ev.preventDefault(); cerrarSesion(); });
     } else {
       c.innerHTML = '<button class="btn btn-primario btn-sm" id="btn-ingresar">Ingresar / Registrarse</button>';
       c.querySelector("#btn-ingresar").addEventListener("click", function () { abrirAuth("ingreso"); });
     }
   }
+  function cerrarMenuCuenta() {
+    var d = document.getElementById("drop"), a = document.getElementById("btn-avatar");
+    if (d) d.classList.remove("on");
+    if (a) a.setAttribute("aria-expanded", "false");
+  }
   // Un solo listener global para cerrar el menú (no se re-agrega en cada render).
-  document.addEventListener("click", function () { var d = document.getElementById("drop"); if (d) d.classList.remove("on"); });
+  document.addEventListener("click", cerrarMenuCuenta);
 
   function cerrarSesion() {
     var eraStaff = rol() && rol() !== "cliente";
@@ -170,26 +181,36 @@
   // ============================ MODAL DE AUTENTICACIÓN ============================
   var modoAuth = "ingreso";
   var modal = document.getElementById("modal-auth");
-  function abrirAuth(modo, alEntrar) { modoAuth = modo || "ingreso"; S._pendiente = alEntrar || null; pintarAuth(); modal.classList.add("on"); }
-  function cerrarAuth() { modal.classList.remove("on"); }
+  var focoAntesDelModal = null;
+  function abrirAuth(modo, alEntrar) {
+    modoAuth = modo || "ingreso"; S._pendiente = alEntrar || null; pintarAuth();
+    focoAntesDelModal = document.activeElement;
+    modal.classList.add("on");
+    var primero = modal.querySelector("input"); if (primero) primero.focus();
+  }
+  function cerrarAuth() {
+    modal.classList.remove("on");
+    if (focoAntesDelModal && document.body.contains(focoAntesDelModal)) focoAntesDelModal.focus();
+  }
+  modal.addEventListener("keydown", function (ev) { if (ev.key === "Escape") cerrarAuth(); });
 
   function pintarAuth() {
     var esRegistro = modoAuth === "registro";
     document.getElementById("auth-titulo").textContent = esRegistro ? "Crea tu cuenta" : "Ingresar en tu cuenta";
     document.getElementById("auth-sub").innerHTML = esRegistro
-      ? '¿Ya tienes cuenta? <a class="tr-link" id="auth-toggle">Ingresa aquí</a>'
-      : '¿No tienes cuenta? <a class="tr-link" id="auth-toggle">Regístrate ahora</a>';
+      ? '¿Ya tienes cuenta? <a href="#" role="button" class="tr-link" id="auth-toggle">Ingresa aquí</a>'
+      : '¿No tienes cuenta? <a href="#" role="button" class="tr-link" id="auth-toggle">Regístrate ahora</a>';
     document.getElementById("auth-campos").innerHTML =
-      (esRegistro ? '<div class="tr-campo"><label>Nombre completo</label><input id="a-nombre" placeholder="Tu nombre"></div>' : "") +
-      '<div class="tr-campo"><label>Correo electrónico</label><input id="a-correo" type="email" placeholder="tucorreo@ejemplo.com"></div>' +
-      '<div class="tr-campo"><label>Contraseña</label><input id="a-clave" type="password" placeholder="••••••••"></div>' +
-      (esRegistro ? '<div class="tr-campo"><label>Documento (opcional)</label><input id="a-doc" placeholder="C.C. / pasaporte"></div>' : "");
+      (esRegistro ? '<div class="tr-campo"><label for="a-nombre">Nombre completo</label><input id="a-nombre" autocomplete="name" placeholder="Tu nombre"></div>' : "") +
+      '<div class="tr-campo"><label for="a-correo">Correo electrónico</label><input id="a-correo" type="email" autocomplete="email" placeholder="tucorreo@ejemplo.com"></div>' +
+      '<div class="tr-campo"><label for="a-clave">Contraseña</label><input id="a-clave" type="password" autocomplete="' + (esRegistro ? "new-password" : "current-password") + '" placeholder="••••••••"></div>' +
+      (esRegistro ? '<div class="tr-campo"><label for="a-doc">Documento (opcional)</label><input id="a-doc" placeholder="C.C. / pasaporte"></div>' : "");
     document.getElementById("auth-enviar").textContent = esRegistro ? "Crear cuenta" : "Ingresar";
     document.getElementById("auth-error").textContent = "";
     document.getElementById("captcha-ok").checked = false;
     document.getElementById("auth-demo").innerHTML = esRegistro ? "" :
       '<strong>Cuentas de demostración:</strong><br>cliente@ticketright.co · cliente123<br>promotor@ticketright.co · promotor123<br>operacion@ticketright.co · operacion123';
-    document.getElementById("auth-toggle").addEventListener("click", function () { modoAuth = esRegistro ? "ingreso" : "registro"; pintarAuth(); });
+    document.getElementById("auth-toggle").addEventListener("click", function (ev) { ev.preventDefault(); modoAuth = esRegistro ? "ingreso" : "registro"; pintarAuth(); modal.querySelector("input").focus(); });
   }
 
   document.getElementById("auth-cerrar").addEventListener("click", cerrarAuth);
@@ -236,8 +257,9 @@
   // ============================ VISTA: INICIO ============================
   async function vistaInicio() {
     app.innerHTML =
-      '<div class="tr-busca-top"><div class="tr-buscador tr-buscador-hero"><span class="tr-lupa">🔍</span>' +
-        '<input id="q-home" placeholder="Busca artistas, eventos o recintos" autocomplete="off"></div><div class="tr-suger" id="suger"></div></div>' +
+      '<h1 class="tr-sr">TicketRight: boletas para conciertos, festivales y teatro</h1>' +
+      '<div class="tr-busca-top"><div class="tr-buscador tr-buscador-hero"><span class="tr-lupa" aria-hidden="true">🔍</span>' +
+        '<input id="q-home" type="search" aria-label="Buscar eventos" placeholder="Busca artistas, eventos o recintos" autocomplete="off"></div><div class="tr-suger" id="suger"></div></div>' +
       '<div id="carrusel" class="tr-carrusel-wrap"></div>' +
       '<section class="tr-sec"><div class="tr-sec-cab"><h2>Recomendados para ti</h2><a href="#/eventos" class="tr-link">Ver todo</a></div><div class="tr-fila-cards" id="reco"><p class="tr-mut">Cargando…</p></div></section>' +
       '<section class="tr-sec"><div class="tr-sec-cab"><h2>Próximos eventos</h2><a href="#/eventos" class="tr-link">Ver todo</a></div><div class="tr-grid" id="prox"></div></section>';
@@ -271,8 +293,8 @@
             '<button class="btn btn-primario" data-ev="' + esc(e.eventoId) + '">Ver evento</button></div></div>';
         }).join("") +
       '</div>' +
-      (items.length > 1 ? '<button class="tr-flecha izq" id="carr-izq">‹</button><button class="tr-flecha der" id="carr-der">›</button>' : "") +
-      '<div class="tr-dots">' + items.map(function (_, i) { return '<span class="tr-dot' + (i === 0 ? " on" : "") + '" data-i="' + i + '"></span>'; }).join("") + '</div>';
+      (items.length > 1 ? '<button type="button" class="tr-flecha izq" id="carr-izq" aria-label="Evento anterior">‹</button><button type="button" class="tr-flecha der" id="carr-der" aria-label="Evento siguiente">›</button>' : "") +
+      '<div class="tr-dots">' + items.map(function (e, i) { return '<button type="button" class="tr-dot' + (i === 0 ? " on" : "") + '" data-i="' + i + '" aria-label="' + esc("Ver " + (e.artista || e.nombre)) + '"' + (i === 0 ? ' aria-current="true"' : "") + '></button>'; }).join("") + '</div>';
     wrap.querySelectorAll(".tr-slide button[data-ev]").forEach(function (b) { b.addEventListener("click", function () { abrirEvento(b.dataset.ev); }); });
     wrap.querySelectorAll(".tr-dot").forEach(function (d) { d.addEventListener("click", function () { irSlide(Number(d.dataset.i)); }); });
     var izq = wrap.querySelector("#carr-izq"), der = wrap.querySelector("#carr-der");
@@ -287,7 +309,11 @@
   function irSlide(i) {
     carruselIdx = i;
     document.querySelectorAll(".tr-slide").forEach(function (s) { s.classList.toggle("on", Number(s.dataset.i) === i); });
-    document.querySelectorAll(".tr-dot").forEach(function (d) { d.classList.toggle("on", Number(d.dataset.i) === i); });
+    document.querySelectorAll(".tr-dot").forEach(function (d) {
+      var activo = Number(d.dataset.i) === i;
+      d.classList.toggle("on", activo);
+      if (activo) d.setAttribute("aria-current", "true"); else d.removeAttribute("aria-current");
+    });
   }
 
   // ---- Buscador del inicio con sugerencias ----
@@ -303,12 +329,12 @@
           var eventos = await cargarCatalogo(q);
           caja.innerHTML = eventos.length
             ? eventos.slice(0, 6).map(function (e) {
-                return '<a class="tr-suger-item" data-ev="' + esc(e.eventoId) + '"><span class="tr-suger-emoji">' + emojiEvento(e) + '</span>' +
+                return '<a href="#/evento" class="tr-suger-item" data-ev="' + esc(e.eventoId) + '"><span class="tr-suger-emoji" aria-hidden="true">' + emojiEvento(e) + '</span>' +
                   '<span class="tr-suger-txt"><strong>' + esc(e.artista || e.nombre) + '</strong><small>' + esc(lugarEvento(e)) + '</small></span></a>';
               }).join("")
             : '<div class="tr-suger-vacio">Sin resultados para “' + esc(q) + '”</div>';
           caja.classList.add("on");
-          caja.querySelectorAll(".tr-suger-item").forEach(function (it) { it.addEventListener("click", function () { caja.classList.remove("on"); input.value = ""; abrirEvento(it.dataset.ev); }); });
+          caja.querySelectorAll(".tr-suger-item").forEach(function (it) { it.addEventListener("click", function (ev) { ev.preventDefault(); caja.classList.remove("on"); input.value = ""; abrirEvento(it.dataset.ev); }); });
         } catch (e) {}
       }, 200);
     });
@@ -323,18 +349,23 @@
   // ---- Tarjetas ----
   function tarjetaEvento(e) {
     var totalDisp = dispTotal(e), poco = totalDisp < 1500;
-    return '<div class="tr-card" data-ev="' + esc(e.eventoId) + '">' +
+    return '<div class="tr-card" data-ev="' + esc(e.eventoId) + '" tabindex="0" role="link" aria-label="' + esc("Ver evento: " + (e.artista || e.nombre)) + '">' +
       '<div class="tr-portada"><span class="insignia ' + (poco ? "insignia-alerta" : "insignia-exito") + '">' + (poco ? "Últimas boletas" : "Venta abierta") + '</span>' + portadaHtml(e) + '</div>' +
       '<div class="cuerpo"><span class="tr-card-cat">' + esc(e.categoria) + '</span><h3>' + esc(e.artista || e.nombre) + '</h3>' +
-        '<p class="lugar">' + esc(lugarEvento(e)) + '</p><p class="tr-fecha">📅 ' + fechaLarga(e.fecha) + '</p>' +
+        '<p class="lugar">' + esc(lugarEvento(e)) + '</p><p class="tr-fecha"><span aria-hidden="true">📅</span> ' + fechaLarga(e.fecha) + '</p>' +
         '<div class="pie"><span class="precio">Desde ' + money(desdePrecio(e)) + '</span><span class="btn btn-primario btn-sm">Ver evento</span></div></div></div>';
   }
   function tarjetaCompacta(e) {
-    return '<div class="tr-card tr-card-mini" data-ev="' + esc(e.eventoId) + '">' +
+    return '<div class="tr-card tr-card-mini" data-ev="' + esc(e.eventoId) + '" tabindex="0" role="link" aria-label="' + esc("Ver evento: " + (e.artista || e.nombre)) + '">' +
       '<div class="tr-portada">' + portadaHtml(e) + '</div>' +
       '<div class="cuerpo"><h3>' + esc(e.artista || e.nombre) + '</h3><p class="lugar">' + esc(e.ciudad) + '</p><span class="precio">Desde ' + money(desdePrecio(e)) + '</span></div></div>';
   }
-  function enlazarCards(cont) { cont.querySelectorAll(".tr-card").forEach(function (c) { c.addEventListener("click", function () { abrirEvento(c.dataset.ev); }); }); }
+  function enlazarCards(cont) {
+    cont.querySelectorAll(".tr-card").forEach(function (c) {
+      c.addEventListener("click", function () { abrirEvento(c.dataset.ev); });
+      c.addEventListener("keydown", function (ev) { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); abrirEvento(c.dataset.ev); } });
+    });
+  }
   function abrirEvento(id) {
     var buscar = function () { return (S.catalogo && S.catalogo.eventos || []).find(function (e) { return e.eventoId === id; }); };
     var e = buscar();
@@ -347,8 +378,8 @@
     var qInicial = location.hash.split("?q=")[1]; qInicial = qInicial ? decodeURIComponent(qInicial) : "";
     app.innerHTML =
       '<div class="tr-hero-mini"><h1>Explora todos los eventos</h1>' +
-      '<div class="tr-buscador"><span class="tr-lupa">🔍</span><input id="q" placeholder="Busca un evento, artista, recinto o ciudad" value="' + esc(qInicial) + '"></div>' +
-      '<div class="tr-cats" id="cats"><span class="tr-cat on" data-c="">Todos</span><span class="tr-cat" data-c="Conciertos">Conciertos</span><span class="tr-cat" data-c="Festivales">Festivales</span><span class="tr-cat" data-c="Teatro">Teatro</span></div></div>' +
+      '<div class="tr-buscador"><span class="tr-lupa" aria-hidden="true">🔍</span><input id="q" type="search" aria-label="Buscar eventos" placeholder="Busca un evento, artista, recinto o ciudad" value="' + esc(qInicial) + '"></div>' +
+      '<div class="tr-cats" id="cats" role="group" aria-label="Categorías">' + [["", "Todos"], ["Conciertos", "Conciertos"], ["Festivales", "Festivales"], ["Teatro", "Teatro"]].map(function (c, i) { return '<button type="button" class="tr-cat' + (i === 0 ? " on" : "") + '" data-c="' + c[0] + '" aria-pressed="' + (i === 0) + '">' + c[1] + '</button>'; }).join("") + '</div></div>' +
       '<div class="tr-grid" id="grid"><p class="tr-mut">Cargando catálogo…</p></div>';
     var input = document.getElementById("q"), grid = document.getElementById("grid"), catActiva = "";
     async function refrescar() {
@@ -363,7 +394,7 @@
     var t = null;
     input.addEventListener("input", function () { if (t) clearTimeout(t); t = setTimeout(refrescar, 220); });
     document.querySelectorAll("#cats .tr-cat").forEach(function (c) {
-      c.addEventListener("click", function () { document.querySelectorAll("#cats .tr-cat").forEach(function (o) { o.classList.remove("on"); }); c.classList.add("on"); catActiva = c.dataset.c; refrescar(); });
+      c.addEventListener("click", function () { document.querySelectorAll("#cats .tr-cat").forEach(function (o) { o.classList.remove("on"); o.setAttribute("aria-pressed", "false"); }); c.classList.add("on"); c.setAttribute("aria-pressed", "true"); catActiva = c.dataset.c; refrescar(); });
     });
     refrescar();
   }
@@ -399,15 +430,16 @@
   async function vistaFila() {
     if (!S.evento) return ir("eventos");
     app.innerHTML =
-      '<div class="tr-centro"><div class="tarjeta tr-fila-card"><div class="tr-spinner"></div>' +
-      '<h2 id="fila-titulo">Estás en la fila</h2><p class="tr-mut" id="fila-sub">Asegurando tu lugar de forma justa…</p>' +
-      '<div class="tr-pista"><div class="tr-avance" id="fila-avance"></div><span class="tr-icono" id="fila-icono">🎫</span><span class="tr-meta">🏁</span></div>' +
+      '<div class="tr-centro"><div class="tarjeta tr-fila-card"><div class="tr-spinner" aria-hidden="true"></div>' +
+      '<h1 class="tr-fila-h" id="fila-titulo">Estás en la fila</h1><p class="tr-mut" id="fila-sub">Asegurando tu lugar de forma justa…</p>' +
+      '<p class="tr-sr" role="status" id="fila-anuncio"></p>' +
+      '<div class="tr-pista" role="progressbar" aria-label="Avance en la fila" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="fila-pista"><div class="tr-avance" id="fila-avance"></div><span class="tr-icono" id="fila-icono" aria-hidden="true">🎫</span><span class="tr-meta" aria-hidden="true">🏁</span></div>' +
       '<div class="fila-datos"><span class="k">Posición</span><span class="v" id="fila-pos">—</span></div>' +
       '<div class="fila-datos"><span class="k">Estado</span><span class="v"><span class="insignia insignia-alerta" id="fila-estado">en espera</span></span></div>' +
       '<p class="tr-mini">Puedes esperar aquí; te damos acceso automáticamente cuando sea tu turno.</p></div></div>';
     try {
       var entrada = await api("POST", "/fila/entrar", { fanId: FAN });
-      S.turnoId = entrada.turnoId; var pos0 = null;
+      S.turnoId = entrada.turnoId; var pos0 = null, anunciado = "";
       for (var i = 0; i < 60; i++) {
         var s = await api("GET", "/fila/" + S.turnoId);
         if (pos0 === null) pos0 = s.posicion || 1;
@@ -416,6 +448,11 @@
         var avance = Math.max(0, Math.min(1, 1 - (s.posicion || 0) / (pos0 || 1))); if (s.estado === "admitido") avance = 1;
         document.getElementById("fila-avance").style.width = (avance * 100) + "%";
         document.getElementById("fila-icono").style.left = (avance * 100) + "%";
+        document.getElementById("fila-pista").setAttribute("aria-valuenow", String(Math.round(avance * 100)));
+        // Se anuncia solo cuando cambia: repetirlo en cada consulta sería ruido.
+        var anuncio = s.estado === "admitido" ? "Es tu turno. Te llevamos a elegir tu localidad."
+          : "Posición " + (s.posicion || 0) + ". " + (s.personasDelante || 0) + " personas delante de ti.";
+        if (anuncio !== anunciado) { document.getElementById("fila-anuncio").textContent = anuncio; anunciado = anuncio; }
         if (s.estado === "admitido") {
           S.token = s.token;
           document.getElementById("fila-estado").textContent = "admitido";
@@ -432,25 +469,54 @@
   // ============================ VISTA: SELECCIÓN (mapa según recinto) ============================
   function vistaSeleccion() {
     if (!S.token || !S.evento) return ir("eventos");
-    S.cantidad = 1; S.localidad = S.evento.localidades[0];
     var locs = S.evento.localidades;
+    S.cantidad = 1;
+    S.localidad = locs.find(function (l) { return l.disponibles > 0; }) || locs[0];
     app.innerHTML =
       '<div class="encabezado-pagina"><span class="etiqueta">Turno admitido · ' + esc(S.evento.recinto || "") + '</span><h1>Elige tu localidad</h1></div>' +
       '<div class="tr-sel-layout">' +
-        '<div class="tarjeta"><div class="tr-mapa">' + mapaRecinto(locs) + '</div><div class="tr-mapa-nota">Mapa referencial del recinto · ' + esc(S.evento.recinto || "") + '</div>' +
-          '<div class="tr-leyenda"><span><span class="tr-muestra tr-m-ok"></span>Disponible</span><span><span class="tr-muestra tr-m-warn"></span>Pocas</span><span><span class="tr-muestra tr-m-off"></span>Agotado</span></div></div>' +
-        '<div class="tarjeta" id="panel-loc"></div>' +
+        '<div class="tarjeta"><div class="tr-mapa con-sel">' + mapaRecinto(locs) + '</div><div class="tr-mapa-nota">Mapa referencial del recinto · ' + esc(S.evento.recinto || "") + '</div>' +
+          '<div class="tr-leyenda" aria-hidden="true"><span><span class="tr-muestra tr-m-ok"></span>Disponible</span><span><span class="tr-muestra tr-m-warn"></span>Pocas</span><span><span class="tr-muestra tr-m-off"></span>Agotado</span></div>' +
+          '<div class="tr-zonas" role="group" aria-label="Localidades">' + locs.map(botonZona).join("") + '</div></div>' +
+        '<div class="tarjeta" id="panel-loc" aria-live="polite"></div>' +
       '</div><div class="tr-barra-total" id="barra-total"></div>';
-    document.querySelectorAll(".tr-zona").forEach(function (z) {
-      z.addEventListener("click", function () {
-        var loc = locs.find(function (l) { return l.localidadId === z.dataset.loc; });
-        if (!loc || loc.disponibles <= 0) return;
-        S.localidad = loc; S.cantidad = 1;
-        document.querySelectorAll(".tr-zona").forEach(function (o) { o.classList.remove("sel"); });
-        z.classList.add("sel"); pintarPanelLoc();
+    // Mapa y lista eligen lo mismo: clic, Enter o espacio.
+    document.querySelectorAll("[data-loc]").forEach(function (z) {
+      z.addEventListener("click", function () { elegirLocalidad(z.dataset.loc, true); });
+      z.addEventListener("keydown", function (ev) {
+        if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); elegirLocalidad(z.dataset.loc, true); }
       });
     });
+    elegirLocalidad(S.localidad.localidadId, false);
+  }
+
+  function estadoLocalidad(l) {
+    if (l.disponibles <= 0) return { clase: "off", texto: "Agotado" };
+    if (l.disponibles < l.aforoAutorizado * 0.15) return { clase: "warn", texto: "Pocas · " + l.disponibles.toLocaleString("es-CO") };
+    return { clase: "ok", texto: "Disponible · " + l.disponibles.toLocaleString("es-CO") };
+  }
+  function botonZona(l) {
+    var e = estadoLocalidad(l);
+    return '<button type="button" class="tr-zona-btn" data-loc="' + l.localidadId + '" aria-pressed="false"' + (l.disponibles <= 0 ? " disabled" : "") + '>' +
+      '<span class="tr-muestra tr-m-' + e.clase + '" aria-hidden="true"></span>' +
+      '<span class="tr-zona-nom">' + esc(l.nombre) + '<small>' + e.texto + '</small></span>' +
+      '<span class="tr-zona-precio">' + money(l.precioCentavos) + '</span></button>';
+  }
+  // Marca la localidad elegida en el mapa y en la lista, y actualiza panel y total.
+  function elegirLocalidad(id, porUsuario) {
+    var loc = S.evento.localidades.find(function (l) { return l.localidadId === id; });
+    if (!loc || loc.disponibles <= 0) return;
+    S.localidad = loc; S.cantidad = 1;
+    document.querySelectorAll("[data-loc]").forEach(function (o) {
+      var sel = o.dataset.loc === id;
+      o.classList.toggle("sel", sel);
+      o.setAttribute("aria-pressed", sel ? "true" : "false");
+    });
     pintarPanelLoc();
+    // En móvil el panel queda bajo el mapa: se lleva a la vista para ver cantidad y total.
+    if (porUsuario && window.matchMedia("(max-width: 860px)").matches) {
+      document.getElementById("panel-loc").scrollIntoView({ behavior: "smooth", block: "center" });
+    }
   }
 
   // Mapa por tipo de recinto inferido del nombre: estadio, arena/music hall, coliseo, teatro, festival.
@@ -467,13 +533,19 @@
       return ["var(--color-primary-soft,#241a3a)", "var(--color-primary,#a78bfa)"];
     };
     var et = function (l) { return l.disponibles > 0 ? l.disponibles.toLocaleString("es-CO") + " disp." : "Agotado"; };
-    var head = '<svg viewBox="0 0 600 360" width="100%">';
+    // Cada zona es un control: se enfoca con Tab y anuncia nombre y estado (no solo color).
+    var zona = function (l) {
+      return '<g class="tr-zona" data-loc="' + l.localidadId + '" role="button" aria-pressed="false"' +
+        (l.disponibles > 0 ? ' tabindex="0"' : ' aria-disabled="true"') +
+        ' aria-label="' + esc(l.nombre + ", " + estadoLocalidad(l).texto) + '" style="cursor:pointer">';
+    };
+    var head = '<svg viewBox="0 0 600 360" width="100%" role="img" aria-label="Mapa del recinto">';
 
     if (tipo === "teatro") {
       var svg = head + '<rect x="180" y="12" width="240" height="34" rx="4" fill="#111" stroke="#888"/><text x="300" y="34" text-anchor="middle" fill="#aaa" style="font:700 12px sans-serif">ESCENARIO</text>';
       var y = 70;
       locs.forEach(function (l) { var c = color(l);
-        svg += '<g class="tr-zona" data-loc="' + l.localidadId + '" style="cursor:pointer"><path d="M80 ' + y + ' Q300 ' + (y - 20) + ' 520 ' + y + ' L508 ' + (y + 44) + ' Q300 ' + (y + 26) + ' 92 ' + (y + 44) + ' Z" fill="' + c[0] + '" stroke="' + c[1] + '" stroke-width="2"/><text x="300" y="' + (y + 28) + '" text-anchor="middle" fill="' + c[1] + '" style="font:700 13px sans-serif">' + l.nombre + ' · ' + et(l) + '</text></g>';
+        svg += zona(l) + '<path d="M80 ' + y + ' Q300 ' + (y - 20) + ' 520 ' + y + ' L508 ' + (y + 44) + ' Q300 ' + (y + 26) + ' 92 ' + (y + 44) + ' Z" fill="' + c[0] + '" stroke="' + c[1] + '" stroke-width="2"/><text x="300" y="' + (y + 28) + '" text-anchor="middle" fill="' + c[1] + '" style="font:700 13px sans-serif">' + esc(l.nombre) + ' · ' + et(l) + '</text></g>';
         y += 58; });
       return svg + "</svg>";
     }
@@ -482,7 +554,11 @@
       var svgc = head + '<ellipse cx="300" cy="185" rx="80" ry="46" fill="#111" stroke="#888"/><text x="300" y="190" text-anchor="middle" fill="#aaa" style="font:700 11px sans-serif">' + etq + '</text>';
       var rx = 120, ry = 78;
       locs.forEach(function (l) { var c = color(l);
-        svgc += '<g class="tr-zona" data-loc="' + l.localidadId + '" style="cursor:pointer"><ellipse cx="300" cy="185" rx="' + rx + '" ry="' + ry + '" fill="none" stroke="' + c[1] + '" stroke-width="18" opacity="0.85"/><text x="300" y="' + (185 - ry + 3) + '" text-anchor="middle" fill="' + c[1] + '" style="font:700 11px sans-serif">' + l.nombre + ' · ' + et(l) + '</text></g>';
+        // La etiqueta va sobre una píldora oscura: encima del anillo lima no se leía.
+        var rotulo = esc(l.nombre) + ' · ' + et(l), ancho = rotulo.length * 6.4 + 18, yEt = 185 - ry;
+        svgc += zona(l) + '<ellipse class="tr-anillo-zona" cx="300" cy="185" rx="' + rx + '" ry="' + ry + '" fill="none" stroke="' + c[1] + '" stroke-width="18" opacity="0.85"/>' +
+          '<rect x="' + (300 - ancho / 2) + '" y="' + (yEt - 10) + '" width="' + ancho + '" height="20" rx="10" fill="var(--color-bg,#0b0d10)" opacity="0.92"/>' +
+          '<text x="300" y="' + (yEt + 4) + '" text-anchor="middle" fill="var(--color-text,#f4f0e8)" style="font:600 11.5px sans-serif">' + rotulo + '</text></g>';
         rx += 50; ry += 33; });
       return svgc + "</svg>";
     }
@@ -492,7 +568,7 @@
         '<rect x="320" y="12" width="220" height="34" rx="4" fill="#111" stroke="#888"/><text x="430" y="34" text-anchor="middle" fill="#aaa" style="font:700 11px sans-serif">SECOND STAGE</text>';
       var cols = [[60, 70], [320, 70], [60, 200], [320, 200]];
       locs.forEach(function (l, i) { var c = color(l); var p = cols[i % cols.length];
-        svgf += '<g class="tr-zona" data-loc="' + l.localidadId + '" style="cursor:pointer"><rect x="' + p[0] + '" y="' + p[1] + '" width="220" height="110" rx="10" fill="' + c[0] + '" stroke="' + c[1] + '" stroke-width="2"/><text x="' + (p[0] + 110) + '" y="' + (p[1] + 52) + '" text-anchor="middle" fill="' + c[1] + '" style="font:700 14px sans-serif">' + l.nombre + '</text><text x="' + (p[0] + 110) + '" y="' + (p[1] + 74) + '" text-anchor="middle" fill="' + c[1] + '" style="font:600 11px sans-serif">' + et(l) + '</text></g>';
+        svgf += zona(l) + '<rect x="' + p[0] + '" y="' + p[1] + '" width="220" height="110" rx="10" fill="' + c[0] + '" stroke="' + c[1] + '" stroke-width="2"/><text x="' + (p[0] + 110) + '" y="' + (p[1] + 52) + '" text-anchor="middle" fill="' + c[1] + '" style="font:700 14px sans-serif">' + esc(l.nombre) + '</text><text x="' + (p[0] + 110) + '" y="' + (p[1] + 74) + '" text-anchor="middle" fill="' + c[1] + '" style="font:600 11px sans-serif">' + et(l) + '</text></g>';
       });
       return svgf + "</svg>";
     }
@@ -505,7 +581,7 @@
       { x: 130, y: 275, w: 160, h: 40 }, { x: 310, y: 275, w: 160, h: 40 },
     ];
     locs.forEach(function (l, i) { var s = slots[i % slots.length], c = color(l);
-      svge += '<g class="tr-zona" data-loc="' + l.localidadId + '" style="cursor:pointer"><rect x="' + s.x + '" y="' + s.y + '" width="' + s.w + '" height="' + s.h + '" rx="8" fill="' + c[0] + '" stroke="' + c[1] + '" stroke-width="2"/><text x="' + (s.x + s.w / 2) + '" y="' + (s.y + s.h / 2 - 1) + '" text-anchor="middle" fill="' + c[1] + '" style="font:700 12px sans-serif">' + l.nombre + '</text><text x="' + (s.x + s.w / 2) + '" y="' + (s.y + s.h / 2 + 14) + '" text-anchor="middle" fill="' + c[1] + '" style="font:600 10px sans-serif">' + et(l) + '</text></g>';
+      svge += zona(l) + '<rect x="' + s.x + '" y="' + s.y + '" width="' + s.w + '" height="' + s.h + '" rx="8" fill="' + c[0] + '" stroke="' + c[1] + '" stroke-width="2"/><text x="' + (s.x + s.w / 2) + '" y="' + (s.y + s.h / 2 - 1) + '" text-anchor="middle" fill="' + c[1] + '" style="font:700 12px sans-serif">' + esc(l.nombre) + '</text><text x="' + (s.x + s.w / 2) + '" y="' + (s.y + s.h / 2 + 14) + '" text-anchor="middle" fill="' + c[1] + '" style="font:600 10px sans-serif">' + et(l) + '</text></g>';
     });
     return svge + "</svg>";
   }
@@ -517,10 +593,19 @@
       '<div class="fila-datos"><span class="k">Precio nominal</span><span class="v">' + money(l.precioCentavos) + '</span></div>' +
       '<div class="tr-disp"><div class="tr-disp-rot"><span class="tr-mut">Vendido</span><span>' + vendido.toLocaleString("es-CO") + " / " + l.aforoAutorizado.toLocaleString("es-CO") + '</span></div>' +
         '<div class="tr-disp-pista"><div class="tr-disp-fill' + (pct >= 90 ? " peligro" : "") + '" style="width:' + pct + '%"></div></div><div class="tr-mini">' + l.disponibles.toLocaleString("es-CO") + ' disponibles</div></div>' +
-      '<label class="tr-lbl">Cantidad (máx. 4 por persona)</label>' +
-      '<div class="tr-contador"><button id="menos">−</button><span id="cifra">' + S.cantidad + '</span><button id="mas">+</button></div>';
-    document.getElementById("menos").addEventListener("click", function () { if (S.cantidad > 1) { S.cantidad--; pintarPanelLoc(); } });
-    document.getElementById("mas").addEventListener("click", function () { if (S.cantidad < Math.min(4, l.disponibles)) { S.cantidad++; pintarPanelLoc(); } });
+      '<span class="tr-lbl" id="lbl-cantidad">Cantidad (máx. 4 por persona)</span>' +
+      '<div class="tr-contador" role="group" aria-labelledby="lbl-cantidad">' +
+        '<button type="button" id="menos" aria-label="Quitar una boleta"' + (S.cantidad <= 1 ? " disabled" : "") + '>−</button>' +
+        '<span id="cifra" aria-live="polite">' + S.cantidad + '</span>' +
+        '<button type="button" id="mas" aria-label="Agregar una boleta"' + (S.cantidad >= Math.min(4, l.disponibles) ? " disabled" : "") + '>+</button></div>';
+    // El panel se vuelve a pintar: se devuelve el foco al botón para no perderlo con teclado.
+    var cambiar = function (delta, id) {
+      S.cantidad += delta; pintarPanelLoc();
+      var b = document.getElementById(id);
+      (b && !b.disabled ? b : document.getElementById(id === "mas" ? "menos" : "mas")).focus();
+    };
+    document.getElementById("menos").addEventListener("click", function () { if (S.cantidad > 1) cambiar(-1, "menos"); });
+    document.getElementById("mas").addEventListener("click", function () { if (S.cantidad < Math.min(4, l.disponibles)) cambiar(1, "mas"); });
     pintarTotal();
   }
   function pintarTotal() {
@@ -562,12 +647,12 @@
         '<div class="fila-datos"><span class="k">Cargo por servicio</span><span class="v">' + money(servicio) + '</span></div>' +
         (para > 0 ? '<div class="fila-datos"><span class="k">Contribución parafiscal</span><span class="v">' + money(para) + '</span></div>' : '') +
         '<div class="fila-datos"><span class="k"><strong>Total</strong></span><span class="v"><strong>' + money(S.total) + '</strong></span></div>' +
-        '<button class="btn btn-primario btn-ancho tr-mt" id="btn-continuar">Continuar</button><a class="tr-cancelar" id="btn-cancelar">Cancelar reserva</a></div></div>';
+        '<button class="btn btn-primario btn-ancho tr-mt" id="btn-continuar">Continuar</button><a href="#" role="button" class="tr-cancelar" id="btn-cancelar">Cancelar reserva</a></div></div>';
     document.getElementById("btn-continuar").addEventListener("click", function () {
       if (reservaVencida()) return expirarReserva();  // no dejar avanzar si ya venció (R3)
       ir("datos");
     });
-    document.getElementById("btn-cancelar").addEventListener("click", function () { liberarReserva(); ir("eventos"); });
+    document.getElementById("btn-cancelar").addEventListener("click", function (ev) { ev.preventDefault(); liberarReserva(); ir("eventos"); });
     if (relojInterval) clearInterval(relojInterval);
     var anillo = document.getElementById("anillo"), reloj = document.getElementById("reloj"), total = 600, circ = 439.8;
     relojInterval = setInterval(function () {
@@ -601,10 +686,10 @@
       '<a class="tr-volver" href="#/reserva">← Volver a la reserva</a>' +
       '<div class="encabezado-pagina"><span class="etiqueta">Confirma al titular</span><h1>¿A nombre de quién van las boletas?</h1></div>' +
       '<div class="tr-centro-1"><div class="tarjeta">' +
-        '<div class="tr-campo"><label>Nombre completo</label><input id="d-nombre" value="' + esc(perfil.nombre || "") + '" placeholder="Tu nombre"></div>' +
-        '<div class="tr-campo"><label>Documento</label><input id="d-doc" value="' + esc(perfil.documento || "") + '" placeholder="C.C. / pasaporte"></div>' +
-        '<div class="tr-campo"><label>Correo electrónico</label><input id="d-correo" type="email" value="' + esc(perfil.correo || "") + '" placeholder="tucorreo@ejemplo.com"></div>' +
-        '<div class="tr-campo"><label>Teléfono</label><input id="d-tel" type="tel" value="' + esc(perfil.telefono || "") + '" placeholder="Celular de contacto"></div>' +
+        '<div class="tr-campo"><label for="d-nombre">Nombre completo</label><input id="d-nombre" autocomplete="name" value="' + esc(perfil.nombre || "") + '" placeholder="Tu nombre"></div>' +
+        '<div class="tr-campo"><label for="d-doc">Documento</label><input id="d-doc" value="' + esc(perfil.documento || "") + '" placeholder="C.C. / pasaporte"></div>' +
+        '<div class="tr-campo"><label for="d-correo">Correo electrónico</label><input id="d-correo" type="email" autocomplete="email" value="' + esc(perfil.correo || "") + '" placeholder="tucorreo@ejemplo.com"></div>' +
+        '<div class="tr-campo"><label for="d-tel">Teléfono</label><input id="d-tel" type="tel" autocomplete="tel" value="' + esc(perfil.telefono || "") + '" placeholder="Celular de contacto"></div>' +
         '<p class="tr-mini tr-err" id="d-error"></p>' +
         '<button class="btn btn-primario btn-ancho" id="btn-datos">Ir a pagar</button></div></div>';
     document.getElementById("btn-datos").addEventListener("click", function () {
@@ -626,9 +711,9 @@
     app.innerHTML =
       '<div class="encabezado-pagina"><span class="etiqueta">Pago · ' + money(S.total) + '</span><h1>Completa tu pago</h1></div>' +
       '<div class="tr-centro-1"><div class="tarjeta" id="pago-form">' +
-        '<div class="tr-campo"><label>Medio de pago</label><select id="p-medio"><option value="tarjeta">Tarjeta de crédito o débito</option><option value="pse">PSE</option><option value="billetera">Billetera digital</option></select></div>' +
-        '<div class="tr-campo"><label>Número de tarjeta</label><input id="p-num" value="4242 4242 4242 4242"></div>' +
-        '<div class="tr-campo"><label>Nombre del titular</label><input id="p-tit" value="' + esc(S.titular.nombre || "") + '"></div>' +
+        '<div class="tr-campo"><label for="p-medio">Medio de pago</label><select id="p-medio"><option value="tarjeta">Tarjeta de crédito o débito</option><option value="pse">PSE</option><option value="billetera">Billetera digital</option></select></div>' +
+        '<div class="tr-campo"><label for="p-num">Número de tarjeta</label><input id="p-num" inputmode="numeric" autocomplete="cc-number" value="4242 4242 4242 4242"></div>' +
+        '<div class="tr-campo"><label for="p-tit">Nombre del titular</label><input id="p-tit" autocomplete="cc-name" value="' + esc(S.titular.nombre || "") + '"></div>' +
         '<button class="btn btn-primario btn-ancho" id="btn-pagar">Pagar ' + money(S.total) + '</button>' +
         '<p class="tr-mini tr-txt-centro tr-mt">🔒 Pago procesado de forma segura</p></div></div>';
     document.getElementById("btn-pagar").addEventListener("click", pagar);
@@ -665,13 +750,27 @@
   function vistaBoleta() {
     if (!S.boletas) return ir("eventos");
     app.innerHTML =
-      '<div class="tr-centro-1"><div class="alerta alerta-exito"><strong>¡Listo! Tus boletas están emitidas</strong>Te enviamos una copia a ' + esc(S.titular.correo || "tu correo") + '.</div>' +
+      '<div class="encabezado-pagina tr-centro-1"><span class="etiqueta">Compra completada</span><h1>Tus boletas</h1></div>' +
+      '<div class="tr-centro-1"><div class="alerta alerta-exito" role="status"><strong>¡Listo! Tus boletas están emitidas</strong>Te enviamos una copia a ' + esc(S.titular.correo || "tu correo") + '.</div>' +
       S.boletas.map(function (b, i) {
         return '<div class="tr-boleta"><div class="tr-boleta-cab"><strong>' + esc(S.evento.artista || S.evento.nombre) + '</strong><span class="insignia insignia-exito">' + esc(b.estado) + '</span></div>' +
-          '<div class="tr-mini">' + esc(S.localidad.nombre) + ' · ' + esc(lugarEvento(S.evento)) + ' · Boleta ' + (i + 1) + ' de ' + S.boletas.length + '</div><div class="tr-qr">▦</div><div class="tr-cod">' + esc(b.codigo) + '</div></div>';
+          '<div class="tr-mini">' + esc(S.localidad.nombre) + ' · ' + esc(lugarEvento(S.evento)) + ' · Boleta ' + (i + 1) + ' de ' + S.boletas.length + '</div>' +
+          qrBoleta(b.codigo, i + 1) +
+          '<div class="tr-cod-lbl">Código de la boleta</div><div class="tr-cod">' + esc(b.codigo) + '</div></div>';
       }).join("") +
       '<button class="btn btn-secundario btn-ancho tr-mt" id="btn-fin">Volver al inicio</button></div>';
     document.getElementById("btn-fin").addEventListener("click", function () { S.compraId = null; S.boletas = null; ir("inicio"); });
+  }
+
+  // QR del código de la boleta (lo que lee el control de acceso). Si la librería no cargó, se
+  // muestra solo el código: la boleta sigue siendo válida con él.
+  function qrBoleta(codigo, numero) {
+    if (typeof window.qrcode !== "function") return "";
+    var qr = window.qrcode(0, "M");
+    qr.addData(String(codigo));
+    qr.make();
+    return '<div class="tr-qr" role="img" aria-label="Código QR de la boleta ' + numero + '">' +
+      qr.createSvgTag({ cellSize: 4, margin: 2, scalable: true }) + '</div>';
   }
 
   // ============================ VISTA: PERFIL ============================
@@ -686,9 +785,9 @@
       document.getElementById("perfil").innerHTML =
         '<div class="tr-perfil-cab"><div class="tr-avatar tr-avatar-lg">' + esc(ini) + '</div><div><h2>' + esc(p.nombre || "Sin nombre") + '</h2><p class="tr-mut">' + esc(p.correo) + ' · <span class="tr-rol-chip">' + etqRol + '</span></p></div></div>' +
         '<div class="tr-centro-1"><div class="tarjeta"><h3>Datos personales</h3>' +
-          '<div class="tr-campo"><label>Nombre completo</label><input id="pf-nombre" value="' + esc(p.nombre || "") + '"></div>' +
-          '<div class="tr-campo"><label>Documento</label><input id="pf-doc" value="' + esc(p.documento || "") + '"></div>' +
-          '<div class="tr-campo"><label>Correo (no editable)</label><input value="' + esc(p.correo) + '" disabled></div>' +
+          '<div class="tr-campo"><label for="pf-nombre">Nombre completo</label><input id="pf-nombre" autocomplete="name" value="' + esc(p.nombre || "") + '"></div>' +
+          '<div class="tr-campo"><label for="pf-doc">Documento</label><input id="pf-doc" value="' + esc(p.documento || "") + '"></div>' +
+          '<div class="tr-campo"><label for="pf-correo">Correo (no editable)</label><input id="pf-correo" value="' + esc(p.correo) + '" disabled></div>' +
           '<button class="btn btn-primario btn-ancho" id="pf-guardar">Guardar cambios</button></div></div>';
       document.getElementById("pf-guardar").addEventListener("click", async function () {
         var btn = document.getElementById("pf-guardar"); btn.disabled = true; btn.textContent = "Guardando…";
@@ -710,15 +809,15 @@
     try {
       var m = await (await fetch("/metrics")).text();
       var ventas = leerMetrica(m, "ticketright_sales_amount_total") / 100;
-      var pagosConf = leerMetrica(m, 'ticketright_payments_total{state="confirmado"}');
-      var cat = S.catalogo ? S.catalogo : await api("GET", "/catalogo"); var eventos = cat.eventos;
-      var aforoTotal = 0, dispT = 0; eventos.forEach(function (e) { e.localidades.forEach(function (l) { aforoTotal += l.aforoAutorizado; dispT += l.disponibles; }); });
-      var vendidas = aforoTotal - dispT;
+      var pagosConf = leerMetrica(m, "ticketright_payments_total", { state: "confirmado" });
+      // Siempre del catálogo recién leído: la ocupación tiene que ser la de ahora.
+      var eventos = (await api("GET", "/catalogo")).eventos;
+      var aforoTotal = 0, vendidas = 0; eventos.forEach(function (e) { e.localidades.forEach(function (l) { aforoTotal += l.aforoAutorizado; vendidas += l.vendidas; }); });
       document.getElementById("promo").innerHTML =
         '<div class="tr-kpis">' + kpi("Dinero recaudado", "$" + Math.round(ventas).toLocaleString("es-CO"), "green") + kpi("Boletas vendidas", vendidas.toLocaleString("es-CO"), "blue") + kpi("Pagos confirmados", pagosConf.toLocaleString("es-CO"), "purple") + kpi("Ocupación global", (aforoTotal ? Math.round((vendidas / aforoTotal) * 100) : 0) + "%", "orange") + '</div>' +
         '<div class="tarjeta tr-mt"><h3>Ocupación por evento</h3>' +
         eventos.map(function (e) {
-          var af = e.localidades.reduce(function (a, l) { return a + l.aforoAutorizado; }, 0), di = e.localidades.reduce(function (a, l) { return a + l.disponibles; }, 0), vend = af - di, pct = af ? Math.round((vend / af) * 100) : 0;
+          var af = e.localidades.reduce(function (a, l) { return a + l.aforoAutorizado; }, 0), vend = e.localidades.reduce(function (a, l) { return a + l.vendidas; }, 0), pct = af ? Math.round((vend / af) * 100) : 0;
           return '<div class="tr-disp"><div class="tr-disp-rot"><span>' + emojiEvento(e) + ' ' + esc(e.artista || e.nombre) + ' · ' + esc(e.ciudad) + '</span><span>' + vend.toLocaleString("es-CO") + " / " + af.toLocaleString("es-CO") + ' (' + pct + '%)</span></div><div class="tr-disp-pista"><div class="tr-disp-fill' + (pct >= 90 ? " peligro" : "") + '" style="width:' + pct + '%"></div></div></div>';
         }).join("") + '</div><p class="tr-mini tr-mt">Datos en vivo (Prometheus + PostgreSQL). Tablero completo en Grafana.</p>';
     } catch (err) { document.getElementById("promo").innerHTML = '<p class="tr-mut">No se pudieron cargar las métricas: ' + esc(err.message) + '</p>'; }
@@ -748,10 +847,20 @@
   }
 
   function kpi(t, v, color) { return '<div class="tr-kpi tr-kpi-' + color + '"><div class="tr-kpi-v">' + v + '</div><div class="tr-kpi-t">' + t + '</div></div>'; }
-  function leerMetrica(txt, nombre) {
-    var lineas = txt.split("\n");
-    for (var i = 0; i < lineas.length; i++) { if (lineas[i].indexOf(nombre) === 0) { var p = lineas[i].split(" "); return Number(p[p.length - 1]) || 0; } }
-    return 0;
+  // Suma las series de una métrica de /metrics (formato Prometheus) cuyas etiquetas incluyan
+  // las pedidas. Cada serie trae además etiquetas propias (service, service_version…), así que
+  // no se puede comparar la línea completa.
+  function leerMetrica(txt, nombre, etiquetas) {
+    var total = 0;
+    txt.split("\n").forEach(function (linea) {
+      var m = /^([a-zA-Z_:][a-zA-Z0-9_:]*)(\{([^}]*)\})?\s+(\S+)/.exec(linea);
+      if (!m || m[1] !== nombre) return;
+      var serie = {};
+      (m[3] || "").replace(/([a-zA-Z_][a-zA-Z0-9_]*)="((?:[^"\\]|\\.)*)"/g, function (_, k, v) { serie[k] = v; });
+      for (var k in etiquetas || {}) { if (serie[k] !== etiquetas[k]) return; }
+      total += Number(m[4]) || 0;
+    });
+    return total;
   }
 
   render();

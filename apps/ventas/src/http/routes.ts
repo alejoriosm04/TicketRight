@@ -150,6 +150,8 @@ export function registrarRutas(app: FastifyInstance, deps: DependenciasDeRutas):
             precioCentavos: Number(l.precio_centavos),
             aforoAutorizado: aut,
             disponibles: disp,
+            // Vendidas de verdad (boletas emitidas), separadas de lo que solo está reservado.
+            vendidas: Number(l.aforo_vendido),
           };
         }),
     }));

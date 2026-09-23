@@ -5,11 +5,16 @@
 body{ font-family:var(--tr-font-b); }
 h1,h2,h3,h4,.tr-logo{ font-family:var(--tr-font-h); }
 img{ display:block; max-width:100%; }
+/* Foco visible con el acento de la marca: el global de estilos.css (azul translúcido) casi no
+   se ve sobre fondo oscuro. --color-accent-text ya está ajustado para el tema claro. */
+:focus-visible{ outline:2px solid var(--color-accent-text,var(--color-primary)); outline-offset:3px; }
+/* Texto solo para lectores de pantalla (títulos de página y anuncios). */
+.tr-sr{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0; }
 
 /* ============ Header ============ */
 .tr-top{ position:sticky; top:0; z-index:30; background:var(--color-surface); border-bottom:1px solid var(--color-border); }
 .tr-top-in{ max-width:var(--tr-max); margin:0 auto; display:flex; align-items:center; gap:26px; padding:14px 28px; }
-.tr-logo{ font-weight:800; font-size:22px; letter-spacing:-.02em; cursor:pointer; white-space:nowrap; }
+.tr-logo{ font-weight:800; font-size:22px; letter-spacing:-.02em; cursor:pointer; white-space:nowrap; color:var(--color-text); text-decoration:none; }
 .tr-logo span{ color:var(--color-primary); }
 .tr-nav{ display:flex; gap:4px; }
 .tr-nav a{ padding:8px 14px; border-radius:8px; color:var(--color-text-muted); font-size:14px; text-decoration:none; font-weight:500; cursor:pointer; }
@@ -40,7 +45,7 @@ img{ display:block; max-width:100%; }
 .tr-lupa{ opacity:.7; }
 .tr-hero-mini{ padding:14px 0 4px; } .tr-hero-mini h1{ font-size:30px; margin-bottom:10px; }
 .tr-cats{ display:flex; gap:10px; flex-wrap:wrap; margin:16px 0 6px; }
-.tr-cat{ padding:8px 16px; border-radius:999px; border:1px solid var(--color-border); color:var(--color-text-muted); font-size:14px; cursor:pointer; }
+.tr-cat{ padding:8px 16px; border-radius:999px; border:1px solid var(--color-border); background:transparent; color:var(--color-text-muted); font:inherit; font-size:14px; cursor:pointer; }
 .tr-cat.on{ background:var(--color-primary); color:var(--color-primary-text-on,#fff); border-color:transparent; font-weight:600; }
 
 /* Sugerencias en tiempo real */
@@ -69,7 +74,7 @@ img{ display:block; max-width:100%; }
 .tr-flecha{ position:absolute; top:50%; transform:translateY(-50%); z-index:3; width:42px; height:42px; border-radius:50%; border:none; background:rgba(0,0,0,.45); color:#fff; font-size:20px; cursor:pointer; display:grid; place-items:center; }
 .tr-flecha:hover{ background:rgba(0,0,0,.7); } .tr-flecha.izq{ left:14px; } .tr-flecha.der{ right:14px; }
 .tr-dots{ display:flex; gap:8px; justify-content:center; margin-top:14px; }
-.tr-dot{ width:9px; height:9px; border-radius:50%; background:var(--color-border); cursor:pointer; transition:background .2s,transform .2s; }
+.tr-dot{ width:9px; height:9px; padding:0; border:none; border-radius:50%; background:var(--color-border); cursor:pointer; transition:background .2s,transform .2s; }
 .tr-dot.on{ background:var(--color-primary); transform:scale(1.25); }
 
 /* ============ Secciones y tarjetas ============ */
@@ -117,7 +122,7 @@ img{ display:block; max-width:100%; }
 .tr-centro{ max-width:540px; margin:40px auto 0; } .tr-centro-1{ max-width:480px; margin:0 auto; }
 .tr-centro-2{ display:grid; grid-template-columns:1fr 1fr; gap:22px; align-items:start; }
 .tr-txt-centro{ text-align:center; }
-.tr-fila-card{ text-align:center; }
+.tr-fila-card{ text-align:center; } .tr-fila-h{ font-size:24px; margin-bottom:4px; }
 .tr-spinner{ width:46px; height:46px; border:4px solid var(--color-border); border-top-color:var(--color-primary); border-radius:50%; animation:trg 1s linear infinite; margin:6px auto 16px; }
 @keyframes trg{ to{ transform:rotate(360deg); } }
 .tr-pista{ position:relative; height:8px; background:var(--color-surface-overlay); border-radius:8px; margin:24px 0; }
@@ -129,16 +134,30 @@ img{ display:block; max-width:100%; }
 .tr-leyenda{ display:flex; gap:18px; margin-top:12px; font-size:13px; color:var(--color-text-muted); flex-wrap:wrap; }
 .tr-muestra{ display:inline-block; width:12px; height:12px; border-radius:3px; margin-right:6px; vertical-align:middle; }
 .tr-m-ok{ background:var(--color-primary); } .tr-m-warn{ background:var(--color-warning,#fbbf24); } .tr-m-off{ background:var(--color-danger,#f87171); }
-.tr-zona{ transition:opacity .15s; } .tr-zona.sel rect,.tr-zona.sel ellipse,.tr-zona.sel path{ stroke-width:4; }
+.tr-zona{ transition:opacity .15s; outline:none; }
+/* Con una localidad elegida, las demás se atenúan; la elegida engrosa su borde (o su anillo). */
+.tr-mapa.con-sel .tr-zona:not(.sel){ opacity:.4; }
+.tr-zona.sel rect,.tr-zona.sel path{ stroke-width:4; } .tr-zona.sel .tr-anillo-zona{ stroke-width:24; opacity:1; }
+.tr-zona:focus-visible rect,.tr-zona:focus-visible path,.tr-zona:focus-visible .tr-anillo-zona{ stroke:var(--color-text); }
+.tr-zona[aria-disabled="true"]{ cursor:not-allowed!important; }
+/* Lista de localidades: la misma elección que el mapa, con el estado escrito (no solo color). */
+.tr-zonas{ display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:8px; margin-top:14px; }
+.tr-zona-btn{ display:flex; align-items:center; gap:12px; width:100%; text-align:left; background:transparent; border:1px solid var(--color-border); border-radius:12px; padding:10px 14px; color:var(--color-text); font:inherit; cursor:pointer; transition:border-color .15s,background .15s; }
+.tr-zona-btn:hover{ border-color:var(--color-text-muted); }
+.tr-zona-btn.sel{ border-color:var(--color-primary); background:var(--color-primary-soft); }
+.tr-zona-btn:disabled{ opacity:.5; cursor:not-allowed; }
+.tr-zona-nom{ flex:1; font-weight:600; font-size:14px; } .tr-zona-nom small{ display:block; font-weight:400; font-size:12px; color:var(--color-text-muted); margin-top:2px; }
+.tr-zona-precio{ font-weight:700; font-family:var(--tr-font-h); font-size:14px; white-space:nowrap; }
 .tr-disp{ margin:14px 0; } .tr-disp-rot{ display:flex; justify-content:space-between; font-size:13px; margin-bottom:5px; }
 .tr-disp-pista{ height:8px; background:var(--color-surface-overlay); border-radius:6px; overflow:hidden; }
 .tr-disp-fill{ height:100%; background:var(--color-primary); } .tr-disp-fill.peligro{ background:var(--color-danger,#f87171); }
 .tr-lbl{ display:block; font-size:13px; font-weight:600; color:var(--color-text-muted); margin:16px 0 6px; }
 .tr-contador{ display:flex; align-items:center; gap:14px; }
 .tr-contador button{ width:40px; height:40px; border-radius:10px; border:1px solid var(--color-border); background:var(--color-surface-overlay); color:var(--color-text); font-size:20px; cursor:pointer; }
+.tr-contador button:disabled{ opacity:.4; cursor:not-allowed; }
 .tr-contador #cifra{ font-size:20px; font-weight:700; min-width:24px; text-align:center; }
 .tr-barra-total{ position:sticky; bottom:0; display:flex; align-items:center; justify-content:space-between; gap:16px; background:var(--color-surface); border:1px solid var(--color-border); border-radius:14px; padding:14px 20px; margin-top:22px; box-shadow:0 -4px 20px rgba(0,0,0,.15); }
-.tr-bt-info{ display:flex; flex-direction:column; } .tr-bt-cifra{ font-size:22px; font-weight:800; font-family:var(--tr-font-h); }
+.tr-bt-info{ display:flex; flex-direction:column; min-width:0; } .tr-bt-cifra{ font-size:22px; font-weight:800; font-family:var(--tr-font-h); }
 .tr-anillo{ display:flex; justify-content:center; margin:10px 0; } .tr-anillo svg{ width:160px; height:160px; }
 .tr-cancelar{ display:block; text-align:center; margin-top:12px; color:var(--color-text-muted); font-size:13px; cursor:pointer; }
 .tr-campo{ margin-bottom:14px; } .tr-campo label{ display:block; font-size:13px; color:var(--color-text-muted); margin-bottom:6px; }
@@ -148,7 +167,10 @@ img{ display:block; max-width:100%; }
 .tr-aviso-sesion{ display:flex; gap:12px; align-items:center; border:1px solid var(--color-primary); background:var(--color-primary-soft); border-radius:12px; padding:14px 16px; margin:16px 0; }
 .tr-boleta{ border:1px dashed var(--color-primary); border-radius:14px; padding:18px; margin-bottom:12px; background:var(--color-surface-overlay); text-align:center; }
 .tr-boleta-cab{ display:flex; justify-content:space-between; align-items:center; }
-.tr-qr{ font-size:60px; line-height:1; margin:12px 0; letter-spacing:-6px; } .tr-cod{ font-family:monospace; font-weight:700; letter-spacing:1px; font-size:13px; word-break:break-all; }
+/* El QR va sobre blanco en ambos temas: los lectores de acceso necesitan ese contraste. */
+.tr-qr{ width:168px; margin:14px auto 10px; padding:8px; background:#fff; border-radius:10px; line-height:0; } .tr-qr svg{ width:100%; height:auto; }
+.tr-cod-lbl{ font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--color-text-muted); margin-bottom:2px; }
+.tr-cod{ font-family:monospace; font-weight:700; letter-spacing:1px; font-size:13px; word-break:break-all; }
 
 /* ============ KPIs promotor / operación ============ */
 .tr-kpis{ display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:16px; }
@@ -199,5 +221,17 @@ img{ display:block; max-width:100%; }
 @media (max-width:560px){
   .tr-nav{ display:none; } .tr-footer-in{ grid-template-columns:1fr; }
   .tr-flecha{ width:34px; height:34px; font-size:16px; }
-  .tr-slide-cta{ padding:14px; } .tr-slide-cta .info p{ display:none; }
+  /* El banner se ve completo y el título va debajo, no encima de la imagen. */
+  .tr-slide-cta{ position:static; padding:12px 14px; background:var(--color-surface); align-items:center; }
+  .tr-slide-cta .info h3{ color:var(--color-text); text-shadow:none; font-size:16px; }
+  .tr-slide-cta .info p{ display:none; }
+  .tr-slide{ display:block; }
+  .tr-slide-cta .info{ min-width:0; } .tr-slide-cta .btn{ white-space:nowrap; padding:10px 16px; }
+  /* Flechas a media altura del banner (proporción ~2,9:1), no de banner + título. */
+  .tr-flecha{ top:calc((100vw - 32px) / 2.9 / 2); }
+  /* Barra de total compacta: en una línea, para no tapar el selector de cantidad. */
+  .tr-barra-total{ padding:10px 14px; gap:12px; border-radius:12px; }
+  .tr-bt-info .tr-mut{ font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .tr-bt-cifra{ font-size:18px; }
+  .tr-barra-total .btn{ padding:10px 18px; flex-shrink:0; }
 }
