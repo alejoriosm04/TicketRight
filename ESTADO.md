@@ -57,6 +57,10 @@ caso de uso principal, y encima de eso pruebas, carga, observabilidad y fallos.
 
 ## Pendientes y preguntas abiertas
 
+- **Evidencias en Codespaces** (video, capturas de Grafana, alerta, los 4 fallos y la carga con
+  Redis y Kafka): paso a paso en
+  [`guia-codespaces.md`](docs/proyecto/03-implementacion/guia-codespaces.md).
+
 - `PENDIENTE: la diapositiva 46 trae una nota manuscrita «¿Máximo?»; preguntar al profesor si la nota del entregable tiene tope.`
 - `PENDIENTE: formato y duración del video demo; el ambiente será local con k3d o minikube, así que también hay que confirmar si la demo en video y los accesos por Tailscale son suficientes.`
 - `PENDIENTE: ratificar los doce umbrales de` [`atributos-de-calidad.md`](docs/proyecto/01-caso-de-negocio/atributos-de-calidad.md).

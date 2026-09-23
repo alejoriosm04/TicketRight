@@ -130,6 +130,8 @@ Checklist antes de entregar:
 
 ## Evidencias que hay que producir
 
+Cómo sacarlas paso a paso en Codespaces: [`guia-codespaces.md`](guia-codespaces.md).
+
 | Evidencia | Criterio | Herramienta o formato |
 |---|---|---|
 | Video demo de la aplicación | 1 | Guion: compra completa + un fallo en vivo |

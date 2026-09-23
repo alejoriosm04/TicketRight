@@ -82,6 +82,7 @@ PAGES = [
     ("docs/proyecto/03-implementacion/coherencia-implementacion.md", "Entrega-3-Coherencia", "Entrega 3 · Implementación", "Coherencia diseño–código"),
     ("docs/proyecto/03-implementacion/bitacora-de-fallos.md", "Entrega-3-Bitacora-de-fallos", "Entrega 3 · Implementación", "Bitácora de fallos"),
     ("docs/proyecto/03-implementacion/pruebas-de-carga.md", "Entrega-3-Pruebas-de-carga", "Entrega 3 · Implementación", "Pruebas de carga"),
+    ("docs/proyecto/03-implementacion/guia-codespaces.md", "Entrega-3-Guia-de-Codespaces", "Entrega 3 · Implementación", "Guía de Codespaces"),
 
     ("docs/proyecto/decisiones/README.md", "ADR", "Decisiones · ADR", "Índice y formato"),
     ("docs/proyecto/decisiones/0001-idea-de-negocio.md", "ADR-001-Idea-de-negocio", "Decisiones · ADR", "AD-001 Idea de negocio"),
