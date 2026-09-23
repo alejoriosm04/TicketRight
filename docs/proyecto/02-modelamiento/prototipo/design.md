@@ -728,3 +728,33 @@ Dos cosas la hacen "viva" en vez de una captura:
 Es accesible desde el dropdown de "Perfil" de cualquier pantalla ("Guía de estilo") y desde
 la lista de accesos rápidos de `index.html` y `guia-de-estilo.html` mismos, igual que el
 mapa de navegación — es una herramienta de referencia, no una pantalla del producto.
+
+## Plataforma `/app` — revisión de uso y accesibilidad del 2026-09-22
+
+Revisión de la plataforma funcional recorriéndola con Chrome en escritorio (1440 px) y móvil
+(390 px), con capturas y una auditoría automática por pantalla. **La identidad no cambió:**
+la plataforma conserva su tipografía (Sora + Inter) y sus emojis, por decisión del equipo,
+aunque difieren de este archivo y de §16 de [`proyecto/design.md`](../../design.md).
+`PENDIENTE: decidir si se documenta esa divergencia como definitiva o se alinea después de la Entrega 3.`
+
+Lo que se corrigió:
+
+- **Elegir localidad.** Los rótulos de los anillos van sobre una píldora oscura (lima sobre
+  lima no se leía); la localidad elegida resalta y las demás se atenúan (antes el estilo
+  «seleccionada» adelgazaba el anillo). Bajo el mapa hay una **lista de localidades** con el
+  estado escrito —«Disponible · 2.600», «Pocas», «Agotado»—, porque el estado nunca se dice
+  solo con color. Mapa y lista eligen lo mismo, con clic o con teclado.
+- **Móvil.** La barra de total es compacta (una línea) y, al elegir localidad, el panel con la
+  cantidad sube a la vista; antes la barra fija tapaba el selector. En el carrusel el banner
+  se ve completo y el título va debajo, no encima de la imagen.
+- **Boleta.** El QR es real (código de la boleta), sobre blanco en ambos temas para que un
+  lector de acceso lo lea; se genera con `vendor/qrcode-generator.js` (MIT), servido desde el
+  repositorio para que la demo funcione sin internet, igual que Chart.js.
+- **Panel del promotor.** «Pagos confirmados» salía en 0: el lector de `/metrics` comparaba la
+  línea completa y la métrica trae etiquetas extra. «Boletas vendidas» contaba también lo
+  reservado; el catálogo ahora expone `vendidas` por localidad.
+- **Teclado y lectores de pantalla.** Tarjetas, categorías, carrusel, menú de cuenta y logo
+  se usan con Tab, Enter y espacio; el modal de ingreso se cierra con Escape y devuelve el
+  foco; todos los campos tienen su `label` asociado y `autocomplete`; cada pantalla tiene un
+  `h1`; la fila anuncia la posición solo cuando cambia; el foco visible usa el acento
+  (`--color-accent-text`), porque el azul translúcido de `estilos.css` casi no se ve en oscuro.
