@@ -161,7 +161,9 @@ Esta volumetría no se prueba sola. Es la carga que:
   validada. `PENDIENTE: validar la mezcla con el promotor piloto`, como ya señala
   [AD-003](../decisiones/0003-consistencia-por-tipo-de-inventario.md#4-supuestos).
 - `PENDIENTE: ejecutar los cuatro escenarios contra la implementación en la Entrega 3 y
-  reemplazar cada cifra `[S]` de este documento por una medida real.`
+  reemplazar cada cifra `[S]` de este documento por una medida real.` Primera campaña, a
+  escala reducida y en el ambiente local, el 22 de septiembre de 2026:
+  [`pruebas-de-carga.md`](../03-implementacion/pruebas-de-carga.md).
 
 ## Referencias
 

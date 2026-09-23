@@ -1,0 +1,223 @@
+{
+    "metrics": {
+        "errores_tecnicos{operacion:reserva}": {
+            "passes": 0,
+            "fails": 1502,
+            "thresholds": {
+                "rate<0.01": false
+            },
+            "value": 0
+        },
+        "http_req_connecting": {
+            "max": 22.618144,
+            "avg": 0.03057709158938279,
+            "med": 0,
+            "p(90)": 0,
+            "p(95)": 0.19680769999999978,
+            "p(99)": 0.35095562
+        },
+        "http_req_receiving": {
+            "avg": 0.24654653361048792,
+            "med": 0.074808,
+            "p(90)": 0.1404034,
+            "p(95)": 0.18085239999999989,
+            "p(99)": 0.6677670199999997,
+            "max": 1078.303619
+        },
+        "http_req_waiting": {
+            "p(95)": 8.129737099999994,
+            "p(99)": 152.73014533999992,
+            "max": 1366.384921,
+            "avg": 6.1693172723376914,
+            "med": 1.009803,
+            "p(90)": 3.475709400000001
+        },
+        "reservas_abandonadas": {
+            "rate": 0.21305479472140754,
+            "count": 22
+        },
+        "http_req_sending": {
+            "med": 0.033057,
+            "p(90)": 0.0691428,
+            "p(95)": 0.08752460000000001,
+            "p(99)": 0.2404483999999999,
+            "max": 539.497314,
+            "avg": 0.1676618007675094
+        },
+        "http_req_duration{operacion:fila_posicion}": {
+            "p(99)": 51.33731528000002,
+            "max": 899.707741,
+            "avg": 4.1343126451105965,
+            "med": 1.03507,
+            "p(90)": 1.8137446000000004,
+            "p(95)": 2.365120600000001,
+            "thresholds": {
+                "p(95)<1000": false
+            }
+        },
+        "reservas_confirmadas": {
+            "rate": 1.7141226666222333,
+            "count": 177
+        },
+        "iterations": {
+            "count": 1502,
+            "rate": 14.545831894161552
+        },
+        "data_sent": {
+            "count": 4240232,
+            "rate": 41063.71628777924
+        },
+        "data_received": {
+            "count": 21980027,
+            "rate": 212861.37002072707
+        },
+        "http_req_tls_handshaking": {
+            "avg": 0,
+            "med": 0,
+            "p(90)": 0,
+            "p(95)": 0,
+            "p(99)": 0,
+            "max": 0
+        },
+        "http_reqs": {
+            "count": 15635,
+            "rate": 151.41416888496394
+        },
+        "iteration_duration": {
+            "avg": 21851.581734191077,
+            "med": 21676.8712545,
+            "p(90)": 37721.5545184,
+            "p(95)": 39681.68725555,
+            "p(99)": 41676.46758144,
+            "max": 43441.903217
+        },
+        "tiempo_hasta_boleta": {
+            "p(90)": 1272.1999999999998,
+            "p(95)": 1726.1999999999998,
+            "p(99)": 2370.4800000000005,
+            "max": 2573,
+            "avg": 1107.683870967742,
+            "med": 1013
+        },
+        "reservas_rechazadas_aforo": {
+            "count": 1325,
+            "rate": 12.831709227539319
+        },
+        "errores_tecnicos": {
+            "passes": 0,
+            "fails": 15631,
+            "value": 0
+        },
+        "vus": {
+            "value": 1,
+            "min": 0,
+            "max": 627
+        },
+        "http_req_duration{expected_response:true}": {
+            "avg": 6.583525606715732,
+            "med": 1.144759,
+            "p(90)": 3.735648400000001,
+            "p(95)": 8.895035999999985,
+            "p(99)": 167.45039259999947,
+            "max": 1366.459077
+        },
+        "http_req_duration{operacion:reserva}": {
+            "p(95)": 32.24255195000003,
+            "p(99)": 487.89329698000034,
+            "max": 1366.459077,
+            "avg": 17.94185446804262,
+            "med": 3.3241935,
+            "p(90)": 12.067929700000008,
+            "thresholds": {
+                "p(95)<2000": false
+            }
+        },
+        "http_req_failed": {
+            "passes": 0,
+            "fails": 15635,
+            "thresholds": {
+                "rate<0.001": false
+            },
+            "value": 0
+        },
+        "checks": {
+            "passes": 1834,
+            "fails": 0,
+            "value": 1
+        },
+        "vus_max": {
+            "value": 1500,
+            "min": 1500,
+            "max": 1500
+        },
+        "boletas_emitidas": {
+            "count": 222,
+            "rate": 2.1499165649160217
+        },
+        "http_req_blocked": {
+            "avg": 0.06328203524144559,
+            "med": 0.007094,
+            "p(90)": 0.07761020000000016,
+            "p(95)": 0.31473659999999976,
+            "p(99)": 0.6011588,
+            "max": 30.465026
+        },
+        "pagos_finalizados": {
+            "fails": 0,
+            "passes": 155,
+            "thresholds": {
+                "rate>=0.99": false
+            },
+            "value": 1
+        },
+        "http_req_duration": {
+            "p(90)": 3.735648400000001,
+            "p(95)": 8.895035999999985,
+            "p(99)": 167.45039259999947,
+            "max": 1366.459077,
+            "avg": 6.583525606715732,
+            "med": 1.144759
+        },
+        "fans_admitidos": {
+            "count": 1502,
+            "rate": 14.545831894161552
+        },
+        "espera_en_fila": {
+            "p(95)": 39624.6,
+            "p(99)": 41667.65,
+            "max": 43424,
+            "avg": 21701.804926764315,
+            "med": 21664.5,
+            "p(90)": 37711.700000000004
+        }
+    },
+    "root_group": {
+        "groups": {},
+        "checks": {
+            "entra a la fila": {
+                "name": "entra a la fila",
+                "path": "::entra a la fila",
+                "id": "b7bd12a2aa523a48b88548feee0b86c7",
+                "passes": 1502,
+                "fails": 0
+            },
+            "reserva confirmada": {
+                "path": "::reserva confirmada",
+                "id": "bef07e128d0e693eae7a33fbaf9c2715",
+                "passes": 177,
+                "fails": 0,
+                "name": "reserva confirmada"
+            },
+            "pago solicitado": {
+                "path": "::pago solicitado",
+                "id": "085e145ae3b8f2f896600b9f91d04730",
+                "passes": 155,
+                "fails": 0,
+                "name": "pago solicitado"
+            }
+        },
+        "name": "",
+        "path": "",
+        "id": "d41d8cd98f00b204e9800998ecf8427e"
+    }
+}

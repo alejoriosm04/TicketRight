@@ -122,8 +122,18 @@ costo por hora configurable (`INFRA_COSTO_HORA_COP`) entre las boletas de la úl
 
 `prometheus/alerts.yml` define cuatro reglas ligadas a atributos: discrepancia prolongada
 (A-1), discrepancias abiertas (A-1), sobreventa (A-2) y reservas vencidas (A-5). Se ven en
-http://localhost:9090/alerts. Para **dispararlas en vivo**: arrancar con
-`PASARELA_PERFIL=repetida` o forzar un fallo de emisión.
+http://localhost:9090/alerts. Para **dispararlas en vivo**, arrancar la app sin reintentos
+de emisión: cada pago confirmado queda como «cobro sin boleta» y abre una discrepancia.
+
+```bash
+MAX_INTENTOS_EMISION=0 npm run dev -w @ticketright/ventas
+npm run e2e -w @ticketright/ventas   # termina en enConciliacion, es lo esperado
+```
+
+`DiscrepanciasAbiertas` pasa a *firing* a los ~10 s y `DiscrepanciaAbiertaProlongada` al
+minuto. Con `PASARELA_PERFIL=repetida` ya no se dispara nada: el webhook repetido es
+idempotente y no abre discrepancias. Para volver a la normalidad, reinicia la app sin la
+variable y resiembra (`npm run db:seed -w @ticketright/ventas`).
 
 ## El tablero
 
