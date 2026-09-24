@@ -1,47 +1,158 @@
+# Reglas de alerta de TicketRight.
+#
+# Cada regla implementa una fila de la tabla de "Alertas accionables" del diseño
+# (docs/proyecto/02-modelamiento/observabilidad.md) y usa métricas que EXISTEN de verdad en
+# apps/ventas/src/observability/metrics.ts. Los umbrales del diseño son [S]; en la demo se
+# acortan las duraciones (for) para que las alertas sean visibles en vivo. Cada regla lleva su
+# atributo de calidad y su severidad (P1/P2/P3) como etiquetas.
+#
+# Nota de alcance del piloto: las alertas de "servicio con capacidad reducida" (réplicas de
+# Kubernetes por debajo de lo esperado) NO se implementan aquí porque el piloto corre una sola
+# réplica (docker compose / single-node); son de la topología de producción con KEDA. El resto
+# de las 13 alertas del diseño están cubiertas.
+
 groups:
+  # ---------------------------------------------------------------------------
   - name: ticketright-negocio
     rules:
-      # A-1: no debe haber dinero confirmado sin boleta al cierre. Una discrepancia
-      # abierta por más de un minuto ya merece atención en la demo (la meta de
-      # conciliación es ≤ 15 min; aquí se acorta para hacerla visible en vivo).
-      - alert: DiscrepanciaAbiertaProlongada
-        expr: ticketright_oldest_discrepancy_age_seconds > 60
-        for: 10s
-        labels:
-          severity: critical
-          atributo: A-1
-        annotations:
-          summary: "Discrepancia entre pago y boleta sin resolver"
-          description: "La discrepancia más antigua lleva {{ $value | humanizeDuration }} abierta; la meta de conciliación es 15 minutos."
-
-      - alert: DiscrepanciasAbiertas
-        expr: ticketright_open_discrepancies > 0
-        for: 10s
-        labels:
-          severity: warning
-          atributo: A-1
-        annotations:
-          summary: "Hay pagos confirmados sin derecho de entrada resuelto"
-          description: "{{ $value }} discrepancia(s) abierta(s) entre dinero y boleta."
-
-      # A-2: el aforo es una restricción legal; una sola sobreventa es crítica.
+      # A-2 · el aforo es una restricción legal; una sola sobreventa es crítica (P1).
       - alert: SobreventaDetectada
         expr: increase(ticketright_oversell_total[1m]) > 0
         for: 0s
-        labels:
-          severity: critical
-          atributo: A-2
+        labels: { severity: critical, prioridad: P1, atributo: A-2 }
         annotations:
           summary: "Se detectó un intento de emitir por encima del aforo"
           description: "El contador de sobreventa creció en la última ventana; el aforo no admite compensación posterior."
 
-      # A-5: una reserva vencida que sigue reteniendo inventario reduce la conversión.
+      # A-3 · una boleta no puede tener dos titularidades activas.
+      - alert: TitularidadInvalida
+        expr: increase(ticketright_invalid_ownership_total[5m]) > 0
+        for: 0s
+        labels: { severity: critical, prioridad: P1, atributo: A-3 }
+        annotations:
+          summary: "Boleta con más de una titularidad activa"
+          description: "Se registró un conflicto de titularidad; revisar transferencias/reventas concurrentes."
+
+      # A-1 · no debe haber dinero confirmado sin boleta. Meta de conciliación 15 min; en la
+      # demo se avisa a los 60 s para hacerla visible, y crítica al superar 15 min (900 s).
+      - alert: DiscrepanciaAbiertaProlongada
+        expr: ticketright_oldest_discrepancy_age_seconds > 60
+        for: 10s
+        labels: { severity: warning, prioridad: P2, atributo: A-1 }
+        annotations:
+          summary: "Discrepancia entre pago y boleta sin resolver"
+          description: "La discrepancia más antigua lleva {{ $value | humanizeDuration }} abierta; la meta de conciliación es 15 minutos."
+
+      - alert: DiscrepanciaIncumpleConciliacion
+        expr: ticketright_oldest_discrepancy_age_seconds > 900
+        for: 0s
+        labels: { severity: critical, prioridad: P1, atributo: A-1 }
+        annotations:
+          summary: "Discrepancia supera el límite de conciliación de 15 minutos"
+          description: "Hay dinero confirmado sin boleta por más de 15 minutos; inspeccionar traza, SAGA y DLQ, y compensar."
+
+      - alert: DiscrepanciasAbiertas
+        expr: ticketright_open_discrepancies > 0
+        for: 10s
+        labels: { severity: warning, prioridad: P3, atributo: A-1 }
+        annotations:
+          summary: "Hay pagos confirmados sin derecho de entrada resuelto"
+          description: "{{ $value }} discrepancia(s) abierta(s) entre dinero y boleta."
+
+      # A-5 · una reserva vencida que sigue reteniendo inventario reduce la conversión.
       - alert: ReservasVencidasSinLiberar
         expr: ticketright_overdue_reservations > 0
         for: 30s
-        labels:
-          severity: warning
-          atributo: A-5
+        labels: { severity: warning, prioridad: P2, atributo: A-5 }
         annotations:
           summary: "Reservas vencidas retienen inventario"
-          description: "{{ $value }} reserva(s) vencida(s) siguen sin liberarse."
+          description: "{{ $value }} reserva(s) vencida(s) siguen sin liberarse; revisar el worker de expiración."
+
+      # A-1 · A-6 · conversión de pago degradada: confirmados/iniciados < 99% con volumen.
+      - alert: PagosEnCursoDegradados
+        expr: |
+          (sum(increase(ticketright_payments_total{state="confirmado"}[5m]))
+           / clamp_min(sum(increase(ticketright_payments_started_total[5m])), 1)) < 0.99
+          and sum(increase(ticketright_payments_started_total[5m])) > 10
+        for: 5m
+        labels: { severity: critical, prioridad: P1, atributo: A-1 }
+        annotations:
+          summary: "La conversión de pagos cayó por debajo del 99%"
+          description: "Menos del 99% de los pagos iniciados se confirman; reducir admisión y revisar pasarela/consumidores."
+
+      # A-7 · viabilidad económica: costo por boleta por encima de la meta de COP $150.
+      - alert: CostoPorBoletaFueraDeMeta
+        expr: ticketright_infrastructure_cost_per_ticket_cop > 150
+        for: 5m
+        labels: { severity: warning, prioridad: P3, atributo: A-7 }
+        annotations:
+          summary: "Costo de infraestructura por boleta por encima de la meta"
+          description: "La proyección es {{ $value }} COP/boleta (meta ≤ 150); revisar capacidad ociosa y techo de escalado."
+
+  # ---------------------------------------------------------------------------
+  - name: ticketright-tecnico
+    rules:
+      # A-10 · latencia de reserva P95 > 2 s durante 5 min.
+      - alert: LatenciaDeReservaAlta
+        expr: |
+          histogram_quantile(0.95, sum(rate(ticketright_reservation_duration_seconds_bucket[5m])) by (le)) > 2
+        for: 5m
+        labels: { severity: warning, prioridad: P2, atributo: A-10 }
+        annotations:
+          summary: "Latencia de reserva (P95) por encima de 2 s"
+          description: "El P95 de la reserva es {{ $value | humanizeDuration }}; revisar bloqueos, conexiones y concurrencia, y bajar la admisión."
+
+      # A-9 · recorrido crítico: dos pruebas sintéticas consecutivas fallan (~2 min).
+      - alert: RecorridoCriticoNoDisponible
+        expr: increase(ticketright_critical_journey_checks_total{result="fallo"}[2m]) >= 2
+        for: 0s
+        labels: { severity: critical, prioridad: P1, atributo: A-9 }
+        annotations:
+          summary: "El recorrido crítico de compra está fallando"
+          description: "Dos o más sondas sintéticas de compra fallaron; confirmar alcance y ejecutar recuperación."
+
+      # A-9 · servicio no disponible: Prometheus no logra raspar el objetivo por 1 min.
+      - alert: ServicioCriticoNoDisponible
+        expr: up{job="ticketright-ventas"} == 0
+        for: 1m
+        labels: { severity: critical, prioridad: P1, atributo: A-9 }
+        annotations:
+          summary: "El servicio de ventas no responde al scrape"
+          description: "El objetivo de Prometheus está caído hace 1 min; restaurar la última versión sana o activar la degradación prevista."
+
+      # A-1 · A-6 · trabajo asíncrono acumulado: lag del consumidor o mensajes en DLQ.
+      - alert: TrabajoAsincronoAcumulado
+        expr: max(ticketright_consumer_lag) > 100 or increase(ticketright_events_dlq_total[5m]) > 0
+        for: 2m
+        labels: { severity: warning, prioridad: P2, atributo: A-6 }
+        annotations:
+          summary: "Lag del bus o mensajes en la DLQ"
+          description: "El consumidor acumula trabajo (lag alto) o hay eventos en la DLQ; detener la reducción de capacidad y reprocesar con control."
+
+      # A-6 · saturación sostenida de CPU del proceso por 10 min (advertencia).
+      - alert: SaturacionSostenidaDeCpu
+        expr: rate(ticketright_process_cpu_seconds_total[5m]) > 0.8
+        for: 10m
+        labels: { severity: warning, prioridad: P3, atributo: A-6 }
+        annotations:
+          summary: "Uso sostenido de CPU por encima del 80%"
+          description: "La CPU del proceso supera el 80% de un núcleo por 10 min; confirmar si la carga es legítima y revisar límites."
+
+      # A-6 · saturación del pool de PostgreSQL (conexiones esperando).
+      - alert: PostgresPoolSaturado
+        expr: ticketright_pg_pool_connections{state="waiting"} > 0
+        for: 2m
+        labels: { severity: warning, prioridad: P2, atributo: A-6 }
+        annotations:
+          summary: "Conexiones esperando un cupo en el pool de PostgreSQL"
+          description: "Hay solicitudes esperando conexión a PostgreSQL; revisar bloqueos, concurrencia y el techo de admisión."
+
+      # A-9 · telemetría incompleta: dejan de llegar las métricas del recorrido crítico
+      # (la tubería OTel/Prometheus se interrumpió) por 5 min.
+      - alert: TelemetriaIncompleta
+        expr: absent(ticketright_process_start_time_seconds)
+        for: 5m
+        labels: { severity: warning, prioridad: P2, atributo: A-9 }
+        annotations:
+          summary: "No llegan métricas del servicio de ventas"
+          description: "La telemetría del servicio no aparece hace 5 min; restaurar la tubería y declarar el intervalo sin evidencia."
