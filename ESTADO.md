@@ -25,10 +25,10 @@ La rúbrica completa llegó con las clases 5 y 6
 | # | Criterio | Peso | Estado |
 |---|---|---|---|
 | 1 | Aplicación funcionando | **40%** | 🟢 App Fastify + PostgreSQL + Redis (fila) + Kafka (bus) + seguridad de borde, corriendo en Codespaces; despliegue k8s/KEDA en `deploy/`. Falta video |
-| 2 | Observabilidad | **20%** | 🟢 Plataforma implementada (OTel + Alloy + Prometheus + Tempo + Loki + Grafana); las 14 métricas del diseño instrumentadas, tablero y 4 alertas |
+| 2 | Observabilidad | **20%** | 🟢 Plataforma implementada (OTel + Alloy + Prometheus + Tempo + Loki + Grafana); las 14 métricas del diseño instrumentadas, tablero y **15 alertas** ligadas a atributos |
 | 3 | Simulación y análisis de fallos | **30%** | 🟢 Los 4 escenarios (IF-01, IF-02, IF-03, IF-05) ejecutados y aprobados; bitácora en [`bitacora-de-fallos.md`](docs/proyecto/03-implementacion/bitacora-de-fallos.md). IF-03 halló y corrigió una debilidad real |
 | 4 | Patrones utilizados | **10%** | ✅ Catálogo en [`patrones.md`](docs/proyecto/03-implementacion/patrones.md), con Outbox/CQRS/Space-Based/KEDA/seguridad implementados |
-| 5 | Autoevaluación | **+10%** | ⚪ Por escribir al cierre |
+| 5 | Autoevaluación | **+10%** | 🟢 Escrita en [`autoevaluacion.md`](docs/proyecto/03-implementacion/autoevaluacion.md) |
 | 6 | Coherencia | **-10%** | 🟢 **22 sep: se halló y corrigió sobreventa por falta de transacciones** ([§7 de la auditoría](docs/proyecto/03-implementacion/coherencia-implementacion.md#7-hallazgo-posterior-sobreventa-por-falta-de-transacciones)). Mapeo ADR→implementación en [`fidelidad-arquitectonica.md`](docs/proyecto/03-implementacion/fidelidad-arquitectonica.md); 21 casos, cobertura en CI y diagramas al día. Auditoría de coherencia 22 sep: ver [`coherencia-implementacion.md`](docs/proyecto/03-implementacion/coherencia-implementacion.md) |
 
 La **defensa** se apoya en los ADR: para cada decisión visible en la demo hay que responder
@@ -96,6 +96,15 @@ Node.js con Vitest, **aceptada el 20 de septiembre de 2026**— y el esqueleto e
 `packages/`: cuatro contextos hexagonales con nombre en inglés —`event-catalog`,
 `admission-identity`, `sales` y `entitlements`— más `shared-kernel`, ambiente local en
 `docker-compose.yml` y CI en `.github/workflows/`. Sigue el código de los veintiún casos.
+
+**Incremento 6 — cierre de coherencia (22 de septiembre):** se implementó el dominio del
+contexto **Oferta de eventos** en `@ticketright/event-catalog` (`Evento`, `Recinto`,
+`Promotor` con `Convenio`, `ReglasVenta`, `ReglasReventa`, `Cancelacion` y la regla R1 del
+aforo del recinto), con pruebas; así **las 12 raíces del modelo tienen código**. Se ampliaron
+las alertas de `4` a `15` (negocio y técnicas, cada una con su atributo) y se escribió la
+[autoevaluación](docs/proyecto/03-implementacion/autoevaluacion.md). El detalle de la
+auditoría diseño↔código está en
+[`coherencia-implementacion.md`](docs/proyecto/03-implementacion/coherencia-implementacion.md).
 
 La **frontera entre contextos** quedó registrada como
 [AD-008](docs/proyecto/decisiones/0008-boleta-en-derecho-de-asistencia.md): `Boleta` vive en

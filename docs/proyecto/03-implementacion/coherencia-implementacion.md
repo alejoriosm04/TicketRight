@@ -19,7 +19,7 @@ difiere, **por qué** y si es una **desviación deliberada** (con su justificaci
 | Reglas de negocio R1–R14 | 🟢 Alta | Los 21 casos del plan de pruebas en verde cubren las reglas |
 | Infraestructura (ADR / arq. de implementación) | 🟢 Alta (piloto) | Homólogos locales documentados; AWS es diseño, no despliegue |
 | Observabilidad | 🟢 Alta | Las 3+3 métricas de la rúbrica y el catálogo del diseño instrumentados |
-| Riqueza del dominio por contexto | 🟡 Parcial | `event-catalog` se resuelve como lectura SQL, no como dominio (ver §3) |
+| Riqueza del dominio por contexto | 🟢 Alta | `event-catalog` ya implementa `Evento`/`Recinto`/`Promotor` como dominio; **12/12 raíces con código** (ver §3) |
 | Detalles de fidelidad del diagrama | 🟡 Menor | Orden de dos mensajes y algún parámetro difieren (ver §4) |
 
 ## 2. Lo que coincide con el diseño
@@ -48,25 +48,43 @@ difiere, **por qué** y si es una **desviación deliberada** (con su justificaci
   (AD-002), borde de seguridad y cuentas con rol (AD-004), KEDA por lag. El mapeo AWS→piloto
   está en [`fidelidad-arquitectonica.md`](fidelidad-arquitectonica.md).
 
-## 3. Diferencia principal: el contexto «Oferta de eventos»
+## 3. Contexto «Oferta de eventos»: dominio implementado, gestión acotada
 
 El [modelo de dominio](../02-modelamiento/modelo-de-dominio.md) define en *Oferta de eventos*
-las raíces **Promotor**, **Recinto**, **Evento** (y `Convenio`, `ReglasVenta`, `ReglasReventa`,
-`Cancelacion`). En la implementación, el paquete `event-catalog` está **vacío de dominio**: el
-catálogo se resuelve como **lectura SQL directa** sobre las tablas `eventos` y `localidades` en
-[`routes.ts`](../../../apps/ventas/src/http/routes.ts) (endpoint `GET /catalogo`), y el
-`eventoId` de la demo se inyecta como configuración.
+las raíces **Promotor**, **Recinto**, **Evento** (y los VO `Convenio`, `ReglasVenta`,
+`ReglasReventa`, `Cancelacion`). Estos **ya están implementados** en el paquete
+[`event-catalog`](../../../packages/event-catalog/src/domain/) (antes estaba vacío):
 
-- **Por qué.** El caso de uso central de la Entrega 3 —y de la demo— es la **venta bajo alta
-  demanda** (turno → reserva → pago → emisión), que vive en `sales`, `admission-identity` y
-  `entitlements`. La *gestión* del catálogo (alta de promotores, convenios, recintos) no está
-  en el escenario de la demo ni en los 21 casos del plan de pruebas.
-- **Consecuencia.** El catálogo funciona como **proyección de lectura (CQRS)**, coherente con
-  el estilo, pero sin agregados de dominio. Faltan 3 de las 12 raíces del modelo como código
-  de dominio: `Promotor`, `Recinto`, `Evento`.
-- **Clasificación:** deuda técnica **deliberada** y acotada. Cierre propuesto: modelar el
-  agregado `Evento`/`Recinto` en `event-catalog` si se requiere el alta de catálogo por
-  promotor; hoy el valor está en el camino de venta.
+- `Recinto` con `aforoMaximo` y la verificación de **R1** (la suma de aforos de localidades no
+  supera el techo del recinto) — [`venue.ts`](../../../packages/event-catalog/src/domain/venue.ts).
+- `Promotor` + `Convenio` (con vigencia y firma) — [`promoter.ts`](../../../packages/event-catalog/src/domain/promoter.ts).
+- `Evento` con su ciclo de vida `borrador → publicado → enVenta → ventaCerrada → realizado`
+  (+ rama `cancelado`), `PerfilDemanda` (`cotidiano`/`masivo`) y los VO `ReglasVenta`,
+  `ReglasReventa`, `Cancelacion` — [`event.ts`](../../../packages/event-catalog/src/domain/event.ts).
+
+Con esto, **las 12 raíces de agregado del modelo tienen código** (la 13.ª conceptual,
+`Identidad`, se mantiene deliberadamente como `IdOpaco` por AD-004). Hay pruebas en
+[`event-catalog/tests`](../../../packages/event-catalog/tests/).
+
+- **Lo que sigue acotado (deliberado):** la *gestión* del catálogo por el promotor (alta de
+  eventos y recintos, edición de convenios) no tiene aún capa de aplicación/adaptadores ni UI;
+  el catálogo que consume la plataforma sigue siendo una **lectura CQRS** sobre las tablas
+  `eventos`/`localidades` ([`routes.ts`](../../../apps/ventas/src/http/routes.ts), `GET /catalogo`).
+  El dominio existe y protege sus reglas; falta el flujo de administración, fuera del escenario
+  de la demo y de los 21 casos de prueba.
+- **Clasificación:** el hueco de raíces sin código **quedó cerrado**; la gestión del catálogo
+  es deuda acotada y declarada.
+
+**Ubicación de `Localidad`, `Aforo` y `Silla` (justificación).** El modelo de dominio lista
+estos tres conceptos dentro de «Oferta de eventos», pero la implementación los ubica en
+`@ticketright/sales` ([`inventory.ts`](../../../packages/sales/src/domain/inventory.ts)). Es
+una **desviación deliberada y justificada por [AD-003](../decisiones/0003-consistencia-por-tipo-de-inventario.md)**:
+la localidad es la **autoridad transaccional del aforo** que se bloquea y actualiza en el
+camino de venta (reserva/venta con `FOR UPDATE`), no un dato de catálogo de solo lectura.
+Ponerla en el contexto de venta evita que dos contextos compartan y muten el mismo agregado, y
+mantiene la regla R1 (`reservado + vendido ≤ autorizado`) donde ocurre la escritura. `Recinto`
+conserva su mitad de R1 (`suma de localidades ≤ aforoMaximo`) en `event-catalog`. La frontera
+es la misma idea de AD-008 para `Boleta`: el concepto vive donde se protege su invariante.
 
 Igualmente, `admission-identity` y `entitlements` tienen **solo la capa `domain`** poblada;
 sus `application/ports/adapters` están vacíos y los adaptadores reales (fila en Redis, emisor
@@ -102,11 +120,11 @@ Ninguna cambia el comportamiento verificado por las pruebas; se registran por ho
 | Criterio | Estado | Evidencia / pendiente |
 |---|---|---|
 | 1 · Aplicación (40 %) | 🟢 | App + plataforma web `/app`; **pendiente** el video demo |
-| 2 · Observabilidad (20 %) | 🟢 | 3+3 métricas instrumentadas, tablero y alertas; **pendiente** capturas/video |
+| 2 · Observabilidad (20 %) | 🟢 | 3+3 métricas instrumentadas, tablero y **15 alertas** ligadas a atributos; **pendiente** capturas/video |
 | 3 · Fallos (30 %) | 🟢 | IF-01/02/03/05 aprobados; **pendiente** capturas del tablero por fallo |
 | 4 · Patrones (10 %) | 🟢 | [`patrones.md`](patrones.md); **pendiente** capturas de código |
-| 5 · Autoevaluación (+10 %) | ⚪ | Por escribir al cierre |
-| 6 · Coherencia (−10 %) | 🟢 | Este documento + `fidelidad-arquitectonica.md`; cobertura ya corre en CI |
+| 5 · Autoevaluación (+10 %) | 🟢 | Escrita en [`autoevaluacion.md`](autoevaluacion.md) |
+| 6 · Coherencia (−10 %) | 🟢 | Este documento + `fidelidad-arquitectonica.md`; cobertura en CI; 12/12 raíces con código |
 
 ## 6. Acciones tomadas en esta auditoría
 
@@ -126,6 +144,23 @@ Ninguna cambia el comportamiento verificado por las pruebas; se registran por ho
   [modelo de dominio](../02-modelamiento/modelo-de-dominio.md) solo modela nombre, documento y
   correo; el teléfono se usa como contacto de la boleta nominal (AD-004), no se añade como
   campo persistente del agregado. Se quitó de la UI el texto sobre el cifrado AES-256-GCM.
+- **Contexto «Oferta de eventos» implementado.** Se creó el dominio de `event-catalog`
+  (`Evento`, `Recinto`, `Promotor` + VOs), con la regla R1 del recinto y pruebas. Cierra la
+  brecha de raíces del modelo sin código (ver §3): **12/12 raíces implementadas**.
+- **Alertas ampliadas.** [`alerts.yml`](../../../observability/prometheus/alerts.yml) pasó de
+  4 a **15 reglas**, cubriendo las alertas del diseño (latencia de reserva P95, DLQ/lag,
+  recorrido crítico, servicio caído, saturación de CPU/pool, telemetría incompleta, conversión
+  de pagos, costo por boleta), cada una con su atributo y severidad. La única del diseño no
+  implementada es «réplicas de Kubernetes por debajo de lo esperado», propia de la topología de
+  producción (el piloto corre single-node).
+- **Autoevaluación escrita** en [`autoevaluacion.md`](autoevaluacion.md).
+- **Refinamiento de `event-catalog` tras auditoría** (segunda revisión): (a) la comisión de
+  reventa por defecto ahora se copia del convenio **al publicar** el evento
+  (`Evento.publicar(comisionPorDefecto)` + `ReglasReventa.tieneComisionPropia`), como pide el
+  modelo; (b) `Evento.marcarRealizado()` exige `ventaCerrada → realizado` (flujo estricto del
+  modelo); (c) la validación de construcción usa un error propio `DatoDeCatalogoInvalido` en
+  vez de reusar `AforoDelRecintoExcedido`; (d) `Recinto` valida nombre y ciudad no vacíos.
+  Cubierto con pruebas (24 casos en `event-catalog`).
 
 ## 7. Hallazgo posterior: sobreventa por falta de transacciones
 
