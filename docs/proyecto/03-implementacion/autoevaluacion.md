@@ -68,10 +68,13 @@ La Entrega 3 no rediseña: **implementa** lo que ya definió el modelamiento (En
 La asumimos a conciencia; no es descuido:
 
 - **Contexto «Oferta de eventos» acotado.** Implementamos los agregados `Evento`, `Recinto`,
-  `Promotor` (con `Convenio`, `ReglasVenta`, `ReglasReventa`, `Cancelacion`) para no dejar
-  raíces del modelo sin código, pero la **gestión** del catálogo (alta por promotor) no está en
-  la demo: el catálogo se consume como lectura CQRS. El valor de la entrega está en el camino de
-  venta.
+  `Promotor` (con `Convenio`, `ReglasVenta`, `ReglasReventa`, `Cancelacion`, la regla R1 del
+  recinto y la copia de la comisión de reventa del convenio al publicar) para no dejar raíces
+  del modelo sin código, pero la **gestión** del catálogo (alta por promotor, edición) no está
+  en la demo: el catálogo se consume como lectura CQRS. `Localidad`/`Aforo`/`Silla` viven en el
+  contexto de venta por AD-003 (autoridad transaccional del aforo), no en catálogo; queda
+  justificado en [`coherencia-implementacion.md`](coherencia-implementacion.md). El valor de la
+  entrega está en el camino de venta.
 - **Circuit breaker completo.** Hay reintentos acotados, timeouts y compensación; falta el
   disyuntor con estados abierto/semiabierto. Suficiente para la demo, deuda para producción.
 - **Infraestructura de producción.** Multi-AZ, RDS Proxy, sharding de Redis, OpenSearch,

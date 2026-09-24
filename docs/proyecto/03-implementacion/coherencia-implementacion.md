@@ -75,6 +75,17 @@ Con esto, **las 12 raíces de agregado del modelo tienen código** (la 13.ª con
 - **Clasificación:** el hueco de raíces sin código **quedó cerrado**; la gestión del catálogo
   es deuda acotada y declarada.
 
+**Ubicación de `Localidad`, `Aforo` y `Silla` (justificación).** El modelo de dominio lista
+estos tres conceptos dentro de «Oferta de eventos», pero la implementación los ubica en
+`@ticketright/sales` ([`inventory.ts`](../../../packages/sales/src/domain/inventory.ts)). Es
+una **desviación deliberada y justificada por [AD-003](../decisiones/0003-consistencia-por-tipo-de-inventario.md)**:
+la localidad es la **autoridad transaccional del aforo** que se bloquea y actualiza en el
+camino de venta (reserva/venta con `FOR UPDATE`), no un dato de catálogo de solo lectura.
+Ponerla en el contexto de venta evita que dos contextos compartan y muten el mismo agregado, y
+mantiene la regla R1 (`reservado + vendido ≤ autorizado`) donde ocurre la escritura. `Recinto`
+conserva su mitad de R1 (`suma de localidades ≤ aforoMaximo`) en `event-catalog`. La frontera
+es la misma idea de AD-008 para `Boleta`: el concepto vive donde se protege su invariante.
+
 Igualmente, `admission-identity` y `entitlements` tienen **solo la capa `domain`** poblada;
 sus `application/ports/adapters` están vacíos y los adaptadores reales (fila en Redis, emisor
 de boletas) viven en el *composition root* `apps/ventas`. Es un patrón válido de raíz de
@@ -143,6 +154,13 @@ Ninguna cambia el comportamiento verificado por las pruebas; se registran por ho
   implementada es «réplicas de Kubernetes por debajo de lo esperado», propia de la topología de
   producción (el piloto corre single-node).
 - **Autoevaluación escrita** en [`autoevaluacion.md`](autoevaluacion.md).
+- **Refinamiento de `event-catalog` tras auditoría** (segunda revisión): (a) la comisión de
+  reventa por defecto ahora se copia del convenio **al publicar** el evento
+  (`Evento.publicar(comisionPorDefecto)` + `ReglasReventa.tieneComisionPropia`), como pide el
+  modelo; (b) `Evento.marcarRealizado()` exige `ventaCerrada → realizado` (flujo estricto del
+  modelo); (c) la validación de construcción usa un error propio `DatoDeCatalogoInvalido` en
+  vez de reusar `AforoDelRecintoExcedido`; (d) `Recinto` valida nombre y ciudad no vacíos.
+  Cubierto con pruebas (24 casos en `event-catalog`).
 
 ## 7. Hallazgo posterior: sobreventa por falta de transacciones
 

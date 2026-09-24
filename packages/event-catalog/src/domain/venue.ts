@@ -1,6 +1,6 @@
 import { nuevoId, type UUID } from "@ticketright/shared-kernel";
 
-import { AforoDelRecintoExcedido } from "./errors.js";
+import { AforoDelRecintoExcedido, DatoDeCatalogoInvalido } from "./errors.js";
 
 /**
  * Recinto (RAÍZ, contexto Oferta de eventos). Lugar autorizado donde ocurre un evento.
@@ -17,8 +17,11 @@ export class Recinto {
   ) {}
 
   static crear(nombre: string, ciudad: string, aforoMaximo: number, recintoId: UUID = nuevoId()): Recinto {
+    if (nombre.trim() === "" || ciudad.trim() === "") {
+      throw new DatoDeCatalogoInvalido("Recinto", "El recinto necesita nombre y ciudad.");
+    }
     if (!Number.isInteger(aforoMaximo) || aforoMaximo <= 0) {
-      throw new AforoDelRecintoExcedido(recintoId, aforoMaximo, aforoMaximo);
+      throw new DatoDeCatalogoInvalido("aforoMaximo", `El aforo máximo del recinto debe ser un entero positivo (recibido: ${aforoMaximo}).`);
     }
     return new Recinto(recintoId, nombre, ciudad, aforoMaximo);
   }

@@ -30,10 +30,17 @@ export class ReglasReventa {
     readonly precioMaximo: Dinero,
     readonly comision: Porcentaje,
     readonly ventana: RangoFecha,
+    /** true si la comisión la fijó el evento; false si quedará por defecto la del convenio. */
+    readonly tieneComisionPropia = true,
   ) {}
 
   ventanaIncluye(en: FechaHora): boolean {
     return dentroDelRango(en, this.ventana);
+  }
+
+  /** Devuelve una copia con la comisión indicada, marcada como propia del evento. */
+  conComision(comision: Porcentaje): ReglasReventa {
+    return new ReglasReventa(this.precioMaximo, comision, this.ventana, true);
   }
 }
 
@@ -59,6 +66,18 @@ export class ReglasVenta {
 
   ventaAbierta(en: FechaHora): boolean {
     return dentroDelRango(en, { inicio: this.inicioVenta, fin: this.finVenta });
+  }
+
+  /** Copia con la comisión de reventa fijada (usado al publicar con el valor del convenio). */
+  conComisionDeReventa(comision: Porcentaje): ReglasVenta {
+    if (!this.reventa) return this;
+    return new ReglasVenta(
+      this.inicioVenta,
+      this.finVenta,
+      this.limitePorFan,
+      this.transferenciaPermitida,
+      this.reventa.conComision(comision),
+    );
   }
 }
 
@@ -136,9 +155,17 @@ export class Evento {
     return this.perfilDemanda === "masivo";
   }
 
-  publicar(): void {
+  /**
+   * Publica el evento. Al publicar, si sus reglas de reventa no fijan comisión, se copia la
+   * del convenio del promotor (`Convenio.comisionReventa`), de modo que la regla del evento
+   * siempre manda y el convenio es el valor por defecto (modelo de dominio, Reglas de reventa).
+   */
+  publicar(comisionReventaPorDefecto?: Porcentaje): void {
     if (this.estadoActual !== "borrador") {
       throw new TransicionDeEventoInvalida(this.estadoActual, "publicado");
+    }
+    if (this.reglas.reventa && !this.reglas.reventa.tieneComisionPropia && comisionReventaPorDefecto) {
+      this.reglas = this.reglas.conComisionDeReventa(comisionReventaPorDefecto);
     }
     this.estadoActual = "publicado";
   }
@@ -158,7 +185,8 @@ export class Evento {
   }
 
   marcarRealizado(): void {
-    if (this.estadoActual !== "ventaCerrada" && this.estadoActual !== "enVenta") {
+    // El flujo del modelo es ventaCerrada → realizado; se cierra la venta antes de realizar.
+    if (this.estadoActual !== "ventaCerrada") {
       throw new TransicionDeEventoInvalida(this.estadoActual, "realizado");
     }
     this.estadoActual = "realizado";

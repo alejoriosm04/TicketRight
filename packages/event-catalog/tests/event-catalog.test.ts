@@ -6,6 +6,7 @@ import {
   Cancelacion,
   ConvenioNoVigente,
   Convenio,
+  DatoDeCatalogoInvalido,
   Evento,
   Promotor,
   Recinto,
@@ -39,7 +40,12 @@ describe("Recinto — R1: la suma de localidades no supera el aforo máximo", ()
   });
 
   it("no permite crear un recinto con aforo no positivo", () => {
-    expect(() => Recinto.crear("X", "Y", 0)).toThrow(AforoDelRecintoExcedido);
+    expect(() => Recinto.crear("X", "Y", 0)).toThrow(DatoDeCatalogoInvalido);
+  });
+
+  it("no permite crear un recinto sin nombre o sin ciudad", () => {
+    expect(() => Recinto.crear("", "Bogotá", 1000)).toThrow(DatoDeCatalogoInvalido);
+    expect(() => Recinto.crear("Estadio", "", 1000)).toThrow(DatoDeCatalogoInvalido);
   });
 });
 
@@ -101,6 +107,16 @@ describe("Evento — ciclo de vida (EstadoEvento) y perfil de demanda", () => {
     expect(() => evento.abrirVenta()).toThrow(TransicionDeEventoInvalida);
   });
 
+  it("marcarRealizado exige cerrar la venta antes (ventaCerrada → realizado)", () => {
+    const evento = Evento.crear("p", "r", "Concierto", fecha("2026-06-14T22:00:00-05:00"), "masivo", reglasVentaBasicas());
+    evento.publicar();
+    evento.abrirVenta();
+    // Desde enVenta no se puede realizar directamente: hay que cerrar la venta.
+    expect(() => evento.marcarRealizado()).toThrow(TransicionDeEventoInvalida);
+    evento.cerrarVenta();
+    expect(() => evento.marcarRealizado()).not.toThrow();
+  });
+
   it("un evento masivo abre con fila visible; uno cotidiano, paso directo", () => {
     const masivo = Evento.crear("p", "r", "Taylor Swift", fecha("2026-05-02T19:00:00-05:00"), "masivo", reglasVentaBasicas());
     const cotidiano = Evento.crear("p", "r", "Obra de teatro", fecha("2026-05-16T20:00:00-05:00"), "cotidiano", reglasVentaBasicas());
@@ -142,6 +158,45 @@ describe("Evento — cancelación (R de comercio electrónico) y reglas de reven
     expect(
       () => new ReglasVenta(fecha("2026-03-20T10:00:00-05:00"), fecha("2026-03-10T10:00:00-05:00"), 4, true),
     ).toThrow(TransicionDeEventoInvalida);
+  });
+
+  it("al publicar, si la reventa no fija comisión, se copia la del convenio (regla del modelo)", () => {
+    // Reventa sin comisión propia (tieneComisionPropia = false): quedará por defecto la del convenio.
+    const reventaSinComision = new ReglasReventa(
+      Dinero.pesos(500000),
+      Porcentaje.de(0),
+      rango(fecha("2026-03-10T00:00:00-05:00"), fecha("2026-03-19T00:00:00-05:00")),
+      false,
+    );
+    const reglas = new ReglasVenta(
+      fecha("2026-03-10T10:00:00-05:00"),
+      fecha("2026-03-20T10:00:00-05:00"),
+      4,
+      true,
+      reventaSinComision,
+    );
+    const evento = Evento.crear("p", "r", "Romeo Santos", fecha("2026-03-28T21:00:00-05:00"), "masivo", reglas);
+    evento.publicar(Porcentaje.de(10)); // comisión por defecto del convenio
+    expect(evento.reglasVenta.reventa?.comision.fraccion).toBeCloseTo(0.1);
+    expect(evento.reglasVenta.reventa?.tieneComisionPropia).toBe(true);
+  });
+
+  it("al publicar, si la reventa YA fija su comisión, no se sobreescribe con la del convenio", () => {
+    const reventaPropia = new ReglasReventa(
+      Dinero.pesos(500000),
+      Porcentaje.de(15),
+      rango(fecha("2026-03-10T00:00:00-05:00"), fecha("2026-03-19T00:00:00-05:00")),
+    );
+    const reglas = new ReglasVenta(
+      fecha("2026-03-10T10:00:00-05:00"),
+      fecha("2026-03-20T10:00:00-05:00"),
+      4,
+      true,
+      reventaPropia,
+    );
+    const evento = Evento.crear("p", "r", "Calvin Harris", fecha("2026-11-13T22:00:00-05:00"), "masivo", reglas);
+    evento.publicar(Porcentaje.de(10));
+    expect(evento.reglasVenta.reventa?.comision.fraccion).toBeCloseTo(0.15); // la del evento manda
   });
 });
 

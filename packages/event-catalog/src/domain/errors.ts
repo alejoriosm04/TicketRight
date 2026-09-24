@@ -19,6 +19,13 @@ export class AforoDelRecintoExcedido extends ExcepcionDeCatalogo {
   }
 }
 
+/** Dato de construcción inválido (p. ej. un aforo que no es un entero positivo). */
+export class DatoDeCatalogoInvalido extends ExcepcionDeCatalogo {
+  constructor(campo: string, mensaje: string) {
+    super(campo, mensaje);
+  }
+}
+
 /** Transición de estado no permitida en el ciclo de vida del evento o del convenio. */
 export class TransicionDeEventoInvalida extends ExcepcionDeCatalogo {
   constructor(desde: string, hacia: string) {
