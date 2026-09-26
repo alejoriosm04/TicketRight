@@ -55,8 +55,8 @@ veces**.
   de la volumetría es de **llegadas**: 30.000 personas que llegan en un minuto, se demore o no
   el sistema. Un ejecutor de tasa de llegada reproduce eso.
 - **Escalado.** La campaña local corre a `ESCALA=0.05`: 1.500 fans por 250 boletas. La
-  proporción y la tasa de admisión son las del diseño; el volumen absoluto no. La corrida a
-  escala mayor va en Codespaces.
+  proporción y la tasa de admisión son las del diseño; el volumen absoluto no. La campaña en
+  Codespaces llegó además a `ESCALA=0.1`: 3.000 fans por 500 boletas.
 - **Sin precalentamiento de 30 min.** El perfil `pico` se activa al empezar; en el piloto no
   hay capacidad que escalar antes de la apertura (KEDA vive en el despliegue con minikube).
 - **Resistencia acotada.** El diseño pide sostener el pico tres horas. Una ola de pico
@@ -123,7 +123,7 @@ reservas abandonadas, todavía vigentes al terminar la corrida.
 - **El primer síntoma de degradación está en la fila, no en la base.** En estrés ×1,5 la
   consulta de posición llega a **P99 de 1,02 s** (el P95 sigue en 5 ms). Es la fila en
   memoria de un solo proceso, que recorre todos los turnos en cada consulta; con Redis
-  (`zrank`) ese costo no crece igual. Es la señal a vigilar en la corrida con Redis.
+  (`zrank`) ese costo no crece igual. Con Redis esa señal no aparece (ver la campaña en Codespaces).
 - **Lo que se cede.** La espera en la fila crece lineal con la multitud: con ×1,5 un fan
   espera hasta 1,5 min. Es el costo aceptado en AD-006: esperar en orden en vez de competir
   contra la base.

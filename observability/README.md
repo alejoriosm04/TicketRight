@@ -46,14 +46,14 @@ node apps/ventas/scripts/trafico-demo.mjs          # tráfico continuo para la d
 | Loki | http://localhost:3100 | Logs (se consultan desde Grafana) |
 | Alloy | http://localhost:12345 | Estado de la tubería |
 
-## El recinto de la demo
+## Los recintos de la demo
 
-El seed modela un recinto con cuatro tribunas con nombre legible (como un estadio o
-coliseo), para que los tableros se lean en lenguaje de ticketera: **Oriental** ($320.000,
-800), **Occidental** ($280.000, 900), **Sur** ($150.000, 1650) y **Norte** ($150.000,
-1650). Suman **5.000 boletas**, alineado con el escenario de pico de la
-[volumetría](../docs/proyecto/02-modelamiento/volumetria.md). El nombre de la tribuna es la
-etiqueta `localidad` de las métricas de aforo.
+La semilla carga ocho eventos en recintos con su propia distribución de localidades
+(estadio, arena, coliseo, teatro y festival), con nombres legibles como *Tribuna Oriental*,
+*Palco VIP* o *Luneta*, para que los tableros se lean en lenguaje de ticketera. El nombre de
+la localidad es la etiqueta `localidad` de las métricas de aforo. Las pruebas de carga crean
+además una localidad dedicada que conserva la proporción de la
+[volumetría](../docs/proyecto/02-modelamiento/volumetria.md): seis fans por boleta.
 
 ## Catálogo de métricas implementadas
 
@@ -157,7 +157,7 @@ Un solo tablero con cinco secciones y títulos en lenguaje de ticketera:
 4. **Diagnóstico técnico** — latencia de reserva, HTTP por ruta, conexiones a la base, CPU/memoria, pagos por estado, costo por boleta, latencia de emisión.
 5. **Registros y trazas** — dos paneles de logs de Loki (toda la actividad, y solo errores/advertencias), enlazados a Tempo.
 
-Cada localidad aparece con su nombre (Oriental, Occidental, Sur, Norte), no con el UUID. El
+Cada localidad aparece con su nombre, no con su identificador. El
 colector reinicia el gauge de aforo en cada refresco para que una localidad retirada no deje
 series colgadas.
 
