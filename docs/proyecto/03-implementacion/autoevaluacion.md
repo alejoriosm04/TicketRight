@@ -1,123 +1,210 @@
-# Autoevaluación — Entrega 3 (criterio 5, valor adicional +10 %)
+# Autoevaluación del equipo — Entrega 3
 
-> Reflexión crítica del equipo sobre el resultado de la implementación, coherente con la
-> evidencia del repositorio. Sigue lo que pide la [rúbrica](rubrica.md#5-autoevaluación-valor-adicional--10):
-> logros, dificultades, mejoras y propuestas de evolución. Escrita al cierre de la entrega,
-> con la evidencia en la mano; no repite lo obvio ni infla resultados.
+> Marco: un **atributo de calidad** (requisito no funcional) expresa una exigencia medible sin
+> decir cómo lograrla; una **táctica** es el medio para alcanzarla (por ejemplo circuit breaker,
+> back pressure o caché). En todo el proyecto seguimos la regla del curso: **cada decisión de
+> arquitectura responde a un atributo de calidad y declara qué se cede a cambio.**
 
-## 1. Qué nos propusimos y qué entregamos
+## Cómo entendemos el resultado
 
-La Entrega 3 no rediseña: **implementa** lo que ya definió el modelamiento (Entrega 2) y lo
-**demuestra funcionando, observado y bajo fallo**. Contra esa vara, esto es lo que quedó:
+La implementación quedó **muy compatible con lo que modelamos**, y no fue casualidad: entendimos
+que **modelamiento e implementación tienen propósitos distintos**.
 
-- Una **aplicación funcional** de venta de boletas de alta demanda, con el recorrido completo
-  admisión → reserva → pago → emisión operando de punta a punta contra PostgreSQL, Redis y
-  Kafka reales, más una **plataforma web** (`/app`) que hace visible ese recorrido como un
-  producto de ticketera.
-- La **SAGA orquestada** del [diagrama de secuencia](../02-modelamiento/diagrama-de-secuencia.md)
-  con sus cinco pasos, incluidos los caminos de error (reserva vencida, pasarela lenta/repetida,
-  webhook duplicado, emisión que no cierra → discrepancia).
-- Las **14 reglas de negocio (R1–R14)** implementadas en el dominio y cubiertas por los
-  **21 casos de prueba** del [plan de pruebas](../02-modelamiento/plan-de-pruebas.md), en verde.
-- **Observabilidad** con OpenTelemetry + Prometheus + Tempo + Loki + Grafana, el catálogo de
-  métricas del diseño (incluidas las 3 de negocio y 3 técnicas de la rúbrica) y **15 alertas**
-  ligadas a atributos de calidad.
-- **Cuatro experimentos de inyección de fallos** ejecutados y aprobados, de tipos distintos,
-  con [bitácora](bitacora-de-fallos.md).
+- **Modelamiento** → definir los atributos de calidad (los requisitos no funcionales) y la
+  arquitectura que los satisface. Es el **norte**.
+- **Implementación** → decidir, con criterio de ingeniería, **qué tácticas construir primero y
+  hasta dónde**, sin sacrificar los atributos que el negocio no negocia.
 
-## 2. Logros de los que respondemos con evidencia
+Nuestras **garantías no negociables** fueron: nunca vender por encima del aforo (**integridad del
+aforo**), nunca cobrar sin entregar la boleta o compensar (**confiabilidad dinero–boleta**) y una
+boleta con un solo titular válido a la vez (**unicidad de titularidad**). Priorizamos cubrirlas de
+verdad y probarlas, antes que dejar muchas tácticas a medias por querer tenerlo todo.
 
-- **El dominio es fiel al modelo.** Las 12 raíces de agregado del
-  [modelo de dominio](../02-modelamiento/modelo-de-dominio.md) tienen código; las reglas viven
-  como métodos de los agregados, no dispersas. La frontera de `Boleta` (AD-008) se respeta:
-  `sales` nunca importa `entitlements`, la emisión cruza por el puerto `EmisorDeBoletas`.
-- **La inyección de fallos cumplió su propósito real.** IF-03 (PostgreSQL congelado)
-  **encontró una debilidad de verdad**: sin timeout de cliente el servicio se colgaba y un
-  rechazo del relay de outbox podía tumbar el proceso. Se corrigió (timeouts acotados,
-  relay tolerante, red de seguridad `unhandledRejection`) y se **reverificó**. Ese ciclo
-  —romper, aprender, corregir, volver a probar— es exactamente lo que evalúa el criterio 3.
-- **Encontramos y corregimos una sobreventa.** Al enviar cinco webhooks **a la vez**, un pago
-  de una boleta llegó a emitir siete: faltaba una unidad de trabajo transaccional. Se
-  introdujo el puerto `UnidadDeTrabajo` y la métrica de sobreventa se pasó a calcular desde las
-  tablas (antes valía 0 pasara lo que pasara). Es la evidencia más honesta de que las pruebas y
-  el caos sirvieron para algo, no para adornar.
-- **Trazabilidad decisión → código → atributo.** Cada patrón y cada homólogo local de AWS está
-  mapeado a su ADR y a su atributo de calidad en [`patrones.md`](patrones.md) y
-  [`fidelidad-arquitectonica.md`](fidelidad-arquitectonica.md).
+## Qué construimos y qué funciona
 
-## 3. Dificultades y cómo las enfrentamos
+- **El flujo principal de compra de punta a punta** (el del diagrama de secuencia de la
+  Entrega 2): fila → reserva → pago → emisión, más la compensación cuando un pago se rechaza.
+  Corre contra PostgreSQL, Redis y Kafka reales.
+- **SAGA orquestada con eventos durables:** outbox transaccional, Kafka particionado por venta,
+  consumidor idempotente, cola de no procesables (DLQ) y webhooks idempotentes.
+- **PostgreSQL como autoridad del aforo:** transacciones con bloqueo de fila (`FOR UPDATE`), un
+  worker que libera las reservas vencidas, y la fila que solo autoriza a intentar reservar.
+- **Arquitectura hexagonal por contexto acotado**, monorepo TypeScript, pruebas con Vitest y CI
+  en GitHub Actions.
+- **La boleta vive en su propio contexto** (derecho de asistencia) y la emisión cruza por el
+  puerto `EmisorDeBoletas`.
+- **Plan de pruebas:** los 21 casos pasan (38 pruebas unitarias más 5 de integración contra
+  PostgreSQL real), con cobertura en CI.
+- **Modelo de dominio:** las 12 raíces de agregado tienen código y las reglas de negocio R1–R14
+  están implementadas.
+- **Observabilidad:** el stack completo (OpenTelemetry, Alloy, Prometheus, Tempo, Loki, Grafana),
+  las 14 métricas diseñadas y 15 alertas.
+- **Inyección de fallos:** 4 de los 5 experimentos ejecutados y aprobados (pasarela tardía y
+  repetida, reinicio del coordinador, PostgreSQL no disponible, saturación de CPU).
+- **Carga:** los 4 escenarios de volumetría con k6 (nominal, pico, estrés, resistencia)
+  ejecutados en local y en Codespaces, aunque a escala reducida (ver «Parcial» más abajo).
+- **Prototipo:** además de las 16 pantallas estáticas, una plataforma web funcional en `/app`
+  conectada a las APIs.
+- **Despliegue:** minikube con autoescalado KEDA en Codespaces.
+- **Desglose de precio:** valor nominal + cargo por servicio + contribución parafiscal, en el
+  dominio.
 
-- **La máquina local no soportó el stack.** Docker/WSL colapsaba con Kafka + observabilidad.
-  Lo resolvimos moviendo el trabajo a **GitHub Codespaces** con un devcontainer; el costo fue
-  que parte de la campaña de fallos corrió sin Grafana y con la fila en memoria.
-- **El borde de seguridad rompió una prueba silenciosamente.** Al añadir el rate-limiting, el
-  experimento IF-05 pasó a dar 0/8 incluso en la línea base porque un solo fan era tratado como
-  bot. Lo detectamos al repetir la campaña y lo corregimos usando ocho fans distintos. Lección:
-  un cambio transversal puede invalidar pruebas que nadie volvió a correr.
-- **Fidelidad vs. alcance de un piloto.** Reproducir AWS (Multi-AZ, API Gateway, Cognito, KMS,
-  EKS) era inviable en el tiempo y la máquina disponibles. Optamos por **homólogos locales
-  equivalentes** (JWT firmado, AES-256-GCM, Kafka, Redis, minikube/KEDA) y lo documentamos en
-  vez de simularlo a medias.
-- **Coherencia entre lo escrito y lo hecho.** El `ESTADO.md` llegó a decir «sin empezar el
-  código» cuando ya había cinco incrementos. Hicimos una auditoría de coherencia
-  ([`coherencia-implementacion.md`](coherencia-implementacion.md)) y sincronizamos la
-  documentación con el estado real.
+## Hecho con equivalente local, o solo en parte
 
-## 4. Deuda técnica deliberada (lo que decidimos NO hacer)
+Aquí hay dos casos distintos: **(a)** piezas que están completas pero con una tecnología de
+piloto en lugar de la de nube —la táctica es la misma, cambia la tecnología, el atributo se
+sostiene con menor robustez que en producción—; y **(b)** piezas que quedaron a medias.
 
-La asumimos a conciencia; no es descuido:
+**(a) Piezas de AWS reemplazadas por equivalentes locales:**
 
-- **Contexto «Oferta de eventos» acotado.** Implementamos los agregados `Evento`, `Recinto`,
-  `Promotor` (con `Convenio`, `ReglasVenta`, `ReglasReventa`, `Cancelacion`, la regla R1 del
-  recinto y la copia de la comisión de reventa del convenio al publicar) para no dejar raíces
-  del modelo sin código, pero la **gestión** del catálogo (alta por promotor, edición) no está
-  en la demo: el catálogo se consume como lectura CQRS. `Localidad`/`Aforo`/`Silla` viven en el
-  contexto de venta por AD-003 (autoridad transaccional del aforo), no en catálogo; queda
-  justificado en [`coherencia-implementacion.md`](coherencia-implementacion.md). El valor de la
-  entrega está en el camino de venta.
-- **Circuit breaker completo.** Hay reintentos acotados, timeouts y compensación; falta el
-  disyuntor con estados abierto/semiabierto. Suficiente para la demo, deuda para producción.
-- **Infraestructura de producción.** Multi-AZ, RDS Proxy, sharding de Redis, OpenSearch,
-  Argo CD/Terraform y KEDA en clúster son diseño, no despliegue del piloto.
-- **IF-04 (pérdida de la proyección de Redis)** quedó como quinto experimento de respaldo; la
-  rúbrica pide cuatro de tipos distintos y esos están ejecutados.
-- **Concurrencia real de aforo.** La invariante R1/R2 bajo concurrencia se prueba con un test
-  de integración contra PostgreSQL (`skipIf` sin base); en local sin DB no corre, en Codespaces
-  sí.
+| En el diseño (nube) | En el piloto |
+|---|---|
+| EKS / Fargate | minikube |
+| Aurora | PostgreSQL (sin Multi-AZ ni RDS Proxy) |
+| MSK | Kafka |
+| ElastiCache | Redis |
+| API Gateway + WAF/Bot Control | Borde propio (control de tasa + heurística, sin ML) |
+| Cognito | JWT propio con cuentas de fan y roles |
+| KMS | Cifrado AES-256-GCM, sin rotación gestionada de llaves |
+| CloudTrail | Tabla de auditoría de solo anexado |
+| Secrets Manager | Secret de Kubernetes |
+| S3 + CloudFront | Portal estático en `/portal` |
 
-## 5. Aprendizajes
+**(b) Parcial:**
 
-- **Una arquitectura hexagonal se paga sola bajo caos.** Poder reiniciar el proceso (IF-02) sin
-  perder estado, o rechazar de forma acotada con la base caída (IF-03), fue posible porque el
-  estado de negocio vive en PostgreSQL y el dominio no conoce infraestructura.
-- **Idempotencia y transacciones no son opcionales en venta de alta demanda.** Las dos fallas
-  más serias (webhook repetido y sobreventa) fueron de concurrencia; el diseño ya las
-  anticipaba, pero solo el código bajo carga las hizo visibles.
-- **La observabilidad tiene que probar cosas ciertas.** Una métrica de sobreventa que siempre
-  vale 0 es peor que no tenerla: da falsa confianza. Aprendimos a validar que la métrica
-  reacciona antes de confiar en su alerta.
-- **La documentación desincronizada cuesta puntos y confianza.** Mantener `ESTADO.md` fiel al
-  repositorio es parte del trabajo, no un extra.
+- **Precalentamiento programado:** el gestor de perfiles existe y `programarVentana` está escrito,
+  pero **nada lo invoca**, así que no hay precalentamiento automático antes de la venta.
+- **Reventa y liquidación al promotor:** existen solo en el dominio (`Reventa`, `ReglasDeReventa`,
+  `Liquidacion`), con pruebas pero **sin endpoint ni pantalla**. Revender y devolver eran los
+  casos de uso secundarios de la Entrega 2.
+- **Oferta de eventos:** el dominio está construido (`Evento`, `Recinto`, `Promotor`, `Convenio`),
+  pero el catálogo es **de solo lectura**; un promotor no puede crear eventos todavía.
+- **Tableros:** el diseño pedía 3 tableros separados (salud de la venta, negocio y promotor,
+  diagnóstico técnico). Hay **1 tablero con 5 secciones**.
+- **Volumetría:** corrió a **escala reducida** (0,05 en local), no con los 30.000 fans en 60 s
+  completos. No se buscó el multiplicador de punto de quiebre.
+- **Retención de datos:** el diseño pide 24 meses (para trazabilidad). En local, Loki guarda logs
+  **7 días** y Tempo guarda trazas **1 hora**.
 
-## 6. Propuestas concretas de evolución
+## No hecho
 
-1. **Cerrar el circuit breaker** alrededor de la pasarela (umbral de apertura + medio-abierto)
-   y exponer su estado como métrica.
-2. **Completar «Oferta de eventos»**: alta de eventos por promotor con su convenio, para que el
-   catálogo deje de ser solo lectura.
-3. **Ejecutar IF-04** (pérdida de la proyección de Redis) y **capturar Grafana** durante los
-   cuatro fallos para el video.
-4. **Corridas de volumetría con k6** (nominal, pico, estrés, resistencia) contra los umbrales de
-   la [volumetría](../02-modelamiento/volumetria.md), hoy pendientes.
-5. **Desplegar en un clúster real** (minikube/k3d con KEDA) para demostrar el autoescalado por
-   lag, no solo declararlo.
-6. **Rotación de llaves y pruebas de seguridad automatizadas**, la deuda que el propio AD-004
-   reconoce.
+- Nada real sobre AWS: Multi-AZ, VPC y subredes, Karpenter, una segunda región.
+- Terraform y Argo CD: el despliegue usa `kubectl` y `helm` con manifiestos versionados.
+- OpenSearch para la búsqueda del catálogo.
+- **Circuit breaker completo:** hay reintentos, timeouts y compensación, pero **no** los estados
+  abierto/medio-abierto.
+- El quinto experimento de fallos (pérdida de la proyección de Redis): quedó como experimento de
+  respaldo.
+- Rotación de llaves y pruebas de seguridad automatizadas (deudas que el propio ADR de seguridad
+  reconoce).
+- Los flujos HTTP de devolución/retracto y de reventa.
 
-## 7. Autonota honesta
+## Atributos de calidad de la Entrega 1: cuáles tienen evidencia
 
-Lo que funciona, funciona de verdad y está probado; lo que falta, está **dicho**. El mayor
-riesgo de la entrega no es el código —el recorrido crítico y sus reglas están sólidos— sino las
-**evidencias visuales** (video y capturas de Grafana/fallos), que dependen de correr el stack
-completo en Codespaces. Si tuviéramos una semana más, la gastaríamos en el despliegue en
-clúster y en la volumetría, no en reescribir dominio.
+**Con evidencia:**
+
+- **Confiabilidad dinero↔boleta:** el experimento de pasarela repetida y las métricas de
+  discrepancia.
+- **Integridad del aforo:** cero sobreventa bajo carga y en las pruebas de concurrencia.
+- **Unicidad de titularidad:** pruebas de dominio.
+- **Liberación de reservas:** el worker de expiración.
+- **Degradación controlada:** el experimento de saturación de CPU.
+- **Rendimiento:** k6 a escala reducida.
+
+**Parcial:**
+
+- **Equidad de la fila:** la fila funciona, pero no se muestra una reconstrucción completa del
+  orden de turnos.
+- **Trazabilidad:** las trazas existen, pero no la retención de 24 meses.
+- **Seguridad:** hay JWT y cifrado, pero sin pruebas de seguridad.
+- **Modificabilidad:** la sostiene la estructura hexagonal, pero no está demostrada.
+
+**No medidos:**
+
+- **Costo por boleta:** requiere costos reales de infraestructura.
+- **Disponibilidad del 99,9%.**
+
+## Caso de negocio de la Entrega 1: qué queda sin verificar
+
+- Los OKR, como la conversión en el pico y el costo por boleta.
+- Los 12 umbrales, que nunca se ratificaron formalmente.
+- La disponibilidad del nombre y la marca «TicketRight».
+
+## Logros de los que respondemos con evidencia
+
+- **Consistencia entre entregas:** el caso de negocio, los atributos de calidad, las decisiones de
+  arquitectura (ADR) y el código forman una sola cadena; cada entregable fue fiel al anterior.
+- **La app resistió más de lo esperado:** un experimento de fallo diseñado para tumbarla no lo
+  logró; tuvimos que subir la intensidad para forzar la degradación.
+- **La inyección de fallos cumplió su propósito:** halló una debilidad real —el servicio se
+  colgaba cuando la base dejaba de responder— que corregimos con timeouts acotados y reverificamos.
+- **Detectamos y corregimos una sobreventa** que solo aparecía con varias confirmaciones
+  simultáneas. El diseño la anticipaba; solo el código bajo carga la hizo visible.
+
+## Dificultades y cómo las enfrentamos
+
+- **Traducir el negocio a atributos de calidad y estos a tácticas.** El reto de fondo. Lo
+  enfrentamos fijando primero, en conjunto, los atributos no negociables y decidiendo cada táctica
+  a partir de ellos.
+- **Las máquinas no soportaban el stack.** Trabajamos en la nube con Codespaces.
+- **Un cambio transversal puede romper una prueba en silencio.** El borde de seguridad invalidó un
+  experimento de resiliencia; aprendimos a re-ejecutar toda la campaña tras un cambio así.
+
+## Aprendizajes
+
+**Más allá del código:**
+
+- **Los atributos de calidad se derivan del negocio.** Estudiar cómo opera una tiquetera y hacer
+  el **modelo financiero** fue lo que nos dio los requisitos no funcionales y sus umbrales: el
+  volumen del pico define disponibilidad y rendimiento, el margen por boleta define la eficiencia
+  de costos, el riesgo de sobreventa define la integridad del aforo. El modelo financiero y la
+  arquitectura quedaron **articulados**: la capacidad y el escalado responden a números del
+  negocio, no a preferencias técnicas.
+- **Las decisiones de arquitectura (ADR) nacen de los atributos de calidad.** Cada decisión que
+  registramos partió de un atributo concreto y de lo que aceptábamos ceder. Esa cadena
+  **atributo → decisión → táctica en el código** es la que nos permite defender por qué el sistema
+  es así y no en su forma más simple.
+
+**Técnicos:**
+
+- La **arquitectura hexagonal** sostiene la resiliencia bajo fallo: el estado vive en la base y el
+  dominio no conoce la infraestructura, por eso el proceso se reinicia sin perder consistencia.
+- **Idempotencia y transacciones** no son opcionales para la confiabilidad y la integridad del
+  aforo en venta de alta demanda.
+- Una **métrica solo sirve si reacciona**: una alerta sobre una señal que nunca cambia da falsa
+  confianza sobre un atributo.
+- Mantener la **documentación al día** con el código es parte de la calidad (modificabilidad), no
+  un extra.
+
+**El más transversal:** un modelo ambicioso es una **guía, no una lista de obligaciones
+inmediatas**. Implementar es priorizar tácticas por atributo, no rebajar el diseño.
+
+## Mejoras que reconocemos
+
+**A partir de la retroalimentación recibida:**
+
+- **Proyección poco realista (feedback previo):** aprendimos a ser conservadores y a sustentar
+  cifras y supuestos con datos, sin sobrevender lo logrado —especialmente en el costo por boleta y
+  la disponibilidad.
+- **Observación de implementación (feedback previo):** nos enfocamos en un núcleo funcional y
+  probado, coherente con el diseño, en vez de abarcar cada componente; la brecha entre diseño y
+  código quedó documentada, no escondida.
+
+**Identificadas por nosotros:**
+
+- Completar el **circuit breaker** de la pasarela (cierra la resiliencia).
+- **Corridas de carga a escala completa** (30.000 fans) para confirmar costo, disponibilidad y
+  rendimiento con números, y encontrar el punto de quiebre.
+- **Desplegar en un clúster real / nube** para demostrar el escalado elástico en vez de declararlo.
+- **Habilitar los flujos que quedaron solo en el dominio:** reventa, devolución/retracto,
+  liquidación al promotor y creación de eventos por el promotor.
+- **Rotación de llaves y pruebas de seguridad automatizadas.**
+- **Cablear el precalentamiento programado** para que la venta arranque con capacidad lista.
+
+## Cierre
+
+Entendimos un sector desde el negocio y las finanzas, **derivamos de ahí los atributos de
+calidad**, tomamos decisiones de arquitectura justificadas en cada atributo y las llevamos a
+código siendo honestos sobre su alcance. **Las garantías no negociables —dinero↔boleta, aforo y
+titularidad— están cubiertas y probadas; el resto está cubierto, parcial o acotado, pero siempre
+dicho y justificado.**
