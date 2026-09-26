@@ -3,6 +3,9 @@
 > Paso a paso para levantar TicketRight en GitHub Codespaces, entender qué pasa por detrás y
 > capturar el video, las capturas y los resultados que faltan antes del **sábado 26 de
 > septiembre de 2026**. Escrita el 22 de septiembre; tiempo total aproximado: **3 horas**.
+>
+> **Ya se usó (25 de septiembre):** las evidencias están tomadas y el video está listo. La guía
+> queda para repetir el ambiente o las corridas, por ejemplo durante la sustentación.
 
 ## Contenido
 

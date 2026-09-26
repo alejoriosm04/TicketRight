@@ -48,7 +48,7 @@ caso de uso principal, y encima de eso pruebas, carga, observabilidad y fallos.
 | # | Criterio | Insumo ya escrito | Estado |
 |---|---|---|---|
 | 1 | Aplicación funcionando (40%) | [AD-007](docs/proyecto/decisiones/0007-stack-de-implementacion.md): TypeScript/Node · [arquitectura hexagonal](docs/proyecto/02-modelamiento/diagrama-de-clases.md) · [caso de uso](docs/proyecto/02-modelamiento/diagrama-de-secuencia.md) | 🟢 API Fastify + PostgreSQL + outbox + pasarela simulada + sala de espera en `apps/ventas`; compra completa, webhook repetido y rechazo verificados en local. Desplegada en **minikube con KEDA** en Codespaces. ✅ Video demo listo (fuera del repo) |
-| 2 | Pruebas y coherencia | [Plan de pruebas](docs/proyecto/02-modelamiento/plan-de-pruebas.md): 21 casos UT sobre las reglas R1–R14 | ✅ Los 21 casos escritos y en verde (38 pruebas; cobertura ~77,7% sentencias), más 5 pruebas de integración contra PostgreSQL real (concurrencia sobre el aforo, webhooks simultáneos y turno de un solo uso), que el CI corre con PostgreSQL de servicio. El CI corre `test:coverage` y **anexa el reporte como artefacto** ([`verificacion.yml`](.github/workflows/verificacion.yml)) |
+| 2 | Pruebas y coherencia | [Plan de pruebas](docs/proyecto/02-modelamiento/plan-de-pruebas.md): 21 casos UT sobre las reglas R1–R14 | ✅ Los 21 casos escritos y en verde (58 pruebas unitarias con las de estructura y las de `event-catalog`), más 5 pruebas de integración contra PostgreSQL real (concurrencia sobre el aforo, webhooks simultáneos y turno de un solo uso), que el CI corre con PostgreSQL de servicio: **63/63 en verde y 78,8 % de sentencias** en `main`. El CI corre `test:coverage` y **anexa el reporte como artefacto** ([`verificacion.yml`](.github/workflows/verificacion.yml)) |
 | 3 | Observabilidad (20%) | [Observabilidad](docs/proyecto/02-modelamiento/observabilidad.md): métricas, tableros y alertas | 🟢 Implementada: plataforma completa (OTel + Alloy + Prometheus + Tempo + Loki + Grafana), las 14 métricas del diseño instrumentadas + complementos de ticketera, tablero de 5 secciones y 15 alertas. Ver [`observability/README.md`](observability/README.md). ✅ Grafana capturado durante los fallos y en el video |
 | 4 | Simulación de fallos (30%) | [Inyección de fallos](docs/proyecto/02-modelamiento/inyeccion-de-fallos.md): IF-01, IF-02, IF-03 e IF-05 elegidos | 🟢 Los 4 ejecutados y aprobados con el arnés de `chaos/`, y **repetidos el 22 sep** con la métrica de sobreventa real y webhooks simultáneos; bitácora en [`bitacora-de-fallos.md`](docs/proyecto/03-implementacion/bitacora-de-fallos.md). ✅ Capturas de Grafana durante cada fallo |
 | 5 | Carga | [Volumetría](docs/proyecto/02-modelamiento/volumetria.md): nominal, pico, estrés y resistencia; 30.000 usuarios en 60 s contra 5.000 boletas | 🟢 Arnés k6 en [`load/`](load/) y primera campaña local (22 sep): los 4 escenarios con umbrales cumplidos y **0 sobreventa**, a escala 0,05. Ver [`pruebas-de-carga.md`](docs/proyecto/03-implementacion/pruebas-de-carga.md). ✅ Campaña repetida en Codespaces con Redis y Kafka |
@@ -97,10 +97,11 @@ Node.js con Vitest, **aceptada el 20 de septiembre de 2026**— y el esqueleto e
 `admission-identity`, `sales` y `entitlements`— más `shared-kernel`, ambiente local en
 `docker-compose.yml` y CI en `.github/workflows/`. Sigue el código de los veintiún casos.
 
-**Incremento 6 — cierre de coherencia (22 de septiembre):** se implementó el dominio del
+**Incremento 8 — cierre de coherencia (23 de septiembre):** se implementó el dominio del
 contexto **Oferta de eventos** en `@ticketright/event-catalog` (`Evento`, `Recinto`,
 `Promotor` con `Convenio`, `ReglasVenta`, `ReglasReventa`, `Cancelacion` y la regla R1 del
-aforo del recinto), con pruebas; así **las 12 raíces del modelo tienen código**. Se ampliaron
+aforo del recinto), con pruebas; así **las 12 raíces del modelo tienen código** (`Identidad`,
+por AD-004, en su almacén aislado de cuentas y no en `packages/`). Se ampliaron
 las alertas de `4` a `15` (negocio y técnicas, cada una con su atributo) y se escribió la
 [autoevaluación](docs/proyecto/03-implementacion/autoevaluacion.md). El detalle de la
 auditoría diseño↔código está en
@@ -190,6 +191,15 @@ campaña local cumplió todos los umbrales. En pico y estrés la fila admite 14,
 mientras llegan 25–37, y la reserva se mantiene en P95 ~35 ms. El primer síntoma de
 degradación es la consulta de posición de la fila en memoria (P99 1,02 s a ×1,5). Detalle en
 [`pruebas-de-carga.md`](docs/proyecto/03-implementacion/pruebas-de-carga.md).
+
+**Cierre y revisión final (25–26 de septiembre):** el video demo y la presentación de la
+sustentación quedaron listos (viven fuera del repositorio). Antes de entregar se revisó todo el
+repositorio contra el diseño: los ocho diagramas de Archify validan con 0 errores y se
+regeneran idénticos byte a byte desde sus fuentes, las clases y mensajes de los diagramas
+existen en el código, el CI de `main` pasa 63/63 pruebas, y se corrigieron conteos y README
+desactualizados. Detalle en el
+[§8 de la auditoría de coherencia](docs/proyecto/03-implementacion/coherencia-implementacion.md#8-revisión-final-antes-de-la-entrega-26-de-septiembre).
+Solo falta la versión final de la autoevaluación, que sube Lina.
 
 ## Tablero
 
