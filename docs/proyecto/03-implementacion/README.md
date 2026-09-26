@@ -119,7 +119,10 @@ la [clase 5-6](../../curso/clase-05-06.md) sobre documentación y deuda técnica
 
 La trazabilidad decisión → implementación → evidencia está en
 [`fidelidad-arquitectonica.md`](fidelidad-arquitectonica.md), con el mapeo AWS → equivalente
-local y lo que quedó fuera de alcance.
+local y lo que quedó fuera de alcance. El diagrama de lo que corre en el piloto, con cada
+componente enlazado a su código y verificado por Archify, está en
+[`arquitectura-implementada.md`](arquitectura-implementada.md): se muestra al lado de los
+diagramas de la Entrega 2.
 
 Checklist antes de entregar:
 
