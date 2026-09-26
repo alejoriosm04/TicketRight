@@ -51,6 +51,22 @@ Termina en `<- API arriba (modo demo: sin sonda, métricas en 0)`.
 **Vistas internas** (para cerrar): salir de la cuenta, entrar como **promotor** (menú Promotor:
 ventas y ocupación) y como **operación** (menú Operación: discrepancias y perfil operativo).
 
+**Fila con multitud (opcional).** Si entras solo a la fila, te admiten en un segundo. Para
+mostrar una fila que tarda, como en la apertura de una venta masiva (AD-006):
+
+```bash
+node apps/ventas/scripts/fila-demo.mjs llenar 300   # admisión cerrada + 300 fans en la fila
+```
+
+Entra a la fila desde `/app`: quedas en la posición 301 sin avanzar. Luego abre la venta:
+
+```bash
+node apps/ventas/scripts/fila-demo.mjs abrir        # pico: 15 por segundo, ~20 s para 300
+```
+
+La posición baja en vivo y en Grafana *Personas en fila vs admitidas* muestra la fila
+vaciándose a ritmo constante (back pressure). Al terminar: `node apps/ventas/scripts/fila-demo.mjs normal`.
+
 > Consejo: una sola compra mueve poco los contadores grandes. Para que se note, hacer 2-3
 > compras seguidas.
 
@@ -95,6 +111,7 @@ bash deploy/arranque-compose.sh
 | `deploy/arranque-demo-limpia.sh` | Métricas en 0, **sin** sonda | Mostrar las métricas subir comprando en vivo |
 | `deploy/arranque-compose.sh` | Arranque normal, **con** sonda de disponibilidad | Arranque estándar del proyecto |
 | `node apps/ventas/scripts/trafico-demo.mjs` | Genera tráfico continuo (Ctrl+C para parar) | Llenar el tablero para ver el pico |
+| `node apps/ventas/scripts/fila-demo.mjs llenar/abrir/normal` | Fila con multitud: cierra la admisión, mete fans y abre en pico | Mostrar una fila que tarda al comprar en vivo |
 
 ## Volver a dejar todo en 0
 
