@@ -121,7 +121,9 @@ compose` local con PostgreSQL y Prometheus, fila en memoria. Cambios al arnés:
 | IF-03 | ✅ Aprobado | Con PostgreSQL en pausa: 4/4 reservas rechazadas (`500` en **~4,0 s**, antes ~2 s: la transacción espera primero una conexión del pool), 0 confirmadas, sobreventa 0. Al reanudar, la compra de control termina en `emitida` |
 | IF-05 | ✅ Aprobado | Línea base 8/8 en 1,4 s (P95 de reserva 0,09 s); con la CPU de PostgreSQL en 0,1: 8/8 en 4,8 s (P95 0,38 s); al restaurar, 8/8 en 2,1 s. Sobreventa 0, discrepancias 0 |
 
-`PENDIENTE: capturas del tablero de Grafana durante cada fallo para el video; esta campaña corrió sin Grafana por la memoria de la máquina local.`
+Esta campaña corrió sin Grafana por la memoria de la máquina local; las capturas del tablero
+de Grafana durante cada fallo se tomaron después en Codespaces y están en las evidencias del
+video.
 
 ## Resumen de la campaña
 

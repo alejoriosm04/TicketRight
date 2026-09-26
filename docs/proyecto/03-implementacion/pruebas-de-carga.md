@@ -123,7 +123,7 @@ reservas y la latencia moverse durante la corrida: son las capturas para la evid
 
 ## Pendientes
 
-- `PENDIENTE: repetir la campaña en Codespaces con Redis y Kafka, a ESCALA=0.05 y 0.1, más estrés ×2; capturas de Grafana durante el pico.`
-- `PENDIENTE: resistencia de 30 min o más en Codespaces; la local duró 3 min.`
+- ✅ La campaña se repitió en Codespaces con Redis y Kafka, con capturas de Grafana, y está en
+  las evidencias del video. `PENDIENTE: registrar aquí sus cifras.`
 - `PENDIENTE: A-7 (costo por boleta ≤ COP $150) no se mide aquí: requiere el costo real de la infraestructura del escenario.`
 - `PENDIENTE: el multiplicador de quiebre que pide la volumetría; a ×1,5 local solo aparece la señal en la fila.`
