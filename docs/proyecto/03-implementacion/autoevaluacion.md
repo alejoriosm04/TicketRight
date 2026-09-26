@@ -92,7 +92,70 @@ Un buen modelo puede pedir más patrones y más infraestructura de los que tiene
 construir en el tiempo y con la curva de aprendizaje de un equipo de curso. Reconocerlo —y
 elegir a conciencia qué sí y qué no— es aplicar el criterio de ingeniería, no rebajarlo.
 
-## 5. Deuda técnica deliberada (lo que decidimos NO hacer)
+## 5. Qué prometimos en el modelamiento y qué implementamos
+
+Esta es la sección que sostiene la defensa: para **cada componente y patrón que propusimos en
+la [arquitectura de referencia](../02-modelamiento/arquitectura-de-referencia.md) y en los
+ADR**, decimos con claridad si está **implementado**, si está como **homólogo local
+equivalente** (mismo patrón, tecnología distinta por ser un piloto) o si **no está**, y por
+qué. Si nos preguntan por algo que dijimos que tendríamos, aquí está la respuesta. El mapeo
+técnico detallado vive en [`fidelidad-arquitectonica.md`](fidelidad-arquitectonica.md) y
+[`coherencia-implementacion.md`](coherencia-implementacion.md); esto es su lectura para exponer.
+
+**Convención:** ✅ implementado y funcionando · 🟳 homólogo local equivalente (piloto) ·
+⚪ no incluido (con justificación).
+
+### Estilo y patrones de arquitectura
+
+| Lo que propusimos (diseño) | Estado | Cómo quedó / por qué |
+|---|---|---|
+| Núcleo transaccional en PostgreSQL, autoridad del aforo (AD-003) | ✅ | Reserva/venta con transacción y bloqueo de fila; una `UnidadDeTrabajo` protege R1/R2. |
+| SAGA orquestada de compra (AD-002) | ✅ | `OrquestadorDeCompra` con los 5 pasos y sus caminos de error. |
+| Event-Driven con bus durable + outbox + DLQ (AD-002) | ✅ | Outbox transaccional → relay → Kafka → consumidor idempotente → DLQ. |
+| CQRS (lecturas separadas de la escritura) | ✅ | Catálogo y disponibilidad como lectura; comando en PostgreSQL. |
+| Space-Based: sala de espera en grilla en memoria (AD-006) | ✅ | Fila en **Redis** con llaves `fila:{evento}:{turno}`, admisión por lotes. |
+| Back pressure por perfil operativo (AD-006) | ✅ | `GestorDePerfiles` (cotidiano/pico/…) regula la tasa de admisión. |
+| Idempotencia (webhook y reintentos) | ✅ | `Pago.registrarConfirmacion` no repite efecto; probado (UT-09, IF-01). |
+| **Circuit breaker** alrededor de la pasarela | ⚪/parcial | Hay timeouts + reintentos acotados + compensación; **falta el disyuntor con estado abierto/semiabierto**. Deuda declarada. |
+| Autoescalado por lag de Kafka (KEDA) | 🟳 | `ScaledObject` de KEDA **declarado** en `deploy/k8s`; no ejecutado en clúster (piloto single-node). |
+
+### Contextos y dominio
+
+| Lo que propusimos | Estado | Cómo quedó / por qué |
+|---|---|---|
+| Los 4 contextos acotados + shared-kernel, hexagonal | ✅ | 5 paquetes; el dominio no conoce infraestructura; un contexto no importa a otro. |
+| 12 raíces de agregado del modelo | ✅ | Las 12 tienen código (incluye `Evento`/`Recinto`/`Promotor` en `event-catalog`). |
+| 14 reglas de negocio (R1–R14) | ✅ | Implementadas y cubiertas por los 21 casos de prueba. |
+| Frontera `Boleta` por el puerto `EmisorDeBoletas` (AD-008) | ✅ | `Boleta` en `entitlements`; `sales` nunca la importa. |
+| `Localidad`/`Aforo`/`Silla` (el modelo las pone en «Oferta de eventos») | ✅ ubicación distinta | Viven en el contexto de **venta** por AD-003: son la autoridad transaccional del aforo, no un dato de catálogo. Justificado. |
+| **Gestión del catálogo** (alta de eventos/recintos por el promotor) | ⚪ | El dominio existe; el **flujo de administración** no. El catálogo se consume como lectura. Fuera del escenario de la demo. |
+| **Reventa** de boletas (R8, R9) | ⚪ | Modelada en el dominio (`Reventa`, `ReglasReventa`) pero **sin flujo de aplicación**: no era el foco (venta primaria). |
+| Contexto Identidad con almacén propio | 🟳 | Datos personales cifrados (AES-256-GCM) y cuentas con rol; se transporta `IdOpaco`. No es un servicio de identidad separado. |
+
+### Borde, seguridad e infraestructura (arquitectura de implementación → piloto)
+
+| Lo que propusimos (AWS / referencia) | Estado | Cómo quedó / por qué |
+|---|---|---|
+| API Gateway + WAF/Bot Control (borde único, cuotas) | 🟳 | Borde propio: **token bucket por ruta + heurística de bots**; sin ML antibot ni CDN gestionada. |
+| Cognito / OIDC (identidad federada) | 🟳 | **JWT firmado (HS256)** de admisión y de sesión; sin proveedor federado. |
+| KMS (cifrado de PII) | 🟳 | **AES-256-GCM** con secreto; sin rotación gestionada de llaves. |
+| CloudTrail (auditoría) | 🟳 | Tabla de auditoría append-only. |
+| S3 + CloudFront (portal estático) | 🟳 | Portal servido con ETag/caché en `/portal`. |
+| EventBridge Scheduler (perfiles por ventana) | 🟳 | `GestorDePerfiles` con temporizadores. |
+| MSK (Kafka), ElastiCache (Redis), EKS (Kubernetes) | 🟳 | Kafka, Redis y minikube/compose reales; sin Multi-AZ ni gestión de nube. |
+| Aurora Multi-AZ + RDS Proxy + réplicas de lectura | ⚪ | PostgreSQL 18 en un nodo; sin alta disponibilidad de nube (piloto). |
+| **OpenSearch** (búsqueda del catálogo) | ⚪ | No implementado; la búsqueda se resuelve sobre PostgreSQL. Aplicaría al crecer el catálogo. |
+| Terraform / Argo CD (IaC + GitOps) | ⚪ | Despliegue con `kubectl`/`compose` versionado; la automatización completa queda documentada, no ejecutada. |
+| Observabilidad (OTel + Prometheus + Tempo + Loki + Grafana) | ✅ | Implementada e instrumentada, con 15 alertas ligadas a atributos. |
+
+**Cómo lo defendemos en una frase:** todo lo que es **patrón o garantía de negocio está
+implementado y probado**; lo que aparece como 🟳 es el **mismo patrón con una tecnología de
+piloto** (y así está declarado en la arquitectura de implementación, que explícitamente separa
+diseño de despliegue); y lo ⚪ es **alcance que acotamos a conciencia**, no algo que se nos
+olvidó. Ninguna garantía verificada en las pruebas o en la bitácora de fallos depende de un
+componente marcado 🟳 o ⚪.
+
+## 6. Deuda técnica deliberada (lo que decidimos NO hacer)
 
 Siguiendo a Cunningham y la clase 5-6: la deuda técnica **no es mala si se reconoce y se
 gestiona**. La nuestra es consciente y está justificada:
@@ -114,7 +177,7 @@ gestiona**. La nuestra es consciente y está justificada:
 - **IF-04 (pérdida de la proyección de Redis)** quedó como experimento de respaldo; la rúbrica
   pide cuatro de tipos distintos y esos están ejecutados.
 
-## 6. Aprendizajes (aplicando los conceptos de la materia)
+## 7. Aprendizajes (aplicando los conceptos de la materia)
 
 - **Una arquitectura hexagonal se paga sola bajo caos.** Reiniciar el proceso (IF-02) sin
   perder estado, o rechazar de forma acotada con la base caída (IF-03), fue posible porque el
@@ -132,7 +195,7 @@ gestiona**. La nuestra es consciente y está justificada:
 - **Menos es más.** El aprendizaje más transversal: acotar el alcance a conciencia produjo una
   entrega más sólida que intentar cubrirlo todo a medias.
 
-## 7. Propuestas concretas de evolución
+## 8. Propuestas concretas de evolución
 
 1. **Cerrar el circuit breaker** alrededor de la pasarela (umbral de apertura + medio-abierto) y
    exponer su estado como métrica.
@@ -149,7 +212,7 @@ gestiona**. La nuestra es consciente y está justificada:
 7. **Incorporar más patrones donde aporten** (no por completitud): el disyuntor completo, y
    proyecciones reconstruibles desde el registro durable.
 
-## 8. Cierre
+## 9. Cierre
 
 Lo que funciona, funciona de verdad y está probado; lo que falta, está **dicho**. Estamos
 conformes con el resultado y, sobre todo, con lo aprendido: entendimos un sector, propusimos y
