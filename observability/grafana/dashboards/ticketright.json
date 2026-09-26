@@ -735,6 +735,190 @@
       "panels": []
     },
     {
+      "type": "stat",
+      "title": "Ventas realizadas",
+      "description": "Compras pagadas con éxito (pagos confirmados). ticketright_payments_total{state=\"confirmado\"}",
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 0,
+        "y": 27
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "green"
+          }
+        }
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "area",
+        "textMode": "value"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum(ticketright_payments_total{state=\"confirmado\"})",
+          "legendFormat": "Ventas realizadas"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Boletas emitidas",
+      "description": "Total de boletas emitidas (una compra puede emitir varias). ticketright_ticket_state_transitions_total{state=\"emitida\"}",
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 6,
+        "y": 27
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "blue"
+          }
+        }
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "area",
+        "textMode": "value"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum(ticketright_ticket_state_transitions_total{state=\"emitida\"})",
+          "legendFormat": "Boletas emitidas"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Personas en la fila",
+      "description": "Turnos esperando su turno de admisión. ticketright_queue_waiting",
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 12,
+        "y": 27
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "orange"
+          }
+        }
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "area",
+        "textMode": "value"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum(ticketright_queue_waiting)",
+          "legendFormat": "Personas en la fila"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Comprando ahora (admitidos)",
+      "description": "Turnos admitidos que ya pueden comprar. ticketright_queue_admitted",
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 18,
+        "y": 27
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "purple"
+          }
+        }
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "area",
+        "textMode": "value"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum(ticketright_queue_admitted)",
+          "legendFormat": "Comprando ahora (admitidos)"
+        }
+      ]
+    },
+    {
       "type": "timeseries",
       "title": "Embudo de la venta",
       "description": "Reservas → pagos iniciados → pagos confirmados → boletas emitidas",
@@ -742,7 +926,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 27
+        "y": 31
       },
       "datasource": {
         "type": "prometheus",
@@ -815,7 +999,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 27
+        "y": 31
       },
       "datasource": {
         "type": "prometheus",
@@ -860,7 +1044,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 35
+        "y": 39
       },
       "datasource": {
         "type": "prometheus",
@@ -925,7 +1109,7 @@
         "h": 7,
         "w": 12,
         "x": 12,
-        "y": 35
+        "y": 39
       },
       "datasource": {
         "type": "prometheus",
@@ -971,7 +1155,7 @@
         "h": 8,
         "w": 8,
         "x": 0,
-        "y": 43
+        "y": 47
       },
       "datasource": {
         "type": "prometheus",
@@ -1019,7 +1203,7 @@
         "h": 8,
         "w": 8,
         "x": 8,
-        "y": 43
+        "y": 47
       },
       "datasource": {
         "type": "prometheus",
@@ -1065,7 +1249,7 @@
         "h": 8,
         "w": 8,
         "x": 16,
-        "y": 43
+        "y": 47
       },
       "datasource": {
         "type": "prometheus",
@@ -1101,7 +1285,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 58
+        "y": 62
       },
       "collapsed": false,
       "panels": []
@@ -1114,7 +1298,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 59
+        "y": 63
       },
       "datasource": {
         "type": "prometheus",
@@ -1192,7 +1376,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 59
+        "y": 63
       },
       "datasource": {
         "type": "prometheus",
@@ -1237,7 +1421,7 @@
         "h": 7,
         "w": 8,
         "x": 0,
-        "y": 67
+        "y": 71
       },
       "datasource": {
         "type": "prometheus",
@@ -1279,7 +1463,7 @@
         "h": 7,
         "w": 8,
         "x": 8,
-        "y": 67
+        "y": 71
       },
       "datasource": {
         "type": "prometheus",
@@ -1353,7 +1537,7 @@
         "h": 7,
         "w": 8,
         "x": 16,
-        "y": 67
+        "y": 71
       },
       "datasource": {
         "type": "prometheus",
@@ -1400,7 +1584,7 @@
         "h": 7,
         "w": 12,
         "x": 0,
-        "y": 75
+        "y": 79
       },
       "datasource": {
         "type": "prometheus",
@@ -1455,7 +1639,7 @@
         "h": 7,
         "w": 12,
         "x": 12,
-        "y": 75
+        "y": 79
       },
       "datasource": {
         "type": "prometheus",
@@ -1486,7 +1670,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 82
+        "y": 86
       },
       "collapsed": false,
       "panels": []
@@ -1499,7 +1683,7 @@
         "h": 10,
         "w": 12,
         "x": 0,
-        "y": 83
+        "y": 87
       },
       "datasource": {
         "type": "loki",
@@ -1530,7 +1714,7 @@
         "h": 10,
         "w": 12,
         "x": 12,
-        "y": 83
+        "y": 87
       },
       "datasource": {
         "type": "loki",
