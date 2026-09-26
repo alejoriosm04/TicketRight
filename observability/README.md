@@ -152,7 +152,7 @@ variable y resiembra (`npm run db:seed -w @ticketright/ventas`).
 Un solo tablero con cinco secciones y títulos en lenguaje de ticketera:
 
 1. **Resumen de la venta** — dinero vendido, personas conectadas ahora, pagos procesándose, conversión, discrepancias, sobreventa.
-2. **Sala de espera y fila** — personas en fila vs admitidas, ritmo de la fila, latencia de posición, disponibilidad del recorrido crítico.
+2. **Sala de espera y fila** — personas en fila vs admitidas, ritmo de la fila, latencia de posición. La disponibilidad del recorrido crítico no tiene panel: la mide la sonda sintética y la vigila la alerta `RecorridoCriticoNoDisponible`.
 3. **Negocio y recinto** — embudo, boletas disponibles por tribuna, ocupación %, boletas vendidas por tribuna, reparto del dinero, boleta promedio, dinero por minuto.
 4. **Diagnóstico técnico** — latencia de reserva, HTTP por ruta, conexiones a la base, CPU/memoria, pagos por estado, costo por boleta, latencia de emisión.
 5. **Registros y trazas** — dos paneles de logs de Loki (toda la actividad, y solo errores/advertencias), enlazados a Tempo.
