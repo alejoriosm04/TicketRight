@@ -10,11 +10,19 @@
 
 ## En una frase
 
-Sentimos que la implementación quedó **muy compatible con lo que pensamos y modelamos**. La
-arquitectura que planteamos nos parece un muy buen modelo; a la hora de implementar aprendimos
-que **menos es más**, y que ser consciente del alcance, del tiempo y de la curva de aprendizaje
-del equipo es parte del diseño, no una excusa. No nos volvimos idealistas con todo lo que nos
-hubiera gustado tener: fuimos realistas con lo que podíamos construir bien y hasta dónde.
+Sentimos que la implementación quedó **muy compatible con lo que pensamos y modelamos**, y esa
+compatibilidad no fue casualidad: fue el resultado de entender que el **modelamiento y la
+implementación tienen propósitos distintos**. En el modelamiento diseñamos la solución
+**completa y correcta** —la arquitectura que el problema merece, sin recortarla por miedo al
+esfuerzo—; ese modelo nos sigue pareciendo sólido. En la implementación el trabajo no es copiar
+ese modelo tal cual, sino **decidir con criterio de ingeniería qué construir primero y hasta
+dónde**, priorizando por valor para el negocio, riesgo y las garantías no negociables (aforo,
+dinero, titularidad), y dejando explícito lo que se pospone. Aprendimos que un modelo ambicioso
+es una **guía y un norte**, no una lista de obligaciones inmediatas: acotar el alcance a
+conciencia —por tiempo, por riesgo y por la curva de aprendizaje del equipo— es parte del
+diseño, no una rebaja del mismo. Por eso no implementamos "todo lo que nos hubiera gustado",
+sino lo que podíamos construir **bien**, probar y defender, y documentamos el resto como camino
+de evolución.
 
 ## 1. Qué nos propusimos y qué entregamos
 
@@ -87,10 +95,13 @@ Presentamos las dos caras, porque una autoevaluación creíble no oculta lo segu
 | Coherencia entre entregas y trazabilidad decisión → evidencia. | Faltó cerrar evidencias visuales (video, capturas de Grafana y de los fallos) por depender del stack en la nube. |
 | Fuimos realistas con el alcance: entregamos lo que podíamos sostener con calidad. | La ambición del diseño supera lo implementado; hay que ser explícitos sobre esa brecha (y lo somos). |
 
-La lección de fondo: **la arquitectura ideal y la implementación viable no son la misma cosa**.
-Un buen modelo puede pedir más patrones y más infraestructura de los que tiene sentido
-construir en el tiempo y con la curva de aprendizaje de un equipo de curso. Reconocerlo —y
-elegir a conciencia qué sí y qué no— es aplicar el criterio de ingeniería, no rebajarlo.
+La lección de fondo es cómo se relacionan las dos fases: **el modelamiento define el destino;
+la implementación traza la ruta y decide hasta qué kilómetro se llega en esta entrega.** Un
+buen modelo legítimamente pide más patrones e infraestructura de los que tiene sentido
+construir de una vez; el error no está en diseñar en grande, sino en pretender implementarlo
+todo a la vez y terminar con muchas piezas a medias. Elegir qué entra ahora —por valor, riesgo
+y aprendizaje— y dejar el resto trazado como evolución es aplicar el criterio de ingeniería, no
+rebajar el diseño.
 
 ## 5. Qué prometimos en el modelamiento y qué implementamos
 
@@ -192,8 +203,11 @@ gestiona**. La nuestra es consciente y está justificada:
 - **La documentación desincronizada cuesta puntos y confianza.** Mantener `ESTADO.md` fiel al
   repositorio es parte de la calidad, no un extra —exactamente el mensaje de la clase 5-6:
   *menos suposiciones, más claridad*.
-- **Menos es más.** El aprendizaje más transversal: acotar el alcance a conciencia produjo una
-  entrega más sólida que intentar cubrirlo todo a medias.
+- **El modelo es el norte; la implementación es priorización.** El aprendizaje más transversal:
+  un modelamiento ambicioso y correcto es valioso como guía, pero implementar es decidir
+  secuencia y alcance con criterio (valor, riesgo, curva de aprendizaje). Acotar a conciencia
+  produjo una entrega más sólida que intentar cubrirlo todo a medias, y sin perder el rumbo del
+  diseño.
 
 ## 8. Propuestas concretas de evolución
 
