@@ -53,7 +53,7 @@ verdad y probarlas, antes que dejar muchas tácticas a medias por querer tenerlo
 
 Aquí hay dos casos distintos: **(a)** piezas que están completas pero con una tecnología de
 piloto en lugar de la de nube —la táctica es la misma, cambia la tecnología, el atributo se
-sostiene con menor robustez que en producción—; y **(b)** piezas que quedaron a medias.
+sostiene con menor robustez que en producción—; y **(b)** piezas que quedaron de manera parcial.
 
 **(a) Piezas de AWS reemplazadas por equivalentes locales:**
 
