@@ -58,7 +58,7 @@ caso de uso principal, y encima de eso pruebas, carga, observabilidad y fallos.
 
 ## Pendientes y preguntas abiertas
 
-- ✅ **Video demo y presentación de la sustentación listos** (25 sep); viven fuera del repo.
+- ✅ **Presentación y video listos:** la [presentación de la simulación y análisis de fallos](https://statuesque-valkyrie-5daa13.netlify.app) incluye el video de la campaña.
   La guía para sacar evidencias en Codespaces sigue en
   [`guia-codespaces.md`](docs/proyecto/03-implementacion/guia-codespaces.md).
 
@@ -195,7 +195,7 @@ degradación es la consulta de posición de la fila en memoria (P99 1,02 s a ×1
 [`pruebas-de-carga.md`](docs/proyecto/03-implementacion/pruebas-de-carga.md).
 
 **Cierre y revisión final (25–26 de septiembre):** el video demo y la presentación de la
-sustentación quedaron listos (viven fuera del repositorio). Antes de entregar se revisó todo el
+sustentación quedaron listos: la [presentación de la simulación y análisis de fallos](https://statuesque-valkyrie-5daa13.netlify.app) incluye el video. Antes de entregar se revisó todo el
 repositorio contra el diseño: los ocho diagramas de Archify validan con 0 errores y se
 regeneran idénticos byte a byte desde sus fuentes, las clases y mensajes de los diagramas
 existen en el código, el CI de `main` pasa 63/63 pruebas, y se corrigieron conteos y README

@@ -24,7 +24,8 @@
 venta completa (fila, reserva, pago y emisión) contra PostgreSQL, **Redis** (fila Space-Based)
 y **Kafka** (bus de eventos), con el borde de seguridad de AD-004; la plataforma web en `/app`
 conectada a las APIs; el despliegue en **minikube con KEDA** dentro de GitHub Codespaces
-([`deploy/`](../../../deploy/README.md)), y el **video demo**, que vive fuera del repositorio.
+([`deploy/`](../../../deploy/README.md)), y el **video** de la campaña de fallos y carga, publicado en la
+[presentación de la simulación y análisis de fallos](https://statuesque-valkyrie-5daa13.netlify.app).
 El mapeo AWS → equivalente local está en [`fidelidad-arquitectonica.md`](fidelidad-arquitectonica.md).
 
 **Incremento 1 entregado (20 de septiembre de 2026):** la composición vive en
@@ -141,7 +142,7 @@ Cómo sacarlas paso a paso en Codespaces: [`guia-codespaces.md`](guia-codespaces
 
 | Evidencia | Criterio | Herramienta o formato | Estado |
 |---|---|---|---|
-| Video demo de la aplicación | 1 | Compra completa + fallos en vivo | ✅ Listo, fuera del repo |
+| Video de la campaña | 1 · 3 | Los cuatro fallos y las cuatro cargas contra la aplicación real | ✅ En la [presentación](https://statuesque-valkyrie-5daa13.netlify.app#video) |
 | Ejemplos de uso y accesos | 1 | Video + README de arranque en Codespaces | ✅ |
 | Tablero de observabilidad | 2 | Grafana + capturas + video | ✅ |
 | Alerta disparada y traza completa | 2 | Captura y `correlation_id` de prueba | ✅ |
@@ -150,7 +151,7 @@ Cómo sacarlas paso a paso en Codespaces: [`guia-codespaces.md`](guia-codespaces
 | Catálogo de patrones con evidencia | 4 | [`patrones.md`](patrones.md) + código | 🟢 Falta revisarlo contra la demo final |
 | Autoevaluación | +10 | [`autoevaluacion.md`](autoevaluacion.md) | ✅ |
 | Reporte de pruebas y cobertura | 6 | Artefacto del CI (`npm run test:coverage`) | ✅ |
-| Presentación de la sustentación | Defensa | Diapositivas | ✅ Lista, fuera del repo |
+| Presentación de la sustentación | Defensa | Página web | ✅ [statuesque-valkyrie-5daa13.netlify.app](https://statuesque-valkyrie-5daa13.netlify.app) |
 
 ## Plan de trabajo hasta el 26 de septiembre
 
