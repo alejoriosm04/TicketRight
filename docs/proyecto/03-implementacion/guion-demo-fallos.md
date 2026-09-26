@@ -1,222 +1,155 @@
-# Guion de la demo de inyección de fallos — Entrega 3
+# Demo de inyección de fallos — cómo ejecutar los 4 experimentos
 
-> Para tener al lado mientras se expone. Muestra los **4 experimentos** en vivo: pasarela
-> repetida (IF-01), reinicio del coordinador (IF-02), PostgreSQL caído (IF-03) y saturación de
-> CPU (IF-05). Cada uno sigue el ciclo del método científico: **estado estable → perturbación →
-> medición → recuperación → veredicto (APROBADO/FALLIDO)**.
+Inyección de fallos: **provocar un fallo de forma controlada y medir si el sistema responde como
+se diseñó**. Cada experimento sigue el ciclo **estado estable → perturbación → medición →
+recuperación → veredicto (APROBADO/FALLIDO)**.
 
-## Qué es esto, en una frase (para abrir)
+Se ejecutan cuatro, de tipos distintos:
 
-Inyección de fallos = **romper el sistema a propósito, de forma controlada, para comprobar que
-se comporta como prometimos**. No esperamos a que el fallo ocurra en producción: lo provocamos
-en un ambiente seguro y medimos. Si el sistema aguanta, tenemos evidencia; si no, encontramos el
-defecto antes que el cliente.
+| Experimento | Tipo de fallo | Qué verifica |
+|---|---|---|
+| IF-01 | Tercero (pasarela) | El webhook repetido produce una sola boleta (idempotencia) |
+| IF-02 | Proceso | Reiniciar la app no pierde compras (estado durable en PostgreSQL) |
+| IF-03 | Red / datos | Con la base caída se rechaza con orden y no hay sobreventa |
+| IF-05 | Recursos | Con CPU saturada el sistema se degrada, no colapsa |
 
-**Nota de fidelidad (por si preguntan):** el diseño proponía Chaos Mesh sobre Kubernetes; el
-profesor aceptó un equivalente local. Reprodujimos cada tipo de fallo con `docker compose`:
-pausar un contenedor ≈ NetworkChaos, limitar CPU ≈ StressChaos, reiniciar el proceso ≈ PodChaos.
-Mismo estímulo, otra herramienta.
+> Nota de fidelidad: el diseño proponía Chaos Mesh sobre Kubernetes; el profesor aceptó un
+> equivalente local. Se reproduce cada tipo con `docker compose`: `docker pause` ≈ NetworkChaos,
+> `docker update --cpus` ≈ StressChaos, reiniciar el proceso ≈ PodChaos.
 
-## Preparación (antes de empezar a exponer)
-
-Deja esto listo y **no lo muestres**; es el montaje.
+## Preparación
 
 ```bash
-# 1. Todo levantado (infra + app)
-bash deploy/arranque-compose.sh          # termina en "{"ok":true} <- API arriba"
+# Infraestructura + app
+bash deploy/arranque-compose.sh                       # termina en "{"ok":true} <- API arriba"
 
-# 2. Confirma el nombre del contenedor de PostgreSQL (se usa en IF-03 e IF-05)
-docker ps --format '{{.Names}}' | grep postgres    # debe decir: ticketright-postgres-1
+# Confirmar el nombre del contenedor de PostgreSQL (usado en IF-03 e IF-05)
+docker ps --format '{{.Names}}' | grep postgres      # esperado: ticketright-postgres-1
 
-# 3. Carpeta para guardar evidencias de la corrida
+# Carpeta de evidencias
 mkdir -p evidencias
 ```
 
-**Ventanas en pantalla:** dos terminales (una para el tráfico, otra para los experimentos) y una
-pestaña de **Grafana** (`/d/ticketright-ventas`, rango **Last 5 minutes**, refresco **5s**).
-
-**Genera tráfico de fondo** en una terminal, para que los tableros no estén vacíos (déjalo
-corriendo salvo donde se indique lo contrario):
-
-```bash
-node apps/ventas/scripts/trafico-demo.mjs
-```
-
-> Ojo: el tráfico de demo y algunos experimentos usan el mismo "fan". Si un experimento se queja
-> de «Demasiadas solicitudes» (429), **pausa el tráfico** (Ctrl+C) mientras lo corres y reanúdalo
-> después.
-
----
-
-## Orden recomendado
-
-Van de menos a más aparatoso. Los dos primeros no tocan Docker; los dos últimos sí.
-
-1. **IF-01** (pasarela repetida) — el más simple y determinista.
-2. **IF-02** (reinicio del coordinador) — muestra durabilidad.
-3. **IF-03** (PostgreSQL caído) — **el estrella**, encontró un defecto real.
-4. **IF-05** (saturación de CPU) — degradación controlada.
+- Tener abierto **Grafana** (`/d/ticketright-ventas`, rango *Last 5 minutes*, refresco *5s*).
+- Opcional: tráfico de fondo para que los tableros no estén vacíos:
+  `node apps/ventas/scripts/trafico-demo.mjs` (si un experimento da error 429, pausarlo con
+  Ctrl+C mientras corre).
 
 ---
 
 ## IF-01 · La pasarela responde tarde y repite la confirmación
 
-**Qué demuestra:** una pasarela real reenvía la confirmación varias veces; nosotros emitimos
-**una sola** boleta. Es el patrón de **idempotencia**.
-
-**Comando (una sola terminal, sin tocar Docker):**
+**Verifica:** aunque el webhook de confirmación llegue varias veces (3 seguidas y 5 simultáneas),
+se emite una sola vez. Es el patrón de **idempotencia**.
 
 ```bash
 node chaos/if-01-pasarela-tardia-repetida.mjs | tee evidencias/if-01.txt
 ```
 
-**Qué decir mientras corre:**
-- «Hago una compra de 2 boletas y, en vez de confirmar el pago una vez, **reenvío el mismo
-  webhook 3 veces seguidas y luego 5 veces al mismo tiempo**, que es como llegan los reintentos
-  de una pasarela real.»
-- «Fíjense en la verificación: la compra queda en **emitida con exactamente 2 boletas**, no 4 ni
-  10; **cero discrepancias, cero sobreventa**.»
-
-**Qué señalar en pantalla:** la salida `RESULTADO IF-01: APROBADO` y la línea `boletas de la
-compra: 2`. En Grafana, el panel de **pagos por estado** (una sola confirmación).
-
-**Frase de cierre:** «Antes de tener la unidad de trabajo transaccional, esos 5 webhooks
-simultáneos llegaban a emitir 7 boletas. Lo detectamos con esta prueba y lo corregimos.»
+**Qué observar:** la compra queda en `emitida` con **2 boletas** (no 4 ni 10), **0 discrepancias**
+y **0 sobreventa**. Termina en `RESULTADO IF-01: APROBADO`. En Grafana: panel de pagos por estado
+(una sola confirmación).
 
 ---
 
-## IF-02 · Se reinicia el coordinador con pagos en curso
+## IF-02 · Reinicio del coordinador con pagos en curso
 
-**Qué demuestra:** si el proceso se cae con pagos a medias, las compras **no se pierden**, porque
-el estado vive en PostgreSQL, no en la memoria del proceso.
-
-**Tiene 3 momentos. Comandos:**
+**Verifica:** si el proceso se reinicia con pagos a medias, las compras no se pierden porque el
+estado vive en PostgreSQL, no en la memoria del proceso.
 
 ```bash
-# 1) Dejar 5 pagos en curso (solicitados, sin confirmar)
+# 1) Dejar 5 pagos solicitados sin confirmar
 node chaos/if-02-reinicio-coordinador.mjs preparar | tee evidencias/if-02-preparar.txt
 
-# 2) EL FALLO: matar y reiniciar el proceso de la app
+# 2) Perturbación: reiniciar el proceso de la app
 pkill -f "tsx src/main.ts"
 nohup npm run dev -w @ticketright/ventas > observability/logs/ventas-run.log 2>&1 &
 sleep 8
 
-# 3) Tras el reinicio, confirmar y comprobar que las 5 compras sobrevivieron
+# 3) Confirmar y verificar que las 5 compras sobrevivieron
 node chaos/if-02-reinicio-coordinador.mjs verificar | tee evidencias/if-02-verificar.txt
 ```
 
-**Qué decir:**
-- (tras `preparar`) «Dejo 5 compras con el pago solicitado pero sin confirmar.»
-- (tras el `pkill`) «Ahora **mato el proceso** de la aplicación, como si el servidor se cayera en
-  pleno pico.»
-- (tras `verificar`) «El proceso reinició y las **5 compras siguen ahí** y terminan en boleta
-  emitida. Confirmo el webhook dos veces a propósito: la idempotencia hace que repetir dé el
-  mismo resultado.»
-
-**Qué señalar:** `RESULTADO IF-02: APROBADO` y las 5 líneas `paso=emitida boletas=2`. En Grafana
-se ve el **hueco del reinicio** (las métricas del proceso vuelven a cero: es normal, porque el
-negocio vive en la base, no en el proceso).
+**Qué observar:** las 5 compras quedan en `paso=emitida boletas=2`, **0 discrepancias**,
+**0 sobreventa**. Termina en `RESULTADO IF-02: APROBADO`. En Grafana se ve el hueco del reinicio
+(las métricas de proceso vuelven a cero; el negocio persiste en la base).
 
 ---
 
-## IF-03 · PostgreSQL deja de responder  ⭐ (el estrella)
+## IF-03 · PostgreSQL deja de responder
 
-**Qué demuestra:** si la base —autoridad del aforo— se cae, el sistema **rechaza rápido y con
-orden**, nunca vende sin base, y se recupera solo. Y **este experimento encontró un defecto real.**
-
-**Tiene 3 fases con perturbación de Docker en medio. Comandos:**
+**Verifica:** con la base (autoridad del aforo) caída, las reservas se rechazan de forma
+controlada, no se confirma ninguna sin base, no hay sobreventa, y el sistema se recupera al
+restaurar.
 
 ```bash
-# 1) Estado estable: una compra de control
+# 1) Estado estable (compra de control)
 node chaos/if-03-postgres-no-disponible.mjs estable | tee evidencias/if-03-estable.txt
 
-# 2) EL FALLO: congelar PostgreSQL
+# 2) Perturbación: congelar PostgreSQL
 docker pause ticketright-postgres-1
 
-# 3) Con la base congelada, intentar reservar y medir
+# 3) Intentar reservar con la base congelada y medir
 node chaos/if-03-postgres-no-disponible.mjs durante | tee evidencias/if-03-durante.txt
-#    >>> AQUÍ captura Grafana: errores de reserva y latencia subiendo <<<
+#    (capturar Grafana aquí: errores de reserva y latencia subiendo)
 
-# 4) Restaurar y comprobar recuperación
+# 4) Restaurar y verificar recuperación
 docker unpause ticketright-postgres-1
 node chaos/if-03-postgres-no-disponible.mjs recuperar | tee evidencias/if-03-recuperar.txt
 ```
 
-**Qué decir:**
-- (estable) «Todo normal, una compra de control queda emitida.»
-- (pause) «**Acabo de congelar la base de datos.**»
-- (durante) «Las **4 reservas se rechazan de forma controlada en ~4 segundos**, no se cuelgan;
-  **cero confirmadas sin base, cero sobreventa**.»
-- (recuperar) «Descongelo la base y una compra nueva vuelve a completarse: **se recupera solo**.»
+**Qué observar:** durante el fallo, **4/4 reservas rechazadas** en ~4 s (no se cuelga),
+**0 confirmadas sin base**, **0 sobreventa**. Al recuperar, una compra nueva queda `emitida`.
+Termina en `RESULTADO IF-03: APROBADO`.
 
-**Qué señalar en Grafana (durante):** el panel de **latencia de reserva** y **errores** subiendo,
-mientras **sobreventa sigue en 0**.
-
-**Frase de cierre (la más importante de toda la demo):** «La **primera vez** que hicimos este
-experimento, el servicio **se colgaba**: las consultas a la base congelada se quedaban esperando
-para siempre. Era un defecto real que no sabíamos que teníamos. La inyección de fallos hizo su
-trabajo: lo encontró. Le pusimos un **límite de tiempo a las consultas** para que fallen rápido, y
-**repetimos el experimento**. Eso es la ingeniería del caos: romper, aprender, corregir y
-verificar.»
+**Hallazgo:** la primera versión se colgaba con la base congelada. Se corrigió con timeouts
+acotados en las consultas (`query_timeout`) y se reverificó. Es el ejemplo del ciclo romper →
+corregir → volver a probar.
 
 ---
 
 ## IF-05 · Saturación de CPU en la base
 
-**Qué demuestra:** bajo presión de CPU el sistema se pone **lento pero no se cae** ni pierde
-integridad. Es **degradación controlada**.
-
-**Tiene 3 fases con perturbación de Docker. Comandos:**
+**Verifica:** con la CPU de la base restringida, la latencia sube pero las compras se completan y
+no hay pérdida de integridad. Es **degradación controlada**.
 
 ```bash
-# 1) Estable: 8 compras concurrentes, todas deben completarse
+# 1) Estable: 8 compras concurrentes
 node chaos/if-05-saturacion-cpu.mjs estable | tee evidencias/if-05-estable.txt
 
-# 2) EL FALLO: dejar a PostgreSQL con el 10% de un núcleo
+# 2) Perturbación: dejar la base con el 10% de un núcleo
 docker update --cpus 0.1 ticketright-postgres-1
 
-# 3) Con la base ahogada, otras 8 compras y medir latencia
+# 3) Otras 8 compras y medir latencia
 node chaos/if-05-saturacion-cpu.mjs durante | tee evidencias/if-05-durante.txt
-#    >>> AQUÍ captura Grafana: latencia de reserva (P95) subiendo <<<
+#    (capturar Grafana aquí: P95 de reserva subiendo)
 
-# 4) Restaurar la CPU y comprobar recuperación
+# 4) Restaurar la CPU y verificar
 docker update --cpus 4 ticketright-postgres-1
 node chaos/if-05-saturacion-cpu.mjs recuperar | tee evidencias/if-05-recuperar.txt
 ```
 
-**Qué decir:**
-- (estable) «8 compras en paralelo, todas se completan rápido.»
-- (update 0.1) «Le dejo a la base **apenas el 10% de un núcleo**.»
-- (durante) «La **latencia sube** —se pone lento, lo esperado—, pero las compras **se siguen
-  completando** y **no hay sobreventa ni discrepancias**. Degrada, no colapsa.»
-- (update 4 + recuperar) «Restauro la CPU y vuelve a la velocidad normal.»
+**Qué observar:** durante el fallo la **latencia (P95) sube**, pero las compras se completan
+(≥ 75%), con **0 sobreventa** y **0 discrepancias**. Al restaurar vuelve a la línea base. Termina
+en `RESULTADO IF-05: APROBADO`.
 
-**Qué señalar en Grafana:** el panel de **P95 de reserva** subiendo durante la fase y bajando al
-restaurar.
-
-> **Importante:** `docker update --cpus 0` **no** quita el límite; hay que fijar un valor alto
-> (`--cpus 4`) para restaurar. Si no, la base queda ahogada para el resto de la demo.
+> `docker update --cpus 0` no quita el límite; hay que fijar un valor alto (`--cpus 4`) para
+> restaurar.
 
 ---
 
-## Cierre de la sección de fallos
+## Resumen
 
-«Cubrimos **cuatro tipos de fallo distintos**: un tercero que falla (la pasarela), un proceso que
-se cae, la red/datos (la base), y los recursos (CPU). En los cuatro, las garantías del negocio se
-mantuvieron: **cero sobreventa y cero dinero sin boleta**. Y lo más valioso: la inyección de
-fallos no fue para lucir un sistema perfecto, sino para **encontrar debilidades** — IF-03
-encontró una real y la corregimos.»
+Los cuatro experimentos cubren tipos de fallo distintos (tercero, proceso, red/datos, recursos).
+En todos se mantienen las garantías del negocio: **cero sobreventa** y **cero dinero sin boleta**.
 
-## Si algo sale mal en vivo (plan B)
+## Si algo falla durante la corrida
 
-| Síntoma | Qué hacer |
+| Síntoma | Solución |
 |---|---|
-| Un experimento dice «Demasiadas solicitudes» (429) | Pausa el tráfico de demo (Ctrl+C) y vuelve a correrlo |
-| Tras IF-03/IF-05 todo va lento | `docker unpause ticketright-postgres-1` y `docker update --cpus 4 ticketright-postgres-1` |
-| La app no responde tras IF-02 | Relanza `nohup npm run dev -w @ticketright/ventas > observability/logs/ventas-run.log 2>&1 &` |
-| No hay tiempo para los 4 en vivo | Muestra IF-01 e IF-03 en vivo y las capturas/salidas `.txt` de IF-02 e IF-05 |
+| Error 429 «Demasiadas solicitudes» | Pausar el tráfico de demo (Ctrl+C) y repetir el experimento |
+| Todo lento tras IF-03/IF-05 | `docker unpause ticketright-postgres-1` y `docker update --cpus 4 ticketright-postgres-1` |
+| La app no responde tras IF-02 | Relanzar `nohup npm run dev -w @ticketright/ventas > observability/logs/ventas-run.log 2>&1 &` |
 
-## Referencia
-
-El análisis completo de cada experimento (hipótesis, resultado, aprendizaje) está en la bitácora
-de fallos. Los scripts viven en `chaos/`.
+El análisis completo (hipótesis, resultado y aprendizaje de cada experimento) está en la bitácora
+de fallos. Los scripts están en `chaos/`.
