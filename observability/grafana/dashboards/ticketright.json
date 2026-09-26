@@ -617,7 +617,7 @@
       "description": "Cuánto tarda TicketRight en responder al fan su posición en la fila. Meta P95 ≤ 1 s. Fuente: ticketright_queue_position_duration_seconds (A-10).",
       "gridPos": {
         "h": 7,
-        "w": 12,
+        "w": 24,
         "x": 0,
         "y": 19
       },
@@ -658,67 +658,6 @@
           },
           "expr": "histogram_quantile(0.95, sum by (le) (rate(ticketright_queue_position_duration_seconds_bucket[1m])))",
           "legendFormat": "P95"
-        }
-      ]
-    },
-    {
-      "type": "stat",
-      "title": "Disponibilidad del recorrido crítico",
-      "description": "Porcentaje de recorridos sintéticos de compra (fila → reserva → pago → emisión) exitosos. Meta ≥ 99,9%. Fuente: ticketright_critical_journey_checks_total (A-9).",
-      "gridPos": {
-        "h": 7,
-        "w": 12,
-        "x": 12,
-        "y": 19
-      },
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "unit": "percentunit",
-          "decimals": 2,
-          "min": 0,
-          "max": 1,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "red",
-                "value": null
-              },
-              {
-                "color": "orange",
-                "value": 0.95
-              },
-              {
-                "color": "green",
-                "value": 0.999
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "options": {
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ]
-        },
-        "colorMode": "background",
-        "graphMode": "area"
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "expr": "sum(ticketright_critical_journey_checks_total{result=\"ok\"}) / clamp_min(sum(ticketright_critical_journey_checks_total), 1)",
-          "legendFormat": "disponibilidad"
         }
       ]
     },
