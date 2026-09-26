@@ -1,0 +1,40 @@
+== IF-02 fase PREPARAR — dejar pagos en curso (in-flight) ==
+
+--- estado estable (antes) ---
+  ventas_cop             5885280
+  pagos_confirmados      12
+  pagos_rechazados       0
+  pagos_en_curso         0
+  boletas_emitidas       14
+  discrepancias_abiertas 0
+  edad_discrepancia_s    0
+  sobreventa             0
+  reservas_ok            12
+  reservas_rechazadas    0
+  errores_reserva        0
+  reserva_p95_s          0.023749999999999997
+  cpu_nucleos            0.023676090909090935
+  pg_conexiones          2
+  compra 246a13ed-4d8b-486b-b8d4-52b0872bf768 — pago eb3c59bc-7445-4aff-976d-830160a52f89 SOLICITADO (sin confirmar)
+  compra a9dd38be-d80a-4b44-852b-f40d7f57b86f — pago 5753214b-0f9a-4561-b746-4d31b5121c89 SOLICITADO (sin confirmar)
+  compra 9d24f62a-68be-4ba4-be23-6c07d2c5b880 — pago eaf2fffc-658e-4622-b560-1838311c67ed SOLICITADO (sin confirmar)
+  compra b9c117bd-861a-40c6-afa5-c16ab78cb0a1 — pago 52fd376c-1e0f-420e-8af5-cdbe9e24fa73 SOLICITADO (sin confirmar)
+  compra 0e990a5c-ec4f-4240-b8cf-1f88729daeb8 — pago 539b0671-998e-4d19-a536-2594a9a66771 SOLICITADO (sin confirmar)
+
+--- con pagos en curso (antes del reinicio) ---
+  ventas_cop             6763680
+  pagos_confirmados      13
+  pagos_rechazados       0
+  pagos_en_curso         0
+  boletas_emitidas       16
+  discrepancias_abiertas 0
+  edad_discrepancia_s    0
+  sobreventa             0
+  reservas_ok            14
+  reservas_rechazadas    0
+  errores_reserva        0
+  reserva_p95_s          0.02375
+  cpu_nucleos            0.025232000000000067
+  pg_conexiones          1
+
+5 pagos quedaron en curso. Ahora se reinicia el proceso de la app.

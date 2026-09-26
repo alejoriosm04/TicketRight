@@ -17,18 +17,23 @@ Este repositorio es donde ese diseño se convierte en código, se prueba y se de
 
 ```
 ESTADO.md     Estado vivo del repo y de la Entrega 3. Empieza aquí siempre
-apps/ventas/  Composición de la aplicación: API Fastify + adaptadores PostgreSQL
+apps/ventas/  Composición de la aplicación: API Fastify, adaptadores (PostgreSQL, Redis, Kafka),
+              borde de seguridad y plataforma web /app
 packages/     El código: shared-kernel + un paquete por contexto acotado, hexagonal dentro
+observability/ OTel, Alloy, Prometheus (alertas), Tempo, Loki y el tablero de Grafana
+deploy/       Arranque con docker compose o minikube + KEDA; devcontainer de Codespaces
+chaos/        Arnés de los experimentos de inyección de fallos
+load/         Pruebas de carga con k6 y sus resultados
 docs/         Base de conocimiento importada de aas
   ESTADO.md     Estado del proyecto y del curso hasta la Entrega 2 (bitácora del diseño)
-  proyecto/     Entregas 1 y 2, ADRs y decisiones
+  proyecto/     Entregas 1, 2 y 3, ADRs y decisiones
     decisiones/   Fuente oficial de los ADR (formato de 8 elementos del profesor)
   02-modelamiento/  Diseños que la Entrega 3 implementa (modelo, arquitecturas, pruebas…)
   curso/        Material del curso digitalizado
     material/     Originales del profesor — SOLO LECTURA
   herramientas/ Verificador de enlaces y utilidades de los entregables
 tools/        publish-wiki.py y archify/ — publica la wiki y regenera los diagramas
-docker-compose.yml  Ambiente local (PostgreSQL, Redis y Kafka)
+docker-compose.yml  Ambiente local (PostgreSQL, Redis, Kafka y observabilidad)
 ```
 
 ## El código
@@ -86,14 +91,15 @@ los grandes se leen por secciones, nunca enteros.
 
 | Si necesitas… | Abre | Tamaño |
 |---|---|---|
-| En qué va el repo, qué sigue y qué está bloqueado | `ESTADO.md` | 6 KB |
+| En qué va el repo, qué sigue y qué está bloqueado | `ESTADO.md` | 18 KB |
 | Estado del proyecto y del curso hasta la Entrega 2 | `docs/ESTADO.md` | 24 KB · con índice |
-| **Qué pide la Entrega 3** | `docs/proyecto/03-implementacion/README.md` | 4 KB |
+| **Qué pide la Entrega 3** | `docs/proyecto/03-implementacion/README.md` | 12 KB |
+| Dónde el código sigue o difiere del diseño | `docs/proyecto/03-implementacion/coherencia-implementacion.md` · `fidelidad-arquitectonica.md` | 10–22 KB |
 | **Los 12 atributos de calidad con su umbral** | `docs/proyecto/01-caso-de-negocio/atributos-de-calidad.md` | 28 KB |
 | El estilo de arquitectura y por qué se eligió | `docs/proyecto/decisiones/0005-estilo-de-arquitectura.md` | 20 KB |
 | Cómo se escribe un ADR y cuáles son los cinco | `docs/proyecto/decisiones/README.md` | 12 KB |
 | El stack de implementación y sus alternativas | `docs/proyecto/decisiones/0007-stack-de-implementacion.md` | 16 KB |
-| Cómo correr la aplicación de la demo | `apps/ventas/README.md` | 4 KB |
+| Cómo correr la aplicación de la demo | `apps/ventas/README.md` · `deploy/README.md` | 6 KB |
 | **Los diseños que hay que implementar** | `docs/proyecto/02-modelamiento/README.md` | 28 KB · con índice |
 | El modelo de dominio (32 conceptos, 12 raíces) | `docs/proyecto/02-modelamiento/modelo-de-dominio.md` | 40 KB · con índice |
 | La arquitectura de referencia (capas y patrones) | `docs/proyecto/02-modelamiento/arquitectura-de-referencia.md` | 36 KB · con índice |
@@ -171,7 +177,8 @@ contradicción, se resuelve en `docs/` con un ADR o una corrección explícita, 
   [volumetría](docs/proyecto/02-modelamiento/volumetria.md), la
   [observabilidad](docs/proyecto/02-modelamiento/observabilidad.md) instrumentada y el módulo
   de [inyección de fallos](docs/proyecto/02-modelamiento/inyeccion-de-fallos.md) con bitácora.
-- `PENDIENTE: confirmar qué se espera de «simulación» y el formato de la sustentación.`
+- La «simulación» es el criterio 3 de la [rúbrica](docs/proyecto/03-implementacion/rubrica.md):
+  cuatro escenarios de fallo de tipos distintos, ejecutados y analizados.
 
 ## Git
 

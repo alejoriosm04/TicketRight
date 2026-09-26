@@ -247,7 +247,7 @@ No son bloqueos del proyecto, pero alguien tiene que responderlos:
 | # | Entrega | Peso | Fecha | Estado |
 |---|---|---|---|---|
 | 1 | Caso de negocio | 20% | sáb 12 sep 2026 | ✅ **Entregada.** Falta la nota |
-| 2 | Modelamiento de la solución | 30% | **sáb 19 sep 2026, 3 p.m.** | ✅ **Entregada** por Teams el 19 sep. Falta la nota y redesplegar el prototipo |
+| 2 | Modelamiento de la solución | 30% | **sáb 19 sep 2026, 3 p.m.** | ✅ **Entregada** por Teams el 19 sep. Falta la nota. El prototipo se redesplegó después |
 | 3 | Implementación, sustentación, simulación y defensa | 30% | sáb 26 sep 2026 | 🟡 **Activa.** Rúbrica y plan en [`proyecto/03-implementacion/`](proyecto/03-implementacion/README.md); el código vive en el repositorio [TicketRight](https://github.com/alejoriosm04/TicketRight) |
 
 > **Paquete de la Entrega 2.** La entrega final está en `exportaciones/entrega-02-modelamiento/`

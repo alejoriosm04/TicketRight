@@ -107,7 +107,8 @@ Nota Entregable 3 = ( Puntos base (0–100) + Puntos adicionales (0–10) − Pu
 ## Preguntas abiertas de la rúbrica
 
 - `PENDIENTE: la diapositiva trae una nota manuscrita «¿Máximo?» junto al título. Preguntar al profesor si el puntaje del entregable tiene tope (por ejemplo, si la nota final puede superar 100 antes de ponderar) o si se refiere al tope de los +10 adicionales.`
-- `PENDIENTE: confirmar el formato y la duración esperados del video demo.`
+- ~~Confirmar el formato y la duración esperados del video demo.~~ Sin respuesta; el video
+  quedó listo el 25 de septiembre.
 
 ---
 

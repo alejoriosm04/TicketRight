@@ -1,0 +1,20 @@
+== IF-05 fase RECUPERAR (CPU restaurada) ==
+  [recuperar] 8/8 compras emitidas en 1429ms; P95 reserva ~ 0.093s
+
+--- después de recuperar ---
+  ventas_cop             12034080
+  pagos_confirmados      38
+  pagos_rechazados       0
+  pagos_en_curso         0
+  boletas_emitidas       42
+  discrepancias_abiertas 0
+  edad_discrepancia_s    0
+  sobreventa             0
+  reservas_ok            38
+  reservas_rechazadas    5
+  errores_reserva        5
+  reserva_p95_s          0.09333333333333332
+  cpu_nucleos            0.028134545454545447
+  pg_conexiones          1
+
+RESULTADO IF-05: APROBADO

@@ -69,13 +69,13 @@ Lo que cambia es el proveedor, no el patrón ni el contrato.
 | JWT de admisión de un solo uso | Firmado al admitir; autoriza a intentar reservar | `admission-token.ts` |
 | KEDA escala por lag de Kafka | `ScaledObject` con el escalador de Kafka sobre `ventas-proyecciones` | [`40-keda-scaledobject.yaml`](../../../deploy/k8s/40-keda-scaledobject.yaml) |
 | Perfiles cotidiano/preparación/pico/recuperación/emergencia | Gestor que ajusta la tasa de admisión (back pressure) y la publica como métrica | [`operational-profiles.ts`](../../../apps/ventas/src/adapters/operational-profiles.ts) |
-| Precalentamiento programado (EventBridge Scheduler) | `programarVentana` dispara las transiciones de perfil | `operational-profiles.ts` |
+| Precalentamiento programado (EventBridge Scheduler) | **Parcial.** `programarVentana` encadena preparación → pico → recuperación → cotidiano con temporizadores, pero ninguna ruta lo invoca todavía: en la demo el perfil lo cambia operación a mano con `POST /operacion/perfil` | `operational-profiles.ts`, `routes.ts` |
 | Techo de admisión | El `ScaledObject` tiene `maxReplicaCount`; la tasa por perfil está acotada | manifiesto KEDA + perfiles |
 
 ### AD-007 — Stack (TypeScript/Node 24, monorepo, Vitest)
 
-Implementado tal cual: monorepo npm workspaces, TypeScript estricto, 43 pruebas Vitest (38
-unitarias y 5 de integración contra PostgreSQL), CI en GitHub Actions con PostgreSQL de
+Implementado tal cual: monorepo npm workspaces, TypeScript estricto, 63 pruebas Vitest (58
+unitarias y 5 de integración contra PostgreSQL, todas en verde en el CI), CI en GitHub Actions con PostgreSQL de
 servicio. La app corre con `tsx` y se empaqueta en `Dockerfile`.
 
 ### AD-008 — Boleta en el contexto de derecho de asistencia
@@ -100,7 +100,7 @@ servicio. La app corre con `tsx` y se empaqueta en `Dockerfile`.
 | AWS CloudTrail | Tabla de auditoría append-only | Mismo propósito |
 | AWS Secrets Manager | Secret de Kubernetes | Mismo propósito; sin rotación automática |
 | S3 + CloudFront | Portal estático en `/portal` con ETag/cache | Mismo patrón de borde de contenido |
-| EventBridge Scheduler | Gestor de perfiles con temporizadores | Mismo propósito |
+| EventBridge Scheduler | Gestor de perfiles con temporizadores (`programarVentana`) | Mismo propósito; la ventana programada no está expuesta, el cambio de perfil es manual |
 | Grafana/Prometheus/Tempo/Loki/Alloy/OTel | Los mismos | **Idéntico** |
 
 ## Lo que quedó fuera de alcance (deuda técnica deliberada)
@@ -115,6 +115,9 @@ Honestamente, y como pide el ADR de no inventar:
   manifiestos versionados; la entrega automatizada completa queda documentada, no ejecutada.
 - **Circuit breaker completo** (umbral de apertura): hoy hay reintentos acotados y timeouts;
   el disyuntor con estados abierto/semiabierto queda como deuda.
+- **Ventana de venta programada.** El homólogo de EventBridge Scheduler existe en el gestor de
+  perfiles, pero no está conectado a una ruta ni a un calendario: el precalentamiento
+  automático antes de la apertura queda como deuda; hoy la transición es manual.
 - **Rotación de llaves y ML antibot**: se usan claves de secreto y heurística; la rotación
   gestionada y el Bot Control avanzado son del diseño de producción.
 

@@ -1,6 +1,6 @@
 # Entrega 3 — Implementación · Sustentación · Simulación · Defensa
 
-**Peso:** 30% · **Fecha:** sábado 26 de septiembre de 2026 · **Estado:** 🟡 Activa
+**Peso:** 30% · **Fecha:** sábado 26 de septiembre de 2026 · **Estado:** 🟢 Lista para sustentar
 **Rúbrica:** [`rubrica.md`](rubrica.md) — criterios, pesos, evidencias y fórmula
 **Material de clase:** [Clases 5 y 6](../../curso/clase-05-06.md#diapositiva-46--rúbrica-entregable-3-proyecto-integrador)
 
@@ -10,45 +10,47 @@
 
 | # | Criterio | Peso | Lo que exige | Nuestro estado |
 |---|---|---|---|---|
-| 1 | **Aplicación funcionando** | 40% | Operativa, desplegada y con evidencias (video/demo, accesos) | 🟡 Dominio y SAGA en verde; faltan adaptadores reales y despliegue |
-| 2 | **Observabilidad** | 20% | 3 métricas de negocio y 3 técnicas reales, con tableros y alertas | 🟡 Diseño completo; falta instrumentar y recolectar |
-| 3 | **Simulación de fallos** | 30% | 4 escenarios de tipos diferentes, analizados y documentados | 🟢 Los 4 ejecutados y aprobados; bitácora en [`bitacora-de-fallos.md`](bitacora-de-fallos.md) |
+| 1 | **Aplicación funcionando** | 40% | Operativa, desplegada y con evidencias (video/demo, accesos) | 🟢 Venta completa contra PostgreSQL, Redis y Kafka, plataforma web `/app`, desplegada en minikube con KEDA en Codespaces; video demo listo |
+| 2 | **Observabilidad** | 20% | 3 métricas de negocio y 3 técnicas reales, con tableros y alertas | 🟢 Las 14 métricas del diseño instrumentadas, tablero de 5 secciones y 15 alertas; Grafana capturado durante los fallos |
+| 3 | **Simulación de fallos** | 30% | 4 escenarios de tipos diferentes, analizados y documentados | 🟢 Los 4 ejecutados y aprobados, con Grafana; bitácora en [`bitacora-de-fallos.md`](bitacora-de-fallos.md) |
 | 4 | **Patrones utilizados** | 10% | Identificados, justificados y relacionados con atributos | ✅ [`patrones.md`](patrones.md) mapea patrón → código → atributo |
-| 5 | **Autoevaluación** | +10% | Reflexión crítica con logros, dificultades y evolución | ⚪ Por escribir al cierre |
-| 6 | **Coherencia** | hasta -10% | Consistencia con ADR, supuestos, alcance y entregables del 2 | 🟢 Los 21 casos ejecutados y los diagramas reconciliados; mantener al día |
+| 5 | **Autoevaluación** | +10% | Reflexión crítica con logros, dificultades y evolución | ✅ Versión final en [`autoevaluacion.md`](autoevaluacion.md) |
+| 6 | **Coherencia** | hasta -10% | Consistencia con ADR, supuestos, alcance y entregables del 2 | 🟢 Los 21 casos en CI con cobertura, diagramas reconciliados y [auditoría de coherencia](coherencia-implementacion.md) |
 
 ## 1. Aplicación funcionando — 40%
 
-**Ya existe:** los cuatro paquetes del dominio con los 21 casos del
-[plan de pruebas](../02-modelamiento/plan-de-pruebas.md) en verde y CI en GitHub Actions; el
-prototipo de 16 pantallas; la topología de producción documentada en la
-[arquitectura de implementación](../02-modelamiento/arquitectura-de-implementacion.md).
-
-**Falta:** Redis y Kafka reales (el outbox ya escribe en PostgreSQL), las rutas restantes
-—fila, reventa y devolución—, el despliegue en el clúster y el video demo.
+**Hecho:** los cinco paquetes del dominio con los 21 casos del
+[plan de pruebas](../02-modelamiento/plan-de-pruebas.md) en verde y CI en GitHub Actions; la
+venta completa (fila, reserva, pago y emisión) contra PostgreSQL, **Redis** (fila Space-Based)
+y **Kafka** (bus de eventos), con el borde de seguridad de AD-004; la plataforma web en `/app`
+conectada a las APIs; el despliegue en **minikube con KEDA** dentro de GitHub Codespaces
+([`deploy/`](../../../deploy/README.md)), y el **video demo**, que vive fuera del repositorio.
+El mapeo AWS → equivalente local está en [`fidelidad-arquitectonica.md`](fidelidad-arquitectonica.md).
 
 **Incremento 1 entregado (20 de septiembre de 2026):** la composición vive en
 [`apps/ventas`](../../../apps/ventas/README.md) —Fastify + PostgreSQL, repositorios, outbox y
 pasarela simulada—. Verificado en local: compra completa con dos boletas, webhook repetido sin
 duplicar y rechazo con el inventario liberado (`npm run e2e -w @ticketright/ventas`).
 
-**Ambiente decidido:** **local con k3d o minikube** — el mínimo es el ambiente local; si el
-tiempo alcanza, se evalúa un despliegue en AWS siguiendo la
-[arquitectura de implementación](../02-modelamiento/arquitectura-de-implementacion.md). El
-profesor aceptó Kubernetes local o un ambiente simulado
+**Ambiente:** **minikube** en GitHub Codespaces, porque las máquinas del equipo no tienen
+RAM para todo el stack; AWS quedó fuera del piloto. El profesor aceptó Kubernetes local o un
+ambiente simulado
 ([transcripción §16](../../curso/clase-03-04-transcripcion.md#16-pregunta-de-un-estudiante-infraestructura-para-la-implementación)).
-`PENDIENTE: elegir k3d o minikube; de eso depende el mecanismo de los 4 fallos (Chaos Mesh
-sobre el clúster local o su equivalente).`
+Los fallos se inyectan con el arnés de [`chaos/`](../../../chaos/), equivalente a Chaos Mesh
+sobre `docker compose`.
 
-**Herramientas compartidas por Quinnie, por evaluar:**
+**Accesos:** la evidencia de uso es el **video demo** más el repositorio: cualquiera puede
+levantar la aplicación en Codespaces con el [README de despliegue](../../../deploy/README.md) y la
+[guía de Codespaces](guia-codespaces.md). No hay despliegue público.
+
+**Herramientas que propuso Quinnie:**
 
 - **k6** para las corridas de la [volumetría](../02-modelamiento/volumetria.md). Se propuso
   `ramping-vus`; al implementarlo se usó `constant-arrival-rate`, porque la carga del diseño
   es de llegadas (30.000 fans en 60 s) y no de usuarios que esperan su turno para pedir. El
   arnés, los resultados y el porqué están en [`pruebas-de-carga.md`](pruebas-de-carga.md).
-- **Tailscale** (plan gratuito para ambientes compartidos) para dar acceso al ambiente local
-  al equipo o al profesor y sostener las evidencias de «accesos» de la rúbrica, si no hay
-  despliegue público.
+- **Tailscale** para dar acceso al ambiente local. No se usó: los accesos se resolvieron con
+  el video y el arranque en Codespaces.
 
 **Escenario de la demo:** comprar en la ventana de alta demanda — turno → reserva → pago con
 pasarela lenta/repetida → emisión → compensación, con los mismos dobles convertidos en
@@ -56,11 +58,11 @@ adaptadores simulados.
 
 ## 2. Observabilidad — 20%
 
-**Ya existe:** el [diseño completo](../02-modelamiento/observabilidad.md) con la plataforma
-Grafana + OpenTelemetry + Prometheus + Loki + Tempo, catálogo de métricas, tableros y alertas.
-
-**Falta:** instrumentar la aplicación y demostrar datos reales. Las **seis métricas de la
-entrega** salen del catálogo ya diseñado:
+**Hecho:** la plataforma del [diseño](../02-modelamiento/observabilidad.md) —OpenTelemetry,
+Grafana Alloy, Prometheus, Tempo, Loki y Grafana— con las 14 métricas del catálogo
+instrumentadas, un tablero de cinco secciones y **15 alertas** ligadas a atributos de calidad
+([`observability/README.md`](../../../observability/README.md)). Las **seis métricas de la
+entrega** salen de ese catálogo:
 
 | Tipo | Métrica (variable) | Qué demuestra | Atributo |
 |---|---|---|---|
@@ -96,7 +98,8 @@ quedaron **aprobados**, midiendo con la observabilidad instrumentada. La
 [bitácora de fallos](bitacora-de-fallos.md) recoge cada uno con el
 [ciclo de experimento](../02-modelamiento/inyeccion-de-fallos.md#ciclo-de-un-experimento):
 estado estable, perturbación, resultado, evidencia y aprendizaje. IF-03 encontró y corrigió
-una debilidad real de resiliencia. `PENDIENTE: capturas del tablero durante cada fallo para el video.`
+una debilidad real de resiliencia. El tablero de Grafana durante cada fallo quedó capturado en
+las evidencias del video.
 
 ## 4. Patrones utilizados — 10%
 
@@ -108,9 +111,9 @@ sí aplican: idempotencia, *back pressure* y *circuit breaker*.
 
 ## 5. Autoevaluación — +10%
 
-Se escribe al cierre, con la evidencia en la mano: qué se logró, qué no, qué deuda técnica se
-asumió de forma deliberada y cuál es el plan para pagarla (insumo: diapositivas 30 a 32 de la
-[clase 5-6](../../curso/clase-05-06.md) sobre documentación y deuda técnica).
+Escrita en [`autoevaluacion.md`](autoevaluacion.md): qué se logró, qué no, qué deuda técnica
+se asumió de forma deliberada y cuál es el plan para pagarla (insumo: diapositivas 30 a 32 de
+la [clase 5-6](../../curso/clase-05-06.md) sobre documentación y deuda técnica).
 
 ## 6. Coherencia — hasta -10%
 
@@ -121,29 +124,33 @@ local y lo que quedó fuera de alcance.
 Checklist antes de entregar:
 
 - [x] Cada decisión visible en la demo se rastrea hasta un ADR y un atributo de calidad ([`fidelidad-arquitectonica.md`](fidelidad-arquitectonica.md))
-- [ ] Los 21 casos del plan de pruebas corren en CI y el reporte de cobertura está anexo
-- [ ] Los diagramas y el modelo viven en las versiones regeneradas ([AD-008](../decisiones/0008-boleta-en-derecho-de-asistencia.md))
-- [ ] La observabilidad ejecutada corresponde a las métricas diseñadas
-- [ ] El prototipo desplegado corresponde al último estado del repositorio
-- [ ] [`ESTADO.md`](../../../ESTADO.md) y la wiki reflejan el estado real, sin pendientes vencidos
-- [ ] No hay credenciales en el repositorio
+- [x] Los 21 casos del plan de pruebas corren en CI y el reporte de cobertura se anexa como artefacto ([`verificacion.yml`](../../../.github/workflows/verificacion.yml))
+- [x] Los diagramas y el modelo viven en las versiones regeneradas ([AD-008](../decisiones/0008-boleta-en-derecho-de-asistencia.md))
+- [x] La observabilidad ejecutada corresponde a las métricas diseñadas
+- [x] El prototipo desplegado corresponde al último estado del repositorio
+- [x] [`ESTADO.md`](../../../ESTADO.md) y la wiki reflejan el estado real, sin pendientes vencidos
+- [x] No hay credenciales en el repositorio (solo valores de demostración local en `.env.example` y `deploy/k8s/10-config-secrets.yaml`)
 
 ## Evidencias que hay que producir
 
 Cómo sacarlas paso a paso en Codespaces: [`guia-codespaces.md`](guia-codespaces.md).
 
-| Evidencia | Criterio | Herramienta o formato |
-|---|---|---|
-| Video demo de la aplicación | 1 | Guion: compra completa + un fallo en vivo |
-| Ejemplos de uso y accesos | 1 | URLs, capturas, README de arranque; Tailscale si el ambiente es local |
-| Tablero de observabilidad | 2 | Grafana en vivo + capturas + video |
-| Alerta disparada y traza completa | 2 | Captura y `correlation_id` de prueba |
-| Bitácora de los 4 fallos | 3 | Un documento por experimento |
-| Catálogo de patrones con evidencia | 4 | [`patrones.md`](patrones.md) + código |
-| Autoevaluación | +10 | Documento corto y honesto |
-| Reporte de pruebas y cobertura | 6 | Salida de `npm test` y `npm run test:coverage` |
+| Evidencia | Criterio | Herramienta o formato | Estado |
+|---|---|---|---|
+| Video demo de la aplicación | 1 | Compra completa + fallos en vivo | ✅ Listo, fuera del repo |
+| Ejemplos de uso y accesos | 1 | Video + README de arranque en Codespaces | ✅ |
+| Tablero de observabilidad | 2 | Grafana + capturas + video | ✅ |
+| Alerta disparada y traza completa | 2 | Captura y `correlation_id` de prueba | ✅ |
+| Bitácora de los 4 fallos | 3 | [`bitacora-de-fallos.md`](bitacora-de-fallos.md) | ✅ |
+| Pruebas de carga | 1 · 2 | [`pruebas-de-carga.md`](pruebas-de-carga.md), local y Codespaces | ✅ |
+| Catálogo de patrones con evidencia | 4 | [`patrones.md`](patrones.md) + código | 🟢 Falta revisarlo contra la demo final |
+| Autoevaluación | +10 | [`autoevaluacion.md`](autoevaluacion.md) | ✅ |
+| Reporte de pruebas y cobertura | 6 | Artefacto del CI (`npm run test:coverage`) | ✅ |
+| Presentación de la sustentación | Defensa | Diapositivas | ✅ Lista, fuera del repo |
 
 ## Plan de trabajo hasta el 26 de septiembre
+
+Cumplido. Se conserva como registro del plan original.
 
 | Día | Foco |
 |---|---|
@@ -158,8 +165,8 @@ Cómo sacarlas paso a paso en Codespaces: [`guia-codespaces.md`](guia-codespaces
 
 - `PENDIENTE: la diapositiva 46 trae una nota manuscrita «¿Máximo?». ¿La nota del entregable
   tiene tope?`
-- `PENDIENTE: formato y duración del video demo.`
-- `PENDIENTE: ¿basta un ambiente local con la demo en video, o espera accesos a un despliegue?`
+- ~~Formato y duración del video demo~~ y ~~si basta un ambiente local con la demo en video~~:
+  sin respuesta del profesor; se resolvió entregando el video y el arranque en Codespaces.
 
 ## Dónde vive el código
 

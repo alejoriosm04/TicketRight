@@ -1,13 +1,13 @@
 # Estado del repositorio — TicketRight
 
 > Archivo vivo. Quien avance algo, lo actualiza.
-> Última actualización: **2026-09-22**. Este archivo registra el estado del **repositorio de
+> Última actualización: **2026-09-25**. Este archivo registra el estado del **repositorio de
 > código** y de la **Entrega 3**. La bitácora del proyecto y del curso hasta la Entrega 2
 > está en [`docs/ESTADO.md`](docs/ESTADO.md).
 
 ## Dónde vamos
 
-**Semana 3 de 4.** La Entrega 1 (caso de negocio) se entregó el 12 de septiembre y la
+**Semana 4 de 4: sustentación el sábado 26.** La Entrega 1 (caso de negocio) se entregó el 12 de septiembre y la
 Entrega 2 (modelamiento) cerró con sus once entregables de diseño. **Entrega activa:
 Entrega 3 — Implementación · Sustentación · Simulación · Defensa**, el **sábado 26 de
 septiembre de 2026** (30%).
@@ -24,47 +24,49 @@ La rúbrica completa llegó con las clases 5 y 6
 
 | # | Criterio | Peso | Estado |
 |---|---|---|---|
-| 1 | Aplicación funcionando | **40%** | 🟢 App Fastify + PostgreSQL + Redis (fila) + Kafka (bus) + seguridad de borde, corriendo en Codespaces; despliegue k8s/KEDA en `deploy/`. Falta video |
+| 1 | Aplicación funcionando | **40%** | 🟢 App Fastify + PostgreSQL + Redis (fila) + Kafka (bus) + seguridad de borde, corriendo en Codespaces; despliegue k8s/KEDA en `deploy/`. ✅ Video demo listo (fuera del repo) |
 | 2 | Observabilidad | **20%** | 🟢 Plataforma implementada (OTel + Alloy + Prometheus + Tempo + Loki + Grafana); las 14 métricas del diseño instrumentadas, tablero y **15 alertas** ligadas a atributos |
 | 3 | Simulación y análisis de fallos | **30%** | 🟢 Los 4 escenarios (IF-01, IF-02, IF-03, IF-05) ejecutados y aprobados; bitácora en [`bitacora-de-fallos.md`](docs/proyecto/03-implementacion/bitacora-de-fallos.md). IF-03 halló y corrigió una debilidad real |
 | 4 | Patrones utilizados | **10%** | ✅ Catálogo en [`patrones.md`](docs/proyecto/03-implementacion/patrones.md), con Outbox/CQRS/Space-Based/KEDA/seguridad implementados |
-| 5 | Autoevaluación | **+10%** | 🟢 Escrita en [`autoevaluacion.md`](docs/proyecto/03-implementacion/autoevaluacion.md) |
+| 5 | Autoevaluación | **+10%** | ✅ Versión final en [`autoevaluacion.md`](docs/proyecto/03-implementacion/autoevaluacion.md) |
 | 6 | Coherencia | **-10%** | 🟢 **22 sep: se halló y corrigió sobreventa por falta de transacciones** ([§7 de la auditoría](docs/proyecto/03-implementacion/coherencia-implementacion.md#7-hallazgo-posterior-sobreventa-por-falta-de-transacciones)). Mapeo ADR→implementación en [`fidelidad-arquitectonica.md`](docs/proyecto/03-implementacion/fidelidad-arquitectonica.md); 21 casos, cobertura en CI y diagramas al día. Auditoría de coherencia 22 sep: ver [`coherencia-implementacion.md`](docs/proyecto/03-implementacion/coherencia-implementacion.md) |
 
 La **defensa** se apoya en los ADR: para cada decisión visible en la demo hay que responder
 qué atributo de calidad la justifica y qué se sacrificó a cambio
 ([`docs/proyecto/decisiones/`](docs/proyecto/decisiones/README.md)).
 
-**Ambiente de la demo:** local con **k3d o minikube** (el mínimo es el ambiente local; AWS es
-opcional si alcanza el tiempo). Para las corridas se propone **k6 con `ramping-vus`** y, para
-dar accesos sin despliegue público, **Tailscale** ([plan por criterios](docs/proyecto/03-implementacion/README.md)).
+**Ambiente de la demo:** **minikube con KEDA en GitHub Codespaces** (AWS quedó fuera del
+piloto). La carga corre con **k6 `constant-arrival-rate`**. Los accesos se evidencian con el
+**video demo** y el arranque en Codespaces; no se usó Tailscale ni hay despliegue público
+([plan por criterios](docs/proyecto/03-implementacion/README.md)).
 
-## Lo que hay que sacar
+## Lo que había que sacar
 
 De los entregables de diseño a la ejecución. **El orden importa**: primero el esqueleto y el
 caso de uso principal, y encima de eso pruebas, carga, observabilidad y fallos.
 
-| # | Criterio | Insumo ya escrito | Qué falta |
+| # | Criterio | Insumo ya escrito | Estado |
 |---|---|---|---|
-| 1 | Aplicación funcionando (40%) | [AD-007](docs/proyecto/decisiones/0007-stack-de-implementacion.md): TypeScript/Node · [arquitectura hexagonal](docs/proyecto/02-modelamiento/diagrama-de-clases.md) · [caso de uso](docs/proyecto/02-modelamiento/diagrama-de-secuencia.md) | 🟢 API Fastify + PostgreSQL + outbox + pasarela simulada + sala de espera en `apps/ventas`; compra completa, webhook repetido y rechazo verificados en local. `PENDIENTE: clúster k3d/minikube y video demo` |
-| 2 | Pruebas y coherencia | [Plan de pruebas](docs/proyecto/02-modelamiento/plan-de-pruebas.md): 21 casos UT sobre las reglas R1–R14 | ✅ Los 21 casos escritos y en verde (38 pruebas; cobertura ~77,7% sentencias), más 5 pruebas de integración contra PostgreSQL real (concurrencia sobre el aforo, webhooks simultáneos y turno de un solo uso), que el CI corre con PostgreSQL de servicio. El CI corre `test:coverage` y **anexa el reporte como artefacto** ([`verificacion.yml`](.github/workflows/verificacion.yml)) |
-| 3 | Observabilidad (20%) | [Observabilidad](docs/proyecto/02-modelamiento/observabilidad.md): métricas, tableros y alertas | 🟢 Implementada: plataforma completa (OTel + Alloy + Prometheus + Tempo + Loki + Grafana), las 14 métricas del diseño instrumentadas + complementos de ticketera, tablero de 5 secciones y 4 alertas. Ver [`observability/README.md`](observability/README.md). `PENDIENTE: capturas y video` |
-| 4 | Simulación de fallos (30%) | [Inyección de fallos](docs/proyecto/02-modelamiento/inyeccion-de-fallos.md): IF-01, IF-02, IF-03 e IF-05 elegidos | 🟢 Los 4 ejecutados y aprobados con el arnés de `chaos/`, y **repetidos el 22 sep** con la métrica de sobreventa real y webhooks simultáneos; bitácora en [`bitacora-de-fallos.md`](docs/proyecto/03-implementacion/bitacora-de-fallos.md). `PENDIENTE: capturas del tablero durante cada fallo para el video` |
-| 5 | Carga | [Volumetría](docs/proyecto/02-modelamiento/volumetria.md): nominal, pico, estrés y resistencia; 30.000 usuarios en 60 s contra 5.000 boletas | 🟢 Arnés k6 en [`load/`](load/) y primera campaña local (22 sep): los 4 escenarios con umbrales cumplidos y **0 sobreventa**, a escala 0,05. Ver [`pruebas-de-carga.md`](docs/proyecto/03-implementacion/pruebas-de-carga.md). `PENDIENTE: campaña en Codespaces con Redis y Kafka, estrés ×2 y capturas` |
+| 1 | Aplicación funcionando (40%) | [AD-007](docs/proyecto/decisiones/0007-stack-de-implementacion.md): TypeScript/Node · [arquitectura hexagonal](docs/proyecto/02-modelamiento/diagrama-de-clases.md) · [caso de uso](docs/proyecto/02-modelamiento/diagrama-de-secuencia.md) | 🟢 API Fastify + PostgreSQL + outbox + pasarela simulada + sala de espera en `apps/ventas`; compra completa, webhook repetido y rechazo verificados en local. Desplegada en **minikube con KEDA** en Codespaces. ✅ Video demo listo (fuera del repo) |
+| 2 | Pruebas y coherencia | [Plan de pruebas](docs/proyecto/02-modelamiento/plan-de-pruebas.md): 21 casos UT sobre las reglas R1–R14 | ✅ Los 21 casos escritos y en verde (58 pruebas unitarias con las de estructura y las de `event-catalog`), más 5 pruebas de integración contra PostgreSQL real (concurrencia sobre el aforo, webhooks simultáneos y turno de un solo uso), que el CI corre con PostgreSQL de servicio: **63/63 en verde y 78,8 % de sentencias** en `main`. El CI corre `test:coverage` y **anexa el reporte como artefacto** ([`verificacion.yml`](.github/workflows/verificacion.yml)) |
+| 3 | Observabilidad (20%) | [Observabilidad](docs/proyecto/02-modelamiento/observabilidad.md): métricas, tableros y alertas | 🟢 Implementada: plataforma completa (OTel + Alloy + Prometheus + Tempo + Loki + Grafana), las 14 métricas del diseño instrumentadas + complementos de ticketera, tablero de 5 secciones y 15 alertas. Ver [`observability/README.md`](observability/README.md). ✅ Grafana capturado durante los fallos y en el video |
+| 4 | Simulación de fallos (30%) | [Inyección de fallos](docs/proyecto/02-modelamiento/inyeccion-de-fallos.md): IF-01, IF-02, IF-03 e IF-05 elegidos | 🟢 Los 4 ejecutados y aprobados con el arnés de `chaos/`, y **repetidos el 22 sep** con la métrica de sobreventa real y webhooks simultáneos; bitácora en [`bitacora-de-fallos.md`](docs/proyecto/03-implementacion/bitacora-de-fallos.md). ✅ Capturas de Grafana durante cada fallo |
+| 5 | Carga | [Volumetría](docs/proyecto/02-modelamiento/volumetria.md): nominal, pico, estrés y resistencia; 30.000 usuarios en 60 s contra 5.000 boletas | 🟢 Arnés k6 en [`load/`](load/) y primera campaña local (22 sep): los 4 escenarios con umbrales cumplidos y **0 sobreventa**, a escala 0,05. Ver [`pruebas-de-carga.md`](docs/proyecto/03-implementacion/pruebas-de-carga.md). ✅ Campaña repetida en Codespaces con Redis y Kafka |
 | 6 | Patrones (10%) | [Patrones utilizados](docs/proyecto/03-implementacion/patrones.md) | Revisar contra la demo y añadir capturas |
 | 7 | Prototipo / plataforma web | [Prototipo](docs/proyecto/02-modelamiento/prototipo/index.html): 16 pantallas, tres roles | 🟢 Además del prototipo estático hay una **plataforma web funcional** en `/app` conectada a las APIs (catálogo, fila, reserva, pago, boleta, promotor, operación) |
-| 8 | Defensa y autoevaluación | [Los ADR](docs/proyecto/decisiones/README.md) · [tipos de deuda técnica](docs/curso/clase-05-06.md) | Repasar trazabilidad atributo → decisión → sacrificio; escribir la autoevaluación |
+| 8 | Defensa y autoevaluación | [Los ADR](docs/proyecto/decisiones/README.md) · [tipos de deuda técnica](docs/curso/clase-05-06.md) | ✅ Presentación para la sustentación del 26 sep lista (fuera del repo). ✅ [Autoevaluación](docs/proyecto/03-implementacion/autoevaluacion.md) final (Lina, 25 sep) |
 
 ## Pendientes y preguntas abiertas
 
-- **Evidencias en Codespaces** (video, capturas de Grafana, alerta, los 4 fallos y la carga con
-  Redis y Kafka): paso a paso en
+- ✅ **Video demo y presentación de la sustentación listos** (25 sep); viven fuera del repo.
+  La guía para sacar evidencias en Codespaces sigue en
   [`guia-codespaces.md`](docs/proyecto/03-implementacion/guia-codespaces.md).
 
 - `PENDIENTE: la diapositiva 46 trae una nota manuscrita «¿Máximo?»; preguntar al profesor si la nota del entregable tiene tope.`
-- `PENDIENTE: formato y duración del video demo; el ambiente será local con k3d o minikube, así que también hay que confirmar si la demo en video y los accesos por Tailscale son suficientes.`
 - `PENDIENTE: ratificar los doce umbrales de` [`atributos-de-calidad.md`](docs/proyecto/01-caso-de-negocio/atributos-de-calidad.md).
-- `PENDIENTE: la nota y la retroalimentación de la Entrega 1.`
+- `PENDIENTE: la nota de la Entrega 1.` La retroalimentación del profesor ya llegó (proyección
+  poco realista y una observación sobre la implementación); la recoge la
+  [autoevaluación](docs/proyecto/03-implementacion/autoevaluacion.md#mejoras-que-reconocemos).
 - `PENDIENTE: la nota de la Entrega 2, entregada por Teams el 19 de septiembre.`
 - `PENDIENTE: verificar disponibilidad de dominio y marca de «TicketRight».`
 
@@ -97,10 +99,11 @@ Node.js con Vitest, **aceptada el 20 de septiembre de 2026**— y el esqueleto e
 `admission-identity`, `sales` y `entitlements`— más `shared-kernel`, ambiente local en
 `docker-compose.yml` y CI en `.github/workflows/`. Sigue el código de los veintiún casos.
 
-**Incremento 6 — cierre de coherencia (22 de septiembre):** se implementó el dominio del
+**Incremento 8 — cierre de coherencia (23 de septiembre):** se implementó el dominio del
 contexto **Oferta de eventos** en `@ticketright/event-catalog` (`Evento`, `Recinto`,
 `Promotor` con `Convenio`, `ReglasVenta`, `ReglasReventa`, `Cancelacion` y la regla R1 del
-aforo del recinto), con pruebas; así **las 12 raíces del modelo tienen código**. Se ampliaron
+aforo del recinto), con pruebas; así **las 12 raíces del modelo tienen código** (`Identidad`,
+por AD-004, en su almacén aislado de cuentas y no en `packages/`). Se ampliaron
 las alertas de `4` a `15` (negocio y técnicas, cada una con su atributo) y se escribió la
 [autoevaluación](docs/proyecto/03-implementacion/autoevaluacion.md). El detalle de la
 auditoría diseño↔código está en
@@ -191,10 +194,20 @@ mientras llegan 25–37, y la reserva se mantiene en P95 ~35 ms. El primer sínt
 degradación es la consulta de posición de la fila en memoria (P99 1,02 s a ×1,5). Detalle en
 [`pruebas-de-carga.md`](docs/proyecto/03-implementacion/pruebas-de-carga.md).
 
+**Cierre y revisión final (25–26 de septiembre):** el video demo y la presentación de la
+sustentación quedaron listos (viven fuera del repositorio). Antes de entregar se revisó todo el
+repositorio contra el diseño: los ocho diagramas de Archify validan con 0 errores y se
+regeneran idénticos byte a byte desde sus fuentes, las clases y mensajes de los diagramas
+existen en el código, el CI de `main` pasa 63/63 pruebas, y se corrigieron conteos y README
+desactualizados. Detalle en el
+[§8 de la auditoría de coherencia](docs/proyecto/03-implementacion/coherencia-implementacion.md#8-revisión-final-antes-de-la-entrega-26-de-septiembre).
+La versión final de la autoevaluación la subió Lina el 25 de septiembre; con ella no queda
+nada pendiente del repositorio para la entrega.
+
 ## Tablero
 
 | # | Entrega | Peso | Fecha | Estado |
 |---|---|---|---|---|
 | 1 | Caso de negocio | 20% | sáb 12 sep 2026 | ✅ Entregada. Falta la nota |
 | 2 | Modelamiento de la solución | 30% | sáb 19 sep 2026, 3 p.m. | ✅ **Entregada** por Teams. Falta la nota |
-| 3 | Implementación, sustentación y defensa | 30% | **sáb 26 sep 2026** | 🟢 **En curso.** App funcional (Fastify + PostgreSQL + Redis + Kafka + seguridad de borde + plataforma web `/app`), observabilidad y 4 fallos ejecutados; faltan video, cobertura en CI y autoevaluación |
+| 3 | Implementación, sustentación y defensa | 30% | **sáb 26 sep 2026** | 🟢 **Lista para sustentar.** App funcional (Fastify + PostgreSQL + Redis + Kafka + seguridad de borde + plataforma web `/app`) en minikube, observabilidad, 4 fallos ejecutados, carga, cobertura en CI, video demo y presentación listos y autoevaluación final |

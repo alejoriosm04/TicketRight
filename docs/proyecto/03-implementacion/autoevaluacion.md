@@ -33,9 +33,10 @@ verdad y probarlas, antes que dejar muchas tácticas a medias por querer tenerlo
   en GitHub Actions.
 - **La boleta vive en su propio contexto** (derecho de asistencia) y la emisión cruza por el
   puerto `EmisorDeBoletas`.
-- **Plan de pruebas:** los 21 casos pasan (38 pruebas unitarias más 5 de integración contra
-  PostgreSQL real), con cobertura en CI.
-- **Modelo de dominio:** las 12 raíces de agregado tienen código y las reglas de negocio R1–R14
+- **Plan de pruebas:** los 21 casos pasan (58 pruebas unitarias más 5 de integración contra
+  PostgreSQL real, 63 en total), con cobertura en CI.
+- **Modelo de dominio:** las 12 raíces de agregado tienen código —11 en el dominio e `Identidad`
+  en su almacén aislado, como pide el ADR de datos personales— y las reglas de negocio R1–R14
   están implementadas.
 - **Observabilidad:** el stack completo (OpenTelemetry, Alloy, Prometheus, Tempo, Loki, Grafana),
   las 14 métricas diseñadas y 15 alertas.
@@ -53,7 +54,7 @@ verdad y probarlas, antes que dejar muchas tácticas a medias por querer tenerlo
 
 Aquí hay dos casos distintos: **(a)** piezas que están completas pero con una tecnología de
 piloto en lugar de la de nube —la táctica es la misma, cambia la tecnología, el atributo se
-sostiene con menor robustez que en producción—; y **(b)** piezas que quedaron a medias.
+sostiene con menor robustez que en producción—; y **(b)** piezas que quedaron de manera parcial.
 
 **(a) Piezas de AWS reemplazadas por equivalentes locales:**
 

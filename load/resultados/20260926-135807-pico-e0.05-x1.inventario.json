@@ -1,0 +1,24 @@
+{
+  "localidad": "c4a60000-0000-4000-8000-000000000001",
+  "aforo_autorizado": 250,
+  "contador_reservado": 38,
+  "contador_vendido": 212,
+  "unidades_en_reservas_vivas": 38,
+  "boletas_validas": 212,
+  "sobreventa": 0,
+  "contador_coherente": true,
+  "turnos_con_mas_de_una_reserva": 0,
+  "discrepancias_abiertas": 0,
+  "reservas_por_estado": [
+    {
+      "estado": "confirmada",
+      "reservas": 154,
+      "unidades": 212
+    },
+    {
+      "estado": "vigente",
+      "reservas": 24,
+      "unidades": 38
+    }
+  ]
+}

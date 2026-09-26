@@ -1,6 +1,7 @@
 # Coherencia entre el modelamiento y la implementación
 
-> Auditoría del **22 de septiembre de 2026**. Contrasta el diseño de la Entrega 2
+> Auditoría del **22 de septiembre de 2026**, con una revisión final antes de la entrega
+> ([§8](#8-revisión-final-antes-de-la-entrega-26-de-septiembre)). Contrasta el diseño de la Entrega 2
 > (guía oficial, en [`../02-modelamiento/`](../02-modelamiento/README.md)) con el código
 > implementado, para el criterio 6 de la [rúbrica](rubrica.md) (coherencia, hasta −10 %).
 > Complementa el mapeo ADR→código de [`fidelidad-arquitectonica.md`](fidelidad-arquitectonica.md).
@@ -19,7 +20,7 @@ difiere, **por qué** y si es una **desviación deliberada** (con su justificaci
 | Reglas de negocio R1–R14 | 🟢 Alta | Los 21 casos del plan de pruebas en verde cubren las reglas |
 | Infraestructura (ADR / arq. de implementación) | 🟢 Alta (piloto) | Homólogos locales documentados; AWS es diseño, no despliegue |
 | Observabilidad | 🟢 Alta | Las 3+3 métricas de la rúbrica y el catálogo del diseño instrumentados |
-| Riqueza del dominio por contexto | 🟢 Alta | `event-catalog` ya implementa `Evento`/`Recinto`/`Promotor` como dominio; **12/12 raíces con código** (ver §3) |
+| Riqueza del dominio por contexto | 🟢 Alta | `event-catalog` ya implementa `Evento`/`Recinto`/`Promotor` como dominio; **11 raíces como clases de dominio e `Identidad` en su almacén aislado** (ver §3) |
 | Detalles de fidelidad del diagrama | 🟡 Menor | Orden de dos mensajes y algún parámetro difieren (ver §4) |
 
 ## 2. Lo que coincide con el diseño
@@ -62,8 +63,13 @@ las raíces **Promotor**, **Recinto**, **Evento** (y los VO `Convenio`, `ReglasV
   (+ rama `cancelado`), `PerfilDemanda` (`cotidiano`/`masivo`) y los VO `ReglasVenta`,
   `ReglasReventa`, `Cancelacion` — [`event.ts`](../../../packages/event-catalog/src/domain/event.ts).
 
-Con esto, **las 12 raíces de agregado del modelo tienen código** (la 13.ª conceptual,
-`Identidad`, se mantiene deliberadamente como `IdOpaco` por AD-004). Hay pruebas en
+Con esto, **las 12 raíces de agregado del modelo tienen código**: once como clases de dominio
+en `packages/` (`Fan`, `FilaDeVenta`, `Promotor`, `Recinto`, `Evento`, `Localidad`, `Reserva`,
+`Pago`, `Discrepancia`, `Liquidacion` y `Boleta`) y la duodécima, **`Identidad`**, fuera del
+dominio a propósito: por [AD-004](../decisiones/0004-datos-personales-almacenamiento-y-acceso.md)
+vive en un almacén aislado con credenciales propias, que en el piloto es el registro de cuentas
+([`accounts.ts`](../../../apps/ventas/src/security/accounts.ts)) con nombre y documento
+cifrados con AES-256-GCM. Los demás contextos solo ven su `identidadRef` opaco. Hay pruebas en
 [`event-catalog/tests`](../../../packages/event-catalog/tests/).
 
 - **Lo que sigue acotado (deliberado):** la *gestión* del catálogo por el promotor (alta de
@@ -114,17 +120,27 @@ Ninguna cambia el comportamiento verificado por las pruebas; se registran por ho
    separado de 3.3), así que un fallo al emitir abre la conciliación sin deshacer el cobro.
 5. **Reintentos con backoff y circuit breaker.** El disyuntor completo es deuda declarada en
    [`fidelidad-arquitectonica.md`](fidelidad-arquitectonica.md).
+6. **Nombres de dos adaptadores.** El diagrama de clases nombra los adaptadores de producción;
+   el piloto realiza los mismos puertos con clases de nombre distinto:
+   `AdaptadorDePasarelaTokenizada` ⇒ `PasarelaDePago` es
+   [`PasarelaSimulada`](../../../apps/ventas/src/adapters/simulated-gateway.ts), porque no hay
+   pasarela real (sus perfiles `tardia`, `repetida` y `rechaza` son los fallos del tercero), y
+   `OutboxTransaccional` ⇒ `PublicadorDeEventos` se reparte entre `PublicadorDeEventosOutbox`
+   (`publicar`, dentro de la transacción) y `RelayDeOutbox`/`RelayDeOutboxKafka` (`despachar`)
+   en [`outbox.ts`](../../../apps/ventas/src/adapters/outbox.ts) y
+   [`kafka.ts`](../../../apps/ventas/src/adapters/kafka.ts). Los contratos de los puertos son
+   los del diagrama.
 
 ## 5. Estado de las evidencias de la rúbrica
 
 | Criterio | Estado | Evidencia / pendiente |
 |---|---|---|
-| 1 · Aplicación (40 %) | 🟢 | App + plataforma web `/app`; **pendiente** el video demo |
-| 2 · Observabilidad (20 %) | 🟢 | 3+3 métricas instrumentadas, tablero y **15 alertas** ligadas a atributos; **pendiente** capturas/video |
-| 3 · Fallos (30 %) | 🟢 | IF-01/02/03/05 aprobados; **pendiente** capturas del tablero por fallo |
+| 1 · Aplicación (40 %) | 🟢 | App + plataforma web `/app` en minikube con KEDA; video demo listo (fuera del repo) |
+| 2 · Observabilidad (20 %) | 🟢 | 3+3 métricas instrumentadas, tablero y **15 alertas** ligadas a atributos; capturas y video listos |
+| 3 · Fallos (30 %) | 🟢 | IF-01/02/03/05 aprobados; capturas del tablero durante cada fallo |
 | 4 · Patrones (10 %) | 🟢 | [`patrones.md`](patrones.md); **pendiente** capturas de código |
 | 5 · Autoevaluación (+10 %) | 🟢 | Escrita en [`autoevaluacion.md`](autoevaluacion.md) |
-| 6 · Coherencia (−10 %) | 🟢 | Este documento + `fidelidad-arquitectonica.md`; cobertura en CI; 12/12 raíces con código |
+| 6 · Coherencia (−10 %) | 🟢 | Este documento + `fidelidad-arquitectonica.md`; 63 pruebas y cobertura en CI; 12/12 raíces con código (11 en el dominio, `Identidad` aislada) |
 
 ## 6. Acciones tomadas en esta auditoría
 
@@ -146,7 +162,8 @@ Ninguna cambia el comportamiento verificado por las pruebas; se registran por ho
   campo persistente del agregado. Se quitó de la UI el texto sobre el cifrado AES-256-GCM.
 - **Contexto «Oferta de eventos» implementado.** Se creó el dominio de `event-catalog`
   (`Evento`, `Recinto`, `Promotor` + VOs), con la regla R1 del recinto y pruebas. Cierra la
-  brecha de raíces del modelo sin código (ver §3): **12/12 raíces implementadas**.
+  brecha de raíces del modelo sin código (ver §3): **12/12 raíces implementadas** (`Identidad`
+  en su almacén aislado, por AD-004).
 - **Alertas ampliadas.** [`alerts.yml`](../../../observability/prometheus/alerts.yml) pasó de
   4 a **15 reglas**, cubriendo las alertas del diseño (latencia de reserva P95, DLQ/lag,
   recorrido crítico, servicio caído, saturación de CPU/pool, telemetría incompleta, conversión
@@ -242,3 +259,41 @@ en vez de ~2 s, porque la transacción espera primero una conexión del pool
   como bot desde el incremento 4 y el experimento ya no pasaba.
 - **Campaña repetida** el 22 de septiembre: los cuatro experimentos aprobados con la métrica
   de sobreventa real ([bitácora](bitacora-de-fallos.md#segunda-campaña--22-de-septiembre)).
+
+## 8. Revisión final antes de la entrega (26 de septiembre)
+
+Pasada completa del repositorio contra el diseño, con los mismos comandos que cualquiera
+puede repetir. Resultado:
+
+**Diagramas (Archify, [`tools/archify/`](../../../tools/archify/), versión 2.17.0-dev.1).**
+Las ocho fuentes `.json` de [`02-modelamiento/`](../02-modelamiento/README.md) pasan
+`validate --quality standard` con **0 errores**, y las advertencias coinciden con las que
+declara cada documento (arquitectura de referencia 16, de implementación 5, clases 1 y 14,
+secuencia 1 y 1, modelo y mapa 1 y 1). Las fuentes con recibo anotado tienen el mismo
+`sha256`. Al regenerar las ocho vistas con `deliver` y sus posprocesados, el HTML resultante
+es **idéntico byte a byte** al versionado: lo publicado sale de las fuentes.
+
+```bash
+for v in dominio aplicacion; do
+  node tools/archify/bin/archify.mjs validate architecture \
+    docs/proyecto/02-modelamiento/diagrama-de-clases-$v.json --quality standard --json
+done
+```
+
+**Diagramas contra el código.** Las 39 clases del diagrama de clases existen en el código con
+el mismo nombre, salvo los dos adaptadores de producción registrados en el §4, punto 6. Las
+llamadas de los 38 mensajes del diagrama de secuencia existen como métodos. Las doce raíces
+del modelo tienen código (§3).
+
+**Pruebas.** `npm run typecheck` sin errores. `npm test` en local: 58 pruebas en verde y las
+5 de integración omitidas por no tener PostgreSQL; en el CI de `main`, con PostgreSQL de
+servicio, **63 de 63 en verde** y cobertura de **78,8 % de sentencias y 59,6 % de ramas**.
+
+**Observabilidad.** Las 15 reglas de
+[`alerts.yml`](../../../observability/prometheus/alerts.yml) y las consultas del tablero usan
+solo métricas que la aplicación expone.
+
+**Corregido en esta revisión.** Conteos de pruebas y de alertas desactualizados, la forma de
+contar las raíces (`Identidad`), los nombres de los dos adaptadores, este §5, y los README de
+la raíz, de `apps/ventas` y de `observability`, que describían el incremento 1.
+

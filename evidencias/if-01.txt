@@ -1,0 +1,56 @@
+== IF-01 — pasarela tardía y repetida ==
+
+--- estado estable (antes) ---
+  ventas_cop             3513600
+  pagos_confirmados      8
+  pagos_rechazados       0
+  pagos_en_curso         0
+  boletas_emitidas       10
+  discrepancias_abiertas 0
+  edad_discrepancia_s    0
+  sobreventa             0
+  reservas_ok            8
+  reservas_rechazadas    5
+  errores_reserva        5
+  reserva_p95_s          0.023749999999999997
+  cpu_nucleos            0.026702381818181853
+  pg_conexiones          1
+
+compra 51bdecfb-a020-4c3a-aa9b-b2f3b9e0f01d, pago 6361e080-3aaa-4c1b-824d-fb1569a2d46d — simulando webhook repetido...
+  webhook #1 -> 200
+  webhook #2 -> 200
+  webhook #3 -> 200
+
+--- después de 3 webhooks idénticos ---
+  ventas_cop             4260240
+  pagos_confirmados      9
+  pagos_rechazados       0
+  pagos_en_curso         0
+  boletas_emitidas       12
+  discrepancias_abiertas 0
+  edad_discrepancia_s    0
+  sobreventa             0
+  reservas_ok            9
+  reservas_rechazadas    5
+  errores_reserva        5
+  reserva_p95_s          0.023749999999999997
+  cpu_nucleos            0.02762220000000003
+  pg_conexiones          2
+
+--- verificación (sobre la compra de IF-01) ---
+  paso de la compra:            emitida (esperado emitida)
+  estado del pago:              confirmado (esperado confirmado)
+  boletas de la compra:         2 (esperado 2, no 4 ni 6)
+  discrepancias de la compra:   0 (esperado 0)
+  sobreventa global:            0 (esperado 0)
+
+compra 5b48f263-1c9f-45e1-93f5-1c9982516f17, pago 924a46ad-e30f-41db-ac4e-db92a9332f5b — 5 webhooks simultáneos...
+  respuestas: 200, 200, 200, 200, 200
+
+--- verificación (fase 2, webhooks simultáneos) ---
+  paso de la compra:            emitida (esperado emitida)
+  boletas de la compra:         2 (esperado 2)
+  discrepancias de la compra:   0 (esperado 0)
+  sobreventa global:            0 (esperado 0)
+
+RESULTADO IF-01: APROBADO

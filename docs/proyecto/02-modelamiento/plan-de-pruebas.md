@@ -204,6 +204,11 @@ declara; lo que falta son adaptadores, proyecciones y transacciones reales, que 
 pertenecen a este plan porque exigen infraestructura desplegada. Se ejecutan con `npm test`
 y el CI las corre en cada push y cada pull request.
 
+**Al cierre de la Entrega 3 (26 de septiembre)** el conjunto creció a **63 pruebas**: 58
+unitarias —los veintiún casos, las de estructura y las del dominio de `event-catalog`— y 5 de
+integración contra PostgreSQL. En el CI de `main` pasan las 63, con **78,8 % de sentencias y
+59,6 % de ramas**.
+
 **Dónde vive cada caso:**
 
 | Casos | Archivo | Paquete |

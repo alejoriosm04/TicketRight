@@ -1,0 +1,7 @@
+== IF-05 fase DURANTE (CPU de la base restringida) ==
+  [durante] 8/8 compras emitidas en 3629ms; P95 reserva ~ 0.094s
+  finalización: 8/8
+  sobreventa: 0 (esperado 0)
+  discrepancias: 0 (esperado 0)
+
+(parcial) durante -> OK (finalización 8/8)

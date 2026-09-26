@@ -1,0 +1,18 @@
+== IF-03 fase ESTABLE (antes) ==
+
+--- estado estable ---
+  ventas_cop             878400
+  pagos_confirmados      2
+  pagos_rechazados       0
+  pagos_en_curso         0
+  boletas_emitidas       2
+  discrepancias_abiertas 0
+  edad_discrepancia_s    0
+  sobreventa             0
+  reservas_ok            2
+  reservas_rechazadas    0
+  errores_reserva        0
+  reserva_p95_s          0.023749999999999997
+  cpu_nucleos            0.0262365818181818
+  pg_conexiones          1
+  compra de control: paso=emitida (esperado emitida)
