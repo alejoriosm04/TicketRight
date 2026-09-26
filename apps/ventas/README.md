@@ -61,6 +61,22 @@ curl -s localhost:3000/compras -H 'content-type: application/json' -H 'user-agen
 Guarda el `compraId` y sigue con `POST /compras/<compraId>/pago` y
 `GET /compras/<compraId>`.
 
+## Fila con multitud para la demo
+
+Si estás solo en la fila, entras en el siguiente segundo. Para mostrar una fila que tarda,
+`scripts/fila-demo.mjs` simula la apertura de una venta masiva (AD-006):
+
+```bash
+node apps/ventas/scripts/fila-demo.mjs llenar 300   # preparación: admisión cerrada + 300 fans en la fila
+# entrar a la fila desde /app: quedas en la posición 301, sin avanzar
+node apps/ventas/scripts/fila-demo.mjs abrir        # pico: admite 15 por segundo (~20 s para 300)
+node apps/ventas/scripts/fila-demo.mjs normal       # al terminar, vuelve a cotidiano
+```
+
+Cada fan simulado es una identidad distinta con un solo ingreso, así que el borde de seguridad
+no lo trata como bot; no compran, solo ocupan su lugar. Mientras la fila está cerrada, la sonda
+sintética del recorrido crítico no alcanza a ser admitida y lo registra como fallo.
+
 ## Cambiar de perfil y reiniciar
 
 ```bash

@@ -440,7 +440,9 @@
     try {
       var entrada = await api("POST", "/fila/entrar", { fanId: FAN });
       S.turnoId = entrada.turnoId; var pos0 = null, anunciado = "";
-      for (var i = 0; i < 60; i++) {
+      // Se espera lo que dura el turno en el servidor (5 min): en pico la fila puede tardar.
+      var limite = Date.now() + 5 * 60 * 1000;
+      while (Date.now() < limite) {
         var s = await api("GET", "/fila/" + S.turnoId);
         if (pos0 === null) pos0 = s.posicion || 1;
         document.getElementById("fila-pos").textContent = s.estado === "admitido" ? "¡es tu turno!" : ("#" + (s.posicion || 0));
