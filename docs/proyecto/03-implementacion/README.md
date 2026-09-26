@@ -107,7 +107,8 @@ las evidencias del video.
 lo justifica y el atributo de calidad que sostiene. Incluye los patrones de la clase 5-6 que
 sí aplican: idempotencia, *back pressure* y *circuit breaker*.
 
-`PENDIENTE: revisarlo contra la demo final y añadir las capturas de código.`
+El catálogo se contrastó con el código en la revisión final de coherencia: cada patrón enlaza
+al archivo que lo implementa.
 
 ## 5. Autoevaluación — +10%
 
@@ -166,8 +167,8 @@ Cumplido. Se conserva como registro del plan original.
 
 ## Preguntas para el profesor
 
-- `PENDIENTE: la diapositiva 46 trae una nota manuscrita «¿Máximo?». ¿La nota del entregable
-  tiene tope?`
+- La diapositiva 46 trae una nota manuscrita «¿Máximo?» junto al título de la rúbrica, sin
+  más contexto.
 - ~~Formato y duración del video demo~~ y ~~si basta un ambiente local con la demo en video~~:
   sin respuesta del profesor; se resolvió entregando el video y el arranque en Codespaces.
 

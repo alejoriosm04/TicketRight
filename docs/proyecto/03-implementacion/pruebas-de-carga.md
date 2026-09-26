@@ -2,7 +2,8 @@
 
 > Ejecución de los escenarios de la [volumetría](../02-modelamiento/volumetria.md#escenarios-de-prueba)
 > (nominal, pico, estrés y resistencia) con **k6** contra la aplicación real. Primera campaña:
-> **22 de septiembre de 2026**, en el ambiente local. El arnés está en [`load/`](../../../load/).
+> **22 de septiembre de 2026**, en el ambiente local; segunda campaña: **26 de septiembre**, en
+> GitHub Codespaces con Redis y Kafka. El arnés está en [`load/`](../../../load/).
 
 ## Contenido
 
@@ -11,9 +12,10 @@
 | [Cómo se traduce la volumetría a la prueba](#cómo-se-traduce-la-volumetría-a-la-prueba) | ¿Qué hace cada fan virtual, cómo se escala y qué se mide? |
 | [Diferencias con el diseño](#diferencias-con-el-diseño) | ¿Dónde la prueba no es literal al diseño, y por qué? |
 | [Resultados de la campaña local](#resultados-de-la-campaña-local) | ¿Qué salió en cada escenario? |
-| [Lectura de los resultados](#lectura-de-los-resultados) | ¿Qué demuestran para la defensa y qué no? |
+| [Campaña en Codespaces](#campaña-en-codespaces) | ¿Qué salió con Redis y Kafka, y con el doble de carga? |
+| [Lectura de los resultados](#lectura-de-los-resultados) | ¿Qué demuestran y qué no? |
 | [Cómo correrlo](#cómo-correrlo) | ¿Cómo se repite, en local o en Codespaces? |
-| [Pendientes](#pendientes) | ¿Qué falta para cerrar los escenarios? |
+| [Alcance y límites](#alcance-y-límites) | ¿Qué no mide esta campaña? |
 
 ## Cómo se traduce la volumetría a la prueba
 
@@ -82,6 +84,30 @@ boleta**, el contador de la localidad **coincide** con las reservas y boletas re
 **ningún turno compró dos veces**. Las boletas que faltan para llegar a 250 son las de las
 reservas abandonadas, que siguen vigentes hasta vencer.
 
+## Campaña en Codespaces
+
+El **26 de septiembre** se repitió el escenario de pico en GitHub Codespaces, con la fila en
+**Redis** y el bus en **Kafka**, a la escala de la campaña local y al **doble**. Las salidas
+completas de k6 están en [`evidencias/`](../../../evidencias/) (`k6-pico-005.txt` y
+`k6-pico-01.txt`) y los resúmenes e informes de inventario en
+[`load/resultados/`](../../../load/resultados/).
+
+| Escenario | Carga | Admitidos | Espera en fila P95 | Posición P95 / P99 | Reserva P95 / P99 | Boletas | Sobreventa | Umbrales |
+|---|---|---|---|---|---|---|---|---|
+| Pico, escala 0,05 | 1.500 fans en 60 s, 250 boletas | 1.501 a 14,4/s | 39,9 s | 3,6 ms / 6,9 ms | 13 ms / 31 ms | 212 | **0** | ✅ |
+| Pico, escala 0,1 | 3.000 fans en 60 s, 500 boletas | 3.000 a 14,8/s | 2 min 15 s | 6,7 ms / 14 ms | 28 ms / 124 ms | 418 | **0** | ✅ |
+
+En las dos corridas: **0 errores técnicos**, **100 % de los pagos iniciados llegaron a un estado
+final**, el contador de la localidad **coincide** con las reservas y las boletas reales y
+**ningún turno compró dos veces**. Las boletas que faltan para llegar al aforo son las de las
+reservas abandonadas, todavía vigentes al terminar la corrida.
+
+- **Con el doble de fans, el núcleo no se entera.** La admisión se mantiene en ~15 por segundo
+  y la reserva sigue en milisegundos (P95 de 28 ms); lo que crece es la espera en la fila, de
+  40 s a 2 min 15 s. Es el costo aceptado en AD-006.
+- **Redis elimina la señal de la campaña local.** La posición en la fila, que en local llegaba
+  a un P99 de 51 ms en el pico, queda en 6,9 ms con Redis.
+
 ## Lectura de los resultados
 
 - **La fila hace su trabajo (AD-006).** En pico y estrés llegan 25 y 37 fans por segundo,
@@ -121,9 +147,12 @@ En **Codespaces**, primero `bash deploy/arranque-compose.sh` (queda la app con R
 y luego los mismos comandos. Con Grafana abierto en «Last 15 minutes» se ven la fila, las
 reservas y la latencia moverse durante la corrida: son las capturas para la evidencia.
 
-## Pendientes
+## Alcance y límites
 
-- ✅ La campaña se repitió en Codespaces con Redis y Kafka, con capturas de Grafana, y está en
-  las evidencias del video. `PENDIENTE: registrar aquí sus cifras.`
-- `PENDIENTE: A-7 (costo por boleta ≤ COP $150) no se mide aquí: requiere el costo real de la infraestructura del escenario.`
-- `PENDIENTE: el multiplicador de quiebre que pide la volumetría; a ×1,5 local solo aparece la señal en la fila.`
+- El **costo por boleta** (A-7, ≤ COP $150) no se mide en esta prueba: requiere el costo real
+  de la infraestructura del escenario.
+- No se alcanzó el **punto de quiebre** que pide la volumetría: con la carga duplicada en
+  Codespaces todos los umbrales se siguen cumpliendo, y la única señal de degradación
+  observada (P99 de la posición en la fila a ×1,5 en local) viene de la fila en memoria, que en
+  Codespaces reemplaza Redis.
+- La **resistencia** se corrió en local durante 3 minutos; no se sostuvo por horas.
