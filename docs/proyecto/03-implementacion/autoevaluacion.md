@@ -41,7 +41,8 @@ verdad y probarlas, antes que dejar muchas tácticas a medias por querer tenerlo
   las 14 métricas diseñadas y 15 alertas.
 - **Inyección de fallos:** 4 de los 5 experimentos ejecutados y aprobados (pasarela tardía y
   repetida, reinicio del coordinador, PostgreSQL no disponible, saturación de CPU).
-- **Carga:** los 4 escenarios de volumetría con k6, en local y en Codespaces.
+- **Carga:** los 4 escenarios de volumetría con k6 (nominal, pico, estrés, resistencia)
+  ejecutados en local y en Codespaces, aunque a escala reducida (ver «Parcial» más abajo).
 - **Prototipo:** además de las 16 pantallas estáticas, una plataforma web funcional en `/app`
   conectada a las APIs.
 - **Despliegue:** minikube con autoescalado KEDA en Codespaces.
@@ -50,10 +51,11 @@ verdad y probarlas, antes que dejar muchas tácticas a medias por querer tenerlo
 
 ## Hecho con equivalente local, o solo en parte
 
-La táctica es la misma que en el diseño; cambia la tecnología o el alcance. El atributo se
-sostiene en la demo, con menor robustez que en producción.
+Aquí hay dos casos distintos: **(a)** piezas que están completas pero con una tecnología de
+piloto en lugar de la de nube —la táctica es la misma, cambia la tecnología, el atributo se
+sostiene con menor robustez que en producción—; y **(b)** piezas que quedaron a medias.
 
-**Piezas de AWS reemplazadas por equivalentes locales:**
+**(a) Piezas de AWS reemplazadas por equivalentes locales:**
 
 | En el diseño (nube) | En el piloto |
 |---|---|
@@ -68,7 +70,7 @@ sostiene en la demo, con menor robustez que en producción.
 | Secrets Manager | Secret de Kubernetes |
 | S3 + CloudFront | Portal estático en `/portal` |
 
-**Parcial:**
+**(b) Parcial:**
 
 - **Precalentamiento programado:** el gestor de perfiles existe y `programarVentana` está escrito,
   pero **nada lo invoca**, así que no hay precalentamiento automático antes de la venta.
