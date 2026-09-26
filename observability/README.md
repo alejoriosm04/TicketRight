@@ -17,7 +17,7 @@ publica hechos y la app los mide. Así el dominio no conoce Prometheus ni OpenTe
 | Métricas | **Prometheus** | Raspa `/metrics` de la app cada 5 s |
 | Trazas | **Grafana Tempo** | Recorrido admisión → reserva → pago → emisión por `trace_id` |
 | Logs | **Grafana Loki** | Logs JSON con el esquema del diseño; enlazan a su traza |
-| Visualización y alertas | **Grafana** | Tablero de ticketera + 4 reglas de alerta |
+| Visualización y alertas | **Grafana** | Tablero de ticketera + 15 reglas de alerta |
 
 ```
 App (OTel SDK) ──OTLP──►  Alloy ──► Tempo (trazas)
@@ -120,9 +120,21 @@ costo por hora configurable (`INFRA_COSTO_HORA_COP`) entre las boletas de la úl
 
 ## Alertas
 
-`prometheus/alerts.yml` define cuatro reglas ligadas a atributos: discrepancia prolongada
-(A-1), discrepancias abiertas (A-1), sobreventa (A-2) y reservas vencidas (A-5). Se ven en
-http://localhost:9090/alerts. Para **dispararlas en vivo**, arrancar la app sin reintentos
+`prometheus/alerts.yml` define **15 reglas**, cada una con su atributo de calidad y su
+prioridad (P1–P3) como etiquetas:
+
+| Atributo | Reglas |
+|---|---|
+| A-1 dinero↔boleta | `DiscrepanciaAbiertaProlongada`, `DiscrepanciaIncumpleConciliacion`, `DiscrepanciasAbiertas`, `PagosEnCursoDegradados` |
+| A-2 aforo | `SobreventaDetectada` |
+| A-3 titularidad | `TitularidadInvalida` |
+| A-5 reservas | `ReservasVencidasSinLiberar` |
+| A-6 degradación | `TrabajoAsincronoAcumulado`, `SaturacionSostenidaDeCpu`, `PostgresPoolSaturado` |
+| A-7 costo | `CostoPorBoletaFueraDeMeta` |
+| A-9 disponibilidad | `RecorridoCriticoNoDisponible`, `ServicioCriticoNoDisponible`, `TelemetriaIncompleta` |
+| A-10 rendimiento | `LatenciaDeReservaAlta` |
+
+Se ven en http://localhost:9090/alerts. Para **dispararlas en vivo**, arrancar la app sin reintentos
 de emisión: cada pago confirmado queda como «cobro sin boleta» y abre una discrepancia.
 
 ```bash
