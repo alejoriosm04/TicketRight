@@ -28,7 +28,7 @@ La rúbrica completa llegó con las clases 5 y 6
 | 2 | Observabilidad | **20%** | 🟢 Plataforma implementada (OTel + Alloy + Prometheus + Tempo + Loki + Grafana); las 14 métricas del diseño instrumentadas, tablero y **15 alertas** ligadas a atributos |
 | 3 | Simulación y análisis de fallos | **30%** | 🟢 Los 4 escenarios (IF-01, IF-02, IF-03, IF-05) ejecutados y aprobados; bitácora en [`bitacora-de-fallos.md`](docs/proyecto/03-implementacion/bitacora-de-fallos.md). IF-03 halló y corrigió una debilidad real |
 | 4 | Patrones utilizados | **10%** | ✅ Catálogo en [`patrones.md`](docs/proyecto/03-implementacion/patrones.md), con Outbox/CQRS/Space-Based/KEDA/seguridad implementados |
-| 5 | Autoevaluación | **+10%** | 🟢 Escrita en [`autoevaluacion.md`](docs/proyecto/03-implementacion/autoevaluacion.md) |
+| 5 | Autoevaluación | **+10%** | ✅ Versión final en [`autoevaluacion.md`](docs/proyecto/03-implementacion/autoevaluacion.md) |
 | 6 | Coherencia | **-10%** | 🟢 **22 sep: se halló y corrigió sobreventa por falta de transacciones** ([§7 de la auditoría](docs/proyecto/03-implementacion/coherencia-implementacion.md#7-hallazgo-posterior-sobreventa-por-falta-de-transacciones)). Mapeo ADR→implementación en [`fidelidad-arquitectonica.md`](docs/proyecto/03-implementacion/fidelidad-arquitectonica.md); 21 casos, cobertura en CI y diagramas al día. Auditoría de coherencia 22 sep: ver [`coherencia-implementacion.md`](docs/proyecto/03-implementacion/coherencia-implementacion.md) |
 
 La **defensa** se apoya en los ADR: para cada decisión visible en la demo hay que responder
@@ -54,7 +54,7 @@ caso de uso principal, y encima de eso pruebas, carga, observabilidad y fallos.
 | 5 | Carga | [Volumetría](docs/proyecto/02-modelamiento/volumetria.md): nominal, pico, estrés y resistencia; 30.000 usuarios en 60 s contra 5.000 boletas | 🟢 Arnés k6 en [`load/`](load/) y primera campaña local (22 sep): los 4 escenarios con umbrales cumplidos y **0 sobreventa**, a escala 0,05. Ver [`pruebas-de-carga.md`](docs/proyecto/03-implementacion/pruebas-de-carga.md). ✅ Campaña repetida en Codespaces con Redis y Kafka |
 | 6 | Patrones (10%) | [Patrones utilizados](docs/proyecto/03-implementacion/patrones.md) | Revisar contra la demo y añadir capturas |
 | 7 | Prototipo / plataforma web | [Prototipo](docs/proyecto/02-modelamiento/prototipo/index.html): 16 pantallas, tres roles | 🟢 Además del prototipo estático hay una **plataforma web funcional** en `/app` conectada a las APIs (catálogo, fila, reserva, pago, boleta, promotor, operación) |
-| 8 | Defensa y autoevaluación | [Los ADR](docs/proyecto/decisiones/README.md) · [tipos de deuda técnica](docs/curso/clase-05-06.md) | ✅ Presentación para la sustentación del 26 sep lista (fuera del repo). 🟢 [Autoevaluación](docs/proyecto/03-implementacion/autoevaluacion.md) escrita; Lina sube la versión final |
+| 8 | Defensa y autoevaluación | [Los ADR](docs/proyecto/decisiones/README.md) · [tipos de deuda técnica](docs/curso/clase-05-06.md) | ✅ Presentación para la sustentación del 26 sep lista (fuera del repo). ✅ [Autoevaluación](docs/proyecto/03-implementacion/autoevaluacion.md) final (Lina, 25 sep) |
 
 ## Pendientes y preguntas abiertas
 
@@ -64,7 +64,9 @@ caso de uso principal, y encima de eso pruebas, carga, observabilidad y fallos.
 
 - `PENDIENTE: la diapositiva 46 trae una nota manuscrita «¿Máximo?»; preguntar al profesor si la nota del entregable tiene tope.`
 - `PENDIENTE: ratificar los doce umbrales de` [`atributos-de-calidad.md`](docs/proyecto/01-caso-de-negocio/atributos-de-calidad.md).
-- `PENDIENTE: la nota y la retroalimentación de la Entrega 1.`
+- `PENDIENTE: la nota de la Entrega 1.` La retroalimentación del profesor ya llegó (proyección
+  poco realista y una observación sobre la implementación); la recoge la
+  [autoevaluación](docs/proyecto/03-implementacion/autoevaluacion.md#mejoras-que-reconocemos).
 - `PENDIENTE: la nota de la Entrega 2, entregada por Teams el 19 de septiembre.`
 - `PENDIENTE: verificar disponibilidad de dominio y marca de «TicketRight».`
 
@@ -199,7 +201,8 @@ regeneran idénticos byte a byte desde sus fuentes, las clases y mensajes de los
 existen en el código, el CI de `main` pasa 63/63 pruebas, y se corrigieron conteos y README
 desactualizados. Detalle en el
 [§8 de la auditoría de coherencia](docs/proyecto/03-implementacion/coherencia-implementacion.md#8-revisión-final-antes-de-la-entrega-26-de-septiembre).
-Solo falta la versión final de la autoevaluación, que sube Lina.
+La versión final de la autoevaluación la subió Lina el 25 de septiembre; con ella no queda
+nada pendiente del repositorio para la entrega.
 
 ## Tablero
 
@@ -207,4 +210,4 @@ Solo falta la versión final de la autoevaluación, que sube Lina.
 |---|---|---|---|---|
 | 1 | Caso de negocio | 20% | sáb 12 sep 2026 | ✅ Entregada. Falta la nota |
 | 2 | Modelamiento de la solución | 30% | sáb 19 sep 2026, 3 p.m. | ✅ **Entregada** por Teams. Falta la nota |
-| 3 | Implementación, sustentación y defensa | 30% | **sáb 26 sep 2026** | 🟢 **Lista para sustentar.** App funcional (Fastify + PostgreSQL + Redis + Kafka + seguridad de borde + plataforma web `/app`) en minikube, observabilidad, 4 fallos ejecutados, carga, cobertura en CI, video demo y presentación listos; Lina sube la versión final de la autoevaluación |
+| 3 | Implementación, sustentación y defensa | 30% | **sáb 26 sep 2026** | 🟢 **Lista para sustentar.** App funcional (Fastify + PostgreSQL + Redis + Kafka + seguridad de borde + plataforma web `/app`) en minikube, observabilidad, 4 fallos ejecutados, carga, cobertura en CI, video demo y presentación listos y autoevaluación final |

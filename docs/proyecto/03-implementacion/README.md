@@ -14,7 +14,7 @@
 | 2 | **Observabilidad** | 20% | 3 métricas de negocio y 3 técnicas reales, con tableros y alertas | 🟢 Las 14 métricas del diseño instrumentadas, tablero de 5 secciones y 15 alertas; Grafana capturado durante los fallos |
 | 3 | **Simulación de fallos** | 30% | 4 escenarios de tipos diferentes, analizados y documentados | 🟢 Los 4 ejecutados y aprobados, con Grafana; bitácora en [`bitacora-de-fallos.md`](bitacora-de-fallos.md) |
 | 4 | **Patrones utilizados** | 10% | Identificados, justificados y relacionados con atributos | ✅ [`patrones.md`](patrones.md) mapea patrón → código → atributo |
-| 5 | **Autoevaluación** | +10% | Reflexión crítica con logros, dificultades y evolución | 🟢 Escrita en [`autoevaluacion.md`](autoevaluacion.md); Lina sube la versión final |
+| 5 | **Autoevaluación** | +10% | Reflexión crítica con logros, dificultades y evolución | ✅ Versión final en [`autoevaluacion.md`](autoevaluacion.md) |
 | 6 | **Coherencia** | hasta -10% | Consistencia con ADR, supuestos, alcance y entregables del 2 | 🟢 Los 21 casos en CI con cobertura, diagramas reconciliados y [auditoría de coherencia](coherencia-implementacion.md) |
 
 ## 1. Aplicación funcionando — 40%
@@ -113,8 +113,7 @@ sí aplican: idempotencia, *back pressure* y *circuit breaker*.
 
 Escrita en [`autoevaluacion.md`](autoevaluacion.md): qué se logró, qué no, qué deuda técnica
 se asumió de forma deliberada y cuál es el plan para pagarla (insumo: diapositivas 30 a 32 de
-la [clase 5-6](../../curso/clase-05-06.md) sobre documentación y deuda técnica). Lina sube la
-versión final.
+la [clase 5-6](../../curso/clase-05-06.md) sobre documentación y deuda técnica).
 
 ## 6. Coherencia — hasta -10%
 
@@ -145,7 +144,7 @@ Cómo sacarlas paso a paso en Codespaces: [`guia-codespaces.md`](guia-codespaces
 | Bitácora de los 4 fallos | 3 | [`bitacora-de-fallos.md`](bitacora-de-fallos.md) | ✅ |
 | Pruebas de carga | 1 · 2 | [`pruebas-de-carga.md`](pruebas-de-carga.md), local y Codespaces | ✅ |
 | Catálogo de patrones con evidencia | 4 | [`patrones.md`](patrones.md) + código | 🟢 Falta revisarlo contra la demo final |
-| Autoevaluación | +10 | [`autoevaluacion.md`](autoevaluacion.md) | 🟢 Lina sube la versión final |
+| Autoevaluación | +10 | [`autoevaluacion.md`](autoevaluacion.md) | ✅ |
 | Reporte de pruebas y cobertura | 6 | Artefacto del CI (`npm run test:coverage`) | ✅ |
 | Presentación de la sustentación | Defensa | Diapositivas | ✅ Lista, fuera del repo |
 
