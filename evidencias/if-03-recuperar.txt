@@ -1,0 +1,20 @@
+== IF-03 fase RECUPERAR (PostgreSQL restaurado) ==
+  compra post-recuperación: paso=emitida (esperado emitida)
+
+--- después de recuperar ---
+  ventas_cop             1756800
+  pagos_confirmados      4
+  pagos_rechazados       0
+  pagos_en_curso         0
+  boletas_emitidas       6
+  discrepancias_abiertas 0
+  edad_discrepancia_s    0
+  sobreventa             0
+  reservas_ok            4
+  reservas_rechazadas    5
+  errores_reserva        5
+  reserva_p95_s          4.8057930722832385
+  cpu_nucleos            0.027956999999999965
+  pg_conexiones          4
+
+RESULTADO IF-03: APROBADO

@@ -1,0 +1,11 @@
+== IF-03 fase DURANTE (PostgreSQL pausado) ==
+  intento 1: status=500 en 4005ms (rechazada)
+  intento 2: status=500 en 4005ms (rechazada)
+  intento 3: status=500 en 4004ms (rechazada)
+  intento 4: status=500 en 4003ms (rechazada)
+
+  reservas rechazadas de forma controlada: 4/4
+  reservas confirmadas sin base (no debería): 0 (esperado 0)
+  sobreventa: 0 (esperado 0)
+
+(parcial) durante -> OK

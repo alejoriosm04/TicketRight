@@ -1,0 +1,25 @@
+== IF-02 fase VERIFICAR — tras el reinicio, confirmar y comprobar ==
+  compra 246a13ed-4d8b-486b-b8d4-52b0872bf768: paso=emitida boletas=2 discrepancias=0 -> OK
+  compra a9dd38be-d80a-4b44-852b-f40d7f57b86f: paso=emitida boletas=2 discrepancias=0 -> OK
+  compra 9d24f62a-68be-4ba4-be23-6c07d2c5b880: paso=emitida boletas=2 discrepancias=0 -> OK
+  compra b9c117bd-861a-40c6-afa5-c16ab78cb0a1: paso=emitida boletas=2 discrepancias=0 -> OK
+  compra 0e990a5c-ec4f-4240-b8cf-1f88729daeb8: paso=emitida boletas=2 discrepancias=0 -> OK
+
+--- después del reinicio y la confirmación ---
+  ventas_cop             0
+  pagos_confirmados      0
+  pagos_rechazados       0
+  pagos_en_curso         0
+  boletas_emitidas       0
+  discrepancias_abiertas 0
+  edad_discrepancia_s    0
+  sobreventa             0
+  reservas_ok            0
+  reservas_rechazadas    0
+  errores_reserva        0
+  reserva_p95_s          NaN
+  cpu_nucleos            0.041349109090909116
+  pg_conexiones          1
+  sobreventa global: 0 (esperado 0)
+
+RESULTADO IF-02: APROBADO
