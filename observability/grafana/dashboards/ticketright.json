@@ -1,283 +1,1787 @@
 {
-  "annotations": { "list": [] },
+  "annotations": {
+    "list": []
+  },
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
   "schemaVersion": 39,
-  "tags": ["ticketright", "entrega-3"],
-  "time": { "from": "now-15m", "to": "now" },
+  "tags": [
+    "ticketright",
+    "entrega-3"
+  ],
+  "time": {
+    "from": "now-15m",
+    "to": "now"
+  },
   "refresh": "5s",
   "title": "TicketRight — Venta y recaudo",
   "uid": "ticketright-ventas",
-  "templating": { "list": [] },
+  "templating": {
+    "list": []
+  },
   "panels": [
-    { "type": "row", "title": "Resumen de la venta", "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 }, "collapsed": false, "panels": [] },
-
     {
-      "type": "stat", "title": "Dinero vendido",
+      "type": "row",
+      "title": "Resumen de la venta",
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "type": "stat",
+      "title": "Dinero vendido",
       "description": "Total confirmado en pesos (solo pagos confirmados). ticketright_sales_amount_total",
-      "gridPos": { "h": 5, "w": 5, "x": 0, "y": 1 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "fieldConfig": { "defaults": { "unit": "locale", "decimals": 0, "color": { "mode": "fixed", "fixedColor": "green" } }, "overrides": [] },
-      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "area", "textMode": "value" },
-      "targets": [ { "refId": "A", "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "sum(ticketright_sales_amount_total) / 100", "legendFormat": "COP" } ]
+      "gridPos": {
+        "h": 5,
+        "w": 5,
+        "x": 0,
+        "y": 1
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "locale",
+          "decimals": 0,
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "green"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "area",
+        "textMode": "value"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum(ticketright_sales_amount_total) / 100",
+          "legendFormat": "COP"
+        }
+      ]
     },
     {
-      "type": "stat", "title": "Personas conectadas ahora",
-      "description": "Turnos que siguen en la venta (en fila o admitidos, aún sin terminar la compra) con actividad en los últimos 5 minutos. Es la magnitud de clientes en línea en este momento. Fuente: ticketright_active_sale_sessions.",
-      "gridPos": { "h": 5, "w": 5, "x": 5, "y": 1 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "fieldConfig": { "defaults": { "unit": "short", "decimals": 0, "color": { "mode": "fixed", "fixedColor": "blue" } }, "overrides": [] },
-      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "area" },
-      "targets": [ { "refId": "A", "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "ticketright_active_sale_sessions", "legendFormat": "conectadas" } ]
+      "type": "stat",
+      "title": "Ventas realizadas",
+      "description": "Número de compras pagadas con éxito (pagos confirmados). ticketright_payments_total{state=\"confirmado\"}",
+      "gridPos": {
+        "h": 5,
+        "w": 5,
+        "x": 5,
+        "y": 1
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "green"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "area",
+        "textMode": "value"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum(ticketright_payments_total{state=\"confirmado\"})",
+          "legendFormat": "ventas"
+        }
+      ]
     },
     {
-      "type": "stat", "title": "Pagos procesándose ahora",
-      "description": "Pagos solicitados que aún esperan respuesta de la pasarela. ticketright_payments_in_flight",
-      "gridPos": { "h": 5, "w": 4, "x": 10, "y": 1 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "fieldConfig": { "defaults": { "unit": "short", "decimals": 0, "color": { "mode": "fixed", "fixedColor": "purple" } }, "overrides": [] },
-      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "area" },
-      "targets": [ { "refId": "A", "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "ticketright_payments_in_flight", "legendFormat": "en curso" } ]
+      "type": "stat",
+      "title": "Boletas emitidas",
+      "description": "Total de boletas emitidas (una compra puede emitir varias). ticketright_ticket_state_transitions_total{state=\"emitida\"}",
+      "gridPos": {
+        "h": 5,
+        "w": 4,
+        "x": 10,
+        "y": 1
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "blue"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "area",
+        "textMode": "value"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum(ticketright_ticket_state_transitions_total{state=\"emitida\"})",
+          "legendFormat": "boletas"
+        }
+      ]
     },
     {
-      "type": "stat", "title": "Conversión de compra",
+      "type": "stat",
+      "title": "Conversión de compra",
       "description": "Pagos confirmados / pagos iniciados. Meta ≥ 98%",
-      "gridPos": { "h": 5, "w": 4, "x": 14, "y": 1 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "fieldConfig": { "defaults": { "unit": "percentunit", "decimals": 1, "min": 0, "max": 1, "thresholds": { "mode": "absolute", "steps": [ { "color": "red", "value": null }, { "color": "orange", "value": 0.9 }, { "color": "green", "value": 0.98 } ] } }, "overrides": [] },
-      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background", "graphMode": "none" },
-      "targets": [ { "refId": "A", "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "sum(ticketright_payments_total{state=\"confirmado\"}) / clamp_min(sum(ticketright_payments_started_total), 1)", "legendFormat": "conversión" } ]
+      "gridPos": {
+        "h": 5,
+        "w": 4,
+        "x": 14,
+        "y": 1
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "decimals": 1,
+          "min": 0,
+          "max": 1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 0.9
+              },
+              {
+                "color": "green",
+                "value": 0.98
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "background",
+        "graphMode": "none"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum(ticketright_payments_total{state=\"confirmado\"}) / clamp_min(sum(ticketright_payments_started_total), 1)",
+          "legendFormat": "conversión"
+        }
+      ]
     },
     {
-      "type": "stat", "title": "Discrepancias abiertas",
+      "type": "stat",
+      "title": "Discrepancias abiertas",
       "description": "Dinero cobrado aún sin boleta. Meta: cero. ticketright_open_discrepancies (A-1)",
-      "gridPos": { "h": 5, "w": 3, "x": 18, "y": 1 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "fieldConfig": { "defaults": { "unit": "short", "decimals": 0, "thresholds": { "mode": "absolute", "steps": [ { "color": "green", "value": null }, { "color": "red", "value": 1 } ] } }, "overrides": [] },
-      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background", "graphMode": "none" },
-      "targets": [ { "refId": "A", "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "ticketright_open_discrepancies", "legendFormat": "abiertas" } ]
+      "gridPos": {
+        "h": 5,
+        "w": 3,
+        "x": 18,
+        "y": 1
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "background",
+        "graphMode": "none"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "ticketright_open_discrepancies",
+          "legendFormat": "abiertas"
+        }
+      ]
     },
     {
-      "type": "stat", "title": "Sobreventa",
+      "type": "stat",
+      "title": "Sobreventa",
       "description": "Boletas por encima del aforo. Meta: cero. ticketright_oversell_total (A-2)",
-      "gridPos": { "h": 5, "w": 3, "x": 21, "y": 1 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "fieldConfig": { "defaults": { "unit": "short", "decimals": 0, "thresholds": { "mode": "absolute", "steps": [ { "color": "green", "value": null }, { "color": "red", "value": 1 } ] } }, "overrides": [] },
-      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background", "graphMode": "none" },
-      "targets": [ { "refId": "A", "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "sum(ticketright_oversell_total) or vector(0)", "legendFormat": "sobreventa" } ]
+      "gridPos": {
+        "h": 5,
+        "w": 3,
+        "x": 21,
+        "y": 1
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "background",
+        "graphMode": "none"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum(ticketright_oversell_total) or vector(0)",
+          "legendFormat": "sobreventa"
+        }
+      ]
     },
-
-    { "type": "row", "title": "Sala de espera y fila de admisión", "gridPos": { "h": 1, "w": 24, "x": 0, "y": 6 }, "collapsed": false, "panels": [] },
-
     {
-      "type": "timeseries", "title": "Personas en fila vs admitidas",
+      "type": "stat",
+      "title": "Personas conectadas ahora",
+      "description": "Turnos que siguen en la venta (en fila o admitidos) con actividad en los últimos 5 minutos. ticketright_active_sale_sessions",
+      "gridPos": {
+        "h": 4,
+        "w": 8,
+        "x": 0,
+        "y": 6
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "blue"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "area"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "ticketright_active_sale_sessions",
+          "legendFormat": "conectadas"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Pagos procesándose ahora",
+      "description": "Pagos solicitados que aún esperan respuesta de la pasarela. ticketright_payments_in_flight",
+      "gridPos": {
+        "h": 4,
+        "w": 8,
+        "x": 8,
+        "y": 6
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "purple"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "area"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "ticketright_payments_in_flight",
+          "legendFormat": "en curso"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Reservas vencidas sin liberar",
+      "description": "Reservas no pagadas que superaron su vencimiento y siguen reteniendo inventario. Meta: cero. ticketright_overdue_reservations (A-5)",
+      "gridPos": {
+        "h": 4,
+        "w": 8,
+        "x": 16,
+        "y": 6
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "background",
+        "graphMode": "none"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "ticketright_overdue_reservations",
+          "legendFormat": "vencidas"
+        }
+      ]
+    },
+    {
+      "type": "row",
+      "title": "Sala de espera y fila de admisión",
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 10
+      },
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "type": "timeseries",
+      "title": "Personas en fila vs admitidas",
       "description": "Cuántas esperan turno y cuántas ya pueden comprar. ticketright_queue_waiting / ticketright_queue_admitted",
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 7 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "fieldConfig": { "defaults": { "unit": "short", "custom": { "drawStyle": "line", "lineWidth": 2, "fillOpacity": 15 } }, "overrides": [] },
-      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull", "max"] } },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 11
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 15
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
+        }
+      },
       "targets": [
-        { "refId": "A", "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "sum(ticketright_queue_waiting)", "legendFormat": "en espera" },
-        { "refId": "B", "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "sum(ticketright_queue_admitted)", "legendFormat": "admitidas" }
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum(ticketright_queue_waiting)",
+          "legendFormat": "en espera"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum(ticketright_queue_admitted)",
+          "legendFormat": "admitidas"
+        }
       ]
     },
     {
-      "type": "timeseries", "title": "Ritmo de la fila (ingresos y admisiones por minuto)",
+      "type": "timeseries",
+      "title": "Ritmo de la fila (ingresos y admisiones por minuto)",
       "description": "Entrada de gente a la fila y ritmo al que se les deja pasar. ticketright_queue_entries_total / ticketright_queue_admissions_total",
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 7 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "fieldConfig": { "defaults": { "unit": "short", "custom": { "drawStyle": "line", "fillOpacity": 10 } }, "overrides": [] },
-      "options": { "legend": { "displayMode": "list", "placement": "bottom" } },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 11
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 10
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
       "targets": [
-        { "refId": "A", "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "sum(rate(ticketright_queue_entries_total[1m])) * 60", "legendFormat": "ingresos/min" },
-        { "refId": "B", "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "sum(rate(ticketright_queue_admissions_total[1m])) * 60", "legendFormat": "admisiones/min" }
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum(rate(ticketright_queue_entries_total[1m])) * 60",
+          "legendFormat": "ingresos/min"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum(rate(ticketright_queue_admissions_total[1m])) * 60",
+          "legendFormat": "admisiones/min"
+        }
       ]
     },
     {
-      "type": "timeseries", "title": "Tiempo de consulta de posición en fila (P95)",
+      "type": "timeseries",
+      "title": "Tiempo de consulta de posición en fila (P95)",
       "description": "Cuánto tarda TicketRight en responder al fan su posición en la fila. Meta P95 ≤ 1 s. Fuente: ticketright_queue_position_duration_seconds (A-10).",
-      "gridPos": { "h": 7, "w": 12, "x": 0, "y": 15 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "fieldConfig": { "defaults": { "unit": "s", "thresholds": { "mode": "absolute", "steps": [ { "color": "green", "value": null }, { "color": "red", "value": 1 } ] }, "custom": { "thresholdsStyle": { "mode": "line" } } }, "overrides": [] },
-      "targets": [ { "refId": "A", "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "histogram_quantile(0.95, sum by (le) (rate(ticketright_queue_position_duration_seconds_bucket[1m])))", "legendFormat": "P95" } ]
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 0,
+        "y": 19
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "custom": {
+            "thresholdsStyle": {
+              "mode": "line"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(ticketright_queue_position_duration_seconds_bucket[1m])))",
+          "legendFormat": "P95"
+        }
+      ]
     },
     {
-      "type": "stat", "title": "Disponibilidad del recorrido crítico",
+      "type": "stat",
+      "title": "Disponibilidad del recorrido crítico",
       "description": "Porcentaje de recorridos sintéticos de compra (fila → reserva → pago → emisión) exitosos. Meta ≥ 99,9%. Fuente: ticketright_critical_journey_checks_total (A-9).",
-      "gridPos": { "h": 7, "w": 12, "x": 12, "y": 15 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "fieldConfig": { "defaults": { "unit": "percentunit", "decimals": 2, "min": 0, "max": 1, "thresholds": { "mode": "absolute", "steps": [ { "color": "red", "value": null }, { "color": "orange", "value": 0.95 }, { "color": "green", "value": 0.999 } ] } }, "overrides": [] },
-      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background", "graphMode": "area" },
-      "targets": [ { "refId": "A", "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "sum(ticketright_critical_journey_checks_total{result=\"ok\"}) / clamp_min(sum(ticketright_critical_journey_checks_total), 1)", "legendFormat": "disponibilidad" } ]
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 12,
+        "y": 19
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "decimals": 2,
+          "min": 0,
+          "max": 1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 0.95
+              },
+              {
+                "color": "green",
+                "value": 0.999
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "background",
+        "graphMode": "area"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum(ticketright_critical_journey_checks_total{result=\"ok\"}) / clamp_min(sum(ticketright_critical_journey_checks_total), 1)",
+          "legendFormat": "disponibilidad"
+        }
+      ]
     },
-
-    { "type": "row", "title": "Negocio y recinto", "gridPos": { "h": 1, "w": 24, "x": 0, "y": 22 }, "collapsed": false, "panels": [] },
-
     {
-      "type": "timeseries", "title": "Embudo de la venta",
+      "type": "row",
+      "title": "Negocio y recinto",
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 26
+      },
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "type": "stat",
+      "title": "Ventas realizadas",
+      "description": "Compras pagadas con éxito (pagos confirmados). ticketright_payments_total{state=\"confirmado\"}",
+      "gridPos": {
+        "h": 4,
+        "w": 5,
+        "x": 0,
+        "y": 27
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "green"
+          }
+        }
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "area",
+        "textMode": "value"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum(ticketright_payments_total{state=\"confirmado\"})",
+          "legendFormat": "Ventas realizadas"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Boletas emitidas",
+      "description": "Total de boletas emitidas (una compra puede emitir varias). ticketright_ticket_state_transitions_total{state=\"emitida\"}",
+      "gridPos": {
+        "h": 4,
+        "w": 5,
+        "x": 5,
+        "y": 27
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "blue"
+          }
+        }
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "area",
+        "textMode": "value"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum(ticketright_ticket_state_transitions_total{state=\"emitida\"})",
+          "legendFormat": "Boletas emitidas"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Personas en la fila",
+      "description": "Turnos esperando su turno de admisión. ticketright_queue_waiting",
+      "gridPos": {
+        "h": 4,
+        "w": 5,
+        "x": 10,
+        "y": 27
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "orange"
+          }
+        }
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "area",
+        "textMode": "value"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum(ticketright_queue_waiting)",
+          "legendFormat": "Personas en la fila"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Comprando ahora (admitidos)",
+      "description": "Turnos admitidos que ya pueden comprar. ticketright_queue_admitted",
+      "gridPos": {
+        "h": 4,
+        "w": 5,
+        "x": 15,
+        "y": 27
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "purple"
+          }
+        }
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "area",
+        "textMode": "value"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum(ticketright_queue_admitted)",
+          "legendFormat": "Comprando ahora (admitidos)"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Boletas disponibles",
+      "description": "Cupos que quedan por vender en todo el recinto; baja a medida que se venden. Suma de ticketright_seat_capacity{state=\"disponible\"}.",
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 20,
+        "y": 27
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "yellow"
+          }
+        }
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "area",
+        "textMode": "value"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum(ticketright_seat_capacity{state=\"disponible\"})",
+          "legendFormat": "disponibles"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Embudo de la venta",
       "description": "Reservas → pagos iniciados → pagos confirmados → boletas emitidas",
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 23 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "fieldConfig": { "defaults": { "unit": "short", "custom": { "drawStyle": "line", "lineWidth": 2, "fillOpacity": 10 } }, "overrides": [] },
-      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull"] } },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 31
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 10
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      },
       "targets": [
-        { "refId": "A", "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "sum(ticketright_reservations_total{result=\"ok\"})", "legendFormat": "reservas" },
-        { "refId": "B", "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "sum(ticketright_payments_started_total)", "legendFormat": "pagos iniciados" },
-        { "refId": "C", "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "sum(ticketright_payments_total{state=\"confirmado\"})", "legendFormat": "pagos confirmados" },
-        { "refId": "D", "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "sum(ticketright_ticket_state_transitions_total{state=\"emitida\"})", "legendFormat": "boletas emitidas" }
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum(ticketright_reservations_total{result=\"ok\"})",
+          "legendFormat": "reservas"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum(ticketright_payments_started_total)",
+          "legendFormat": "pagos iniciados"
+        },
+        {
+          "refId": "C",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum(ticketright_payments_total{state=\"confirmado\"})",
+          "legendFormat": "pagos confirmados"
+        },
+        {
+          "refId": "D",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum(ticketright_ticket_state_transitions_total{state=\"emitida\"})",
+          "legendFormat": "boletas emitidas"
+        }
       ]
     },
     {
-      "type": "bargauge", "title": "Boletas disponibles por tribuna",
+      "type": "bargauge",
+      "title": "Boletas disponibles por tribuna",
       "description": "Cupos que quedan por vender en cada tribuna del recinto (Oriental, Occidental, Sur, Norte). Fuente: ticketright_seat_capacity con state=disponible.",
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 23 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "fieldConfig": { "defaults": { "unit": "short", "decimals": 0, "color": { "mode": "continuous-GrYlRd" } }, "overrides": [] },
-      "options": { "orientation": "horizontal", "displayMode": "gradient", "reduceOptions": { "calcs": ["lastNotNull"] } },
-      "targets": [ { "refId": "A", "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "sum by (localidad) (ticketright_seat_capacity{state=\"disponible\"})", "legendFormat": "{{localidad}}" } ]
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 31
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "color": {
+            "mode": "continuous-GrYlRd"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "orientation": "horizontal",
+        "displayMode": "gradient",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum by (localidad) (ticketright_seat_capacity{state=\"disponible\"})",
+          "legendFormat": "{{localidad}}"
+        }
+      ]
     },
     {
-      "type": "bargauge", "title": "Ocupación del recinto por tribuna (%)",
+      "type": "bargauge",
+      "title": "Ocupación del recinto por tribuna (%)",
       "description": "Porcentaje del aforo ya vendido en cada tribuna. Se calcula como vendido ÷ autorizado. Ayuda a ver qué tribuna se está agotando. Fuente: ticketright_seat_capacity.",
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 31 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "fieldConfig": { "defaults": { "unit": "percentunit", "decimals": 1, "min": 0, "max": 1, "thresholds": { "mode": "absolute", "steps": [ { "color": "blue", "value": null }, { "color": "green", "value": 0.5 }, { "color": "orange", "value": 0.85 }, { "color": "red", "value": 0.98 } ] } }, "overrides": [] },
-      "options": { "orientation": "horizontal", "displayMode": "gradient", "reduceOptions": { "calcs": ["lastNotNull"] } },
-      "targets": [ { "refId": "A", "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "sum by (localidad) (ticketright_seat_capacity{state=\"vendido\"}) / sum by (localidad) (ticketright_seat_capacity{state=\"autorizado\"})", "legendFormat": "{{localidad}}" } ]
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 39
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "decimals": 1,
+          "min": 0,
+          "max": 1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 0.5
+              },
+              {
+                "color": "orange",
+                "value": 0.85
+              },
+              {
+                "color": "red",
+                "value": 0.98
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "orientation": "horizontal",
+        "displayMode": "gradient",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum by (localidad) (ticketright_seat_capacity{state=\"vendido\"}) / sum by (localidad) (ticketright_seat_capacity{state=\"autorizado\"})",
+          "legendFormat": "{{localidad}}"
+        }
+      ]
     },
     {
-      "type": "timeseries", "title": "Boletas vendidas por tribuna (acumulado)",
+      "type": "timeseries",
+      "title": "Boletas vendidas por tribuna (acumulado)",
       "description": "Boletas efectivamente vendidas (pago confirmado) en cada tribuna. Fuente: ticketright_tickets_sold_total. Aporta al OKR-3 de rentabilidad por evento.",
-      "gridPos": { "h": 7, "w": 12, "x": 12, "y": 31 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "fieldConfig": { "defaults": { "unit": "short", "custom": { "drawStyle": "line", "lineWidth": 2, "fillOpacity": 10 } }, "overrides": [] },
-      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull"] } },
-      "targets": [ { "refId": "A", "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "sum by (localidad) (ticketright_tickets_sold_total)", "legendFormat": "{{localidad}}" } ]
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 12,
+        "y": 39
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 10
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum by (localidad) (ticketright_tickets_sold_total)",
+          "legendFormat": "{{localidad}}"
+        }
+      ]
     },
     {
-      "type": "piechart", "title": "Reparto del dinero (acuerdo con la promotora)",
+      "type": "piechart",
+      "title": "Reparto del dinero (acuerdo con la promotora)",
       "description": "Cómo se reparte el dinero confirmado: valor nominal (va a la promotora), cargo por servicio (ingreso de la ticketera) y contribución parafiscal (impuesto). Fuente: ticketright_sales_breakdown_total.",
-      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 39 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "fieldConfig": { "defaults": { "unit": "locale", "decimals": 0 }, "overrides": [] },
-      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "legend": { "displayMode": "table", "placement": "right", "values": ["value"] }, "pieType": "donut" },
-      "targets": [ { "refId": "A", "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "sum by (component) (ticketright_sales_breakdown_total) / 100", "legendFormat": "{{component}}" } ]
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 0,
+        "y": 47
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "locale",
+          "decimals": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "values": [
+            "value"
+          ]
+        },
+        "pieType": "donut"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum by (component) (ticketright_sales_breakdown_total) / 100",
+          "legendFormat": "{{component}}"
+        }
+      ]
     },
     {
-      "type": "stat", "title": "Boleta promedio (COP)",
+      "type": "stat",
+      "title": "Boleta promedio (COP)",
       "description": "Valor promedio pagado por boleta vendida: dinero confirmado ÷ boletas emitidas. Fuente: ticketright_sales_amount_total ÷ ticketright_ticket_state_transitions_total.",
-      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 39 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "fieldConfig": { "defaults": { "unit": "locale", "decimals": 0, "color": { "mode": "fixed", "fixedColor": "green" } }, "overrides": [] },
-      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "area" },
-      "targets": [ { "refId": "A", "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "(sum(ticketright_sales_amount_total) / 100) / clamp_min(sum(ticketright_ticket_state_transitions_total{state=\"emitida\"}), 1)", "legendFormat": "boleta promedio" } ]
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 8,
+        "y": 47
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "locale",
+          "decimals": 0,
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "green"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "area"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "(sum(ticketright_sales_amount_total) / 100) / clamp_min(sum(ticketright_ticket_state_transitions_total{state=\"emitida\"}), 1)",
+          "legendFormat": "boleta promedio"
+        }
+      ]
     },
     {
-      "type": "timeseries", "title": "Dinero vendido por minuto (COP)",
+      "type": "timeseries",
+      "title": "Dinero vendido por minuto (COP)",
       "description": "Ritmo de ingresos confirmados por minuto. Muestra la intensidad de la venta en la ventana. Fuente: ticketright_sales_amount_total. OKR-3.",
-      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 39 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "fieldConfig": { "defaults": { "unit": "locale", "decimals": 0, "custom": { "drawStyle": "bars", "fillOpacity": 40 } }, "overrides": [] },
-      "targets": [ { "refId": "A", "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "sum(increase(ticketright_sales_amount_total[1m])) / 100", "legendFormat": "COP / min" } ]
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 47
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "locale",
+          "decimals": 0,
+          "custom": {
+            "drawStyle": "bars",
+            "fillOpacity": 40
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum(increase(ticketright_sales_amount_total[1m])) / 100",
+          "legendFormat": "COP / min"
+        }
+      ]
     },
-
-    { "type": "row", "title": "Diagnóstico técnico", "gridPos": { "h": 1, "w": 24, "x": 0, "y": 54 }, "collapsed": false, "panels": [] },
-
     {
-      "type": "timeseries", "title": "Latencia de reserva (P50 · P95 · P99)",
+      "type": "row",
+      "title": "Diagnóstico técnico",
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 62
+      },
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "type": "timeseries",
+      "title": "Latencia de reserva (P50 · P95 · P99)",
       "description": "Tiempo en confirmar o rechazar una reserva. Meta P95 ≤ 2 s. ticketright_reservation_duration_seconds (A-10)",
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 55 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "fieldConfig": { "defaults": { "unit": "s", "thresholds": { "mode": "absolute", "steps": [ { "color": "green", "value": null }, { "color": "red", "value": 2 } ] }, "custom": { "thresholdsStyle": { "mode": "line" } } }, "overrides": [] },
-      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull", "max"] } },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 63
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 2
+              }
+            ]
+          },
+          "custom": {
+            "thresholdsStyle": {
+              "mode": "line"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
+        }
+      },
       "targets": [
-        { "refId": "A", "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "histogram_quantile(0.50, sum by (le) (rate(ticketright_reservation_duration_seconds_bucket[1m])))", "legendFormat": "P50" },
-        { "refId": "B", "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "histogram_quantile(0.95, sum by (le) (rate(ticketright_reservation_duration_seconds_bucket[1m])))", "legendFormat": "P95" },
-        { "refId": "C", "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "histogram_quantile(0.99, sum by (le) (rate(ticketright_reservation_duration_seconds_bucket[1m])))", "legendFormat": "P99" }
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "histogram_quantile(0.50, sum by (le) (rate(ticketright_reservation_duration_seconds_bucket[1m])))",
+          "legendFormat": "P50"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(ticketright_reservation_duration_seconds_bucket[1m])))",
+          "legendFormat": "P95"
+        },
+        {
+          "refId": "C",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "histogram_quantile(0.99, sum by (le) (rate(ticketright_reservation_duration_seconds_bucket[1m])))",
+          "legendFormat": "P99"
+        }
       ]
     },
     {
-      "type": "timeseries", "title": "Solicitudes por ruta (por segundo)",
+      "type": "timeseries",
+      "title": "Solicitudes por ruta (por segundo)",
       "description": "Tráfico HTTP por endpoint. ticketright_http_requests_total (método RED)",
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 55 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "fieldConfig": { "defaults": { "unit": "reqps", "custom": { "drawStyle": "line", "fillOpacity": 10 } }, "overrides": [] },
-      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull"] } },
-      "targets": [ { "refId": "A", "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "sum by (route) (rate(ticketright_http_requests_total[1m]))", "legendFormat": "{{route}}" } ]
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 63
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 10
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum by (route) (rate(ticketright_http_requests_total[1m]))",
+          "legendFormat": "{{route}}"
+        }
+      ]
     },
     {
-      "type": "timeseries", "title": "Conexiones a la base de datos",
+      "type": "timeseries",
+      "title": "Conexiones a la base de datos",
       "description": "Uso del pool de PostgreSQL: total, libres y en espera. ticketright_pg_pool_connections (A-6)",
-      "gridPos": { "h": 7, "w": 8, "x": 0, "y": 63 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "fieldConfig": { "defaults": { "unit": "short", "custom": { "drawStyle": "line", "fillOpacity": 10 } }, "overrides": [] },
-      "options": { "legend": { "displayMode": "list", "placement": "bottom" } },
-      "targets": [ { "refId": "A", "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "ticketright_pg_pool_connections", "legendFormat": "{{state}}" } ]
+      "gridPos": {
+        "h": 7,
+        "w": 8,
+        "x": 0,
+        "y": 71
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 10
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "ticketright_pg_pool_connections",
+          "legendFormat": "{{state}}"
+        }
+      ]
     },
     {
-      "type": "timeseries", "title": "CPU y memoria del servicio",
+      "type": "timeseries",
+      "title": "CPU y memoria del servicio",
       "description": "Consumo del proceso de ventas. ticketright_process_* (A-6 · A-9)",
-      "gridPos": { "h": 7, "w": 8, "x": 8, "y": 63 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "fieldConfig": { "defaults": {}, "overrides": [
-        { "matcher": { "id": "byName", "options": "memoria" }, "properties": [ { "id": "unit", "value": "bytes" }, { "id": "custom.axisPlacement", "value": "right" } ] },
-        { "matcher": { "id": "byName", "options": "CPU (núcleos)" }, "properties": [ { "id": "unit", "value": "short" } ] }
-      ] },
-      "options": { "legend": { "displayMode": "list", "placement": "bottom" } },
+      "gridPos": {
+        "h": 7,
+        "w": 8,
+        "x": 8,
+        "y": 71
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "memoria"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "bytes"
+              },
+              {
+                "id": "custom.axisPlacement",
+                "value": "right"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "CPU (núcleos)"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "short"
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
       "targets": [
-        { "refId": "A", "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "rate(ticketright_process_cpu_seconds_total[1m])", "legendFormat": "CPU (núcleos)" },
-        { "refId": "B", "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "ticketright_process_resident_memory_bytes", "legendFormat": "memoria" }
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "rate(ticketright_process_cpu_seconds_total[1m])",
+          "legendFormat": "CPU (núcleos)"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "ticketright_process_resident_memory_bytes",
+          "legendFormat": "memoria"
+        }
       ]
     },
     {
-      "type": "timeseries", "title": "Pagos por estado y errores de reserva",
+      "type": "timeseries",
+      "title": "Pagos por estado y errores de reserva",
       "description": "Cómo terminan los pagos y errores al reservar. ticketright_payments_total / ticketright_reservation_errors_total (A-6 · A-10)",
-      "gridPos": { "h": 7, "w": 8, "x": 16, "y": 63 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "fieldConfig": { "defaults": { "unit": "short" }, "overrides": [] },
-      "options": { "legend": { "displayMode": "list", "placement": "bottom" } },
+      "gridPos": {
+        "h": 7,
+        "w": 8,
+        "x": 16,
+        "y": 71
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
       "targets": [
-        { "refId": "A", "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "sum by (state) (ticketright_payments_total)", "legendFormat": "pago: {{state}}" },
-        { "refId": "B", "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "sum by (kind) (ticketright_reservation_errors_total)", "legendFormat": "error: {{kind}}" }
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum by (state) (ticketright_payments_total)",
+          "legendFormat": "pago: {{state}}"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum by (kind) (ticketright_reservation_errors_total)",
+          "legendFormat": "error: {{kind}}"
+        }
       ]
     },
-
     {
-      "type": "stat", "title": "Costo de infraestructura por boleta (COP)",
+      "type": "stat",
+      "title": "Costo de infraestructura por boleta (COP)",
       "description": "Costo estimado de infraestructura dividido entre las boletas vendidas en la última hora. Meta ≤ COP $150. Fuente: ticketright_infrastructure_cost_per_ticket_cop (A-7).",
-      "gridPos": { "h": 7, "w": 12, "x": 0, "y": 71 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "fieldConfig": { "defaults": { "unit": "locale", "decimals": 0, "thresholds": { "mode": "absolute", "steps": [ { "color": "green", "value": null }, { "color": "red", "value": 150 } ] } }, "overrides": [] },
-      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background", "graphMode": "area" },
-      "targets": [ { "refId": "A", "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "ticketright_infrastructure_cost_per_ticket_cop", "legendFormat": "COP/boleta" } ]
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 0,
+        "y": 79
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "locale",
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 150
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "background",
+        "graphMode": "area"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "ticketright_infrastructure_cost_per_ticket_cop",
+          "legendFormat": "COP/boleta"
+        }
+      ]
     },
     {
-      "type": "timeseries", "title": "Latencia de emisión de boletas (P95)",
+      "type": "timeseries",
+      "title": "Latencia de emisión de boletas (P95)",
       "description": "Tiempo en emitir las boletas tras confirmar el pago (cierre de la SAGA). Fuente: ticketright_issuance_duration_seconds (A-1).",
-      "gridPos": { "h": 7, "w": 12, "x": 12, "y": 71 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "fieldConfig": { "defaults": { "unit": "s" }, "overrides": [] },
-      "targets": [ { "refId": "A", "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "histogram_quantile(0.95, sum by (le) (rate(ticketright_issuance_duration_seconds_bucket[5m])))", "legendFormat": "P95 emisión" } ]
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 12,
+        "y": 79
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(ticketright_issuance_duration_seconds_bucket[5m])))",
+          "legendFormat": "P95 emisión"
+        }
+      ]
     },
-
-    { "type": "row", "title": "Registros (logs) y trazas", "gridPos": { "h": 1, "w": 24, "x": 0, "y": 78 }, "collapsed": false, "panels": [] },
-
     {
-      "type": "logs", "title": "Actividad del servicio (todos los logs)",
+      "type": "row",
+      "title": "Registros (logs) y trazas",
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 86
+      },
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "type": "logs",
+      "title": "Actividad del servicio (todos los logs)",
       "description": "Todos los logs estructurados del servicio de ventas. Cada línea con trace_id enlaza a su traza en Tempo. Consulta: {service=\"ventas\"}",
-      "gridPos": { "h": 10, "w": 12, "x": 0, "y": 79 },
-      "datasource": { "type": "loki", "uid": "loki" },
-      "options": { "showTime": true, "wrapLogMessage": true, "sortOrder": "Descending", "enableLogDetails": true },
-      "targets": [ { "refId": "A", "datasource": { "type": "loki", "uid": "loki" }, "expr": "{service=\"ventas\"}" } ]
+      "gridPos": {
+        "h": 10,
+        "w": 12,
+        "x": 0,
+        "y": 87
+      },
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "options": {
+        "showTime": true,
+        "wrapLogMessage": true,
+        "sortOrder": "Descending",
+        "enableLogDetails": true
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "expr": "{service=\"ventas\"}"
+        }
+      ]
     },
     {
-      "type": "logs", "title": "Solo errores y advertencias",
+      "type": "logs",
+      "title": "Solo errores y advertencias",
       "description": "Logs de nivel warn o error del servicio. Útil para ver problemas sin ruido. Consulta: {service=\"ventas\"} | json | level=~\"warn|error\"",
-      "gridPos": { "h": 10, "w": 12, "x": 12, "y": 79 },
-      "datasource": { "type": "loki", "uid": "loki" },
-      "options": { "showTime": true, "wrapLogMessage": true, "sortOrder": "Descending", "enableLogDetails": true },
-      "targets": [ { "refId": "A", "datasource": { "type": "loki", "uid": "loki" }, "expr": "{service=\"ventas\"} | json | level=~\"warn|error\"" } ]
+      "gridPos": {
+        "h": 10,
+        "w": 12,
+        "x": 12,
+        "y": 87
+      },
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "options": {
+        "showTime": true,
+        "wrapLogMessage": true,
+        "sortOrder": "Descending",
+        "enableLogDetails": true
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "expr": "{service=\"ventas\"} | json | level=~\"warn|error\""
+        }
+      ]
     }
   ]
 }
