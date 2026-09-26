@@ -1,123 +1,160 @@
-# Autoevaluación — Entrega 3 (criterio 5, valor adicional +10 %)
+# Autoevaluación del equipo — Entrega 3
 
-> Reflexión crítica del equipo sobre el resultado de la implementación, coherente con la
-> evidencia del repositorio. Sigue lo que pide la [rúbrica](rubrica.md#5-autoevaluación-valor-adicional--10):
-> logros, dificultades, mejoras y propuestas de evolución. Escrita al cierre de la entrega,
-> con la evidencia en la mano; no repite lo obvio ni infla resultados.
+> Reflexión crítica del equipo sobre el resultado, los aprendizajes y las oportunidades de
+> mejora. Responde a lo que valora el criterio 5 de la [rúbrica](rubrica.md#5-autoevaluación-valor-adicional--10):
+> **análisis honesto y fundamentado**, **logros / dificultades / mejoras**, **propuestas
+> concretas de evolución** y **coherencia con la evidencia del proyecto**. Aplica el marco de
+> [documentación y deuda técnica](../../curso/clase-05-06.md#diapositiva-30--proyecto-integrador-documentación-y-deuda-técnica)
+> visto en clase 5-6: la deuda técnica no es mala, lo importante es **reconocerla, medirla y
+> gestionarla**.
+
+## En una frase
+
+Sentimos que la implementación quedó **muy compatible con lo que pensamos y modelamos**. La
+arquitectura que planteamos nos parece un muy buen modelo; a la hora de implementar aprendimos
+que **menos es más**, y que ser consciente del alcance, del tiempo y de la curva de aprendizaje
+del equipo es parte del diseño, no una excusa. No nos volvimos idealistas con todo lo que nos
+hubiera gustado tener: fuimos realistas con lo que podíamos construir bien y hasta dónde.
 
 ## 1. Qué nos propusimos y qué entregamos
 
-La Entrega 3 no rediseña: **implementa** lo que ya definió el modelamiento (Entrega 2) y lo
-**demuestra funcionando, observado y bajo fallo**. Contra esa vara, esto es lo que quedó:
+Nos propusimos **explorar un caso de negocio que nos llamaba mucho la atención**: las
+tiqueteras. Queríamos entender de verdad cómo funciona esto por detrás —la venta de boletas de
+alta demanda— y todo lo que involucra a nivel de tecnología y de negocio.
 
-- Una **aplicación funcional** de venta de boletas de alta demanda, con el recorrido completo
-  admisión → reserva → pago → emisión operando de punta a punta contra PostgreSQL, Redis y
-  Kafka reales, más una **plataforma web** (`/app`) que hace visible ese recorrido como un
-  producto de ticketera.
-- La **SAGA orquestada** del [diagrama de secuencia](../02-modelamiento/diagrama-de-secuencia.md)
-  con sus cinco pasos, incluidos los caminos de error (reserva vencida, pasarela lenta/repetida,
-  webhook duplicado, emisión que no cierra → discrepancia).
-- Las **14 reglas de negocio (R1–R14)** implementadas en el dominio y cubiertas por los
-  **21 casos de prueba** del [plan de pruebas](../02-modelamiento/plan-de-pruebas.md), en verde.
-- **Observabilidad** con OpenTelemetry + Prometheus + Tempo + Loki + Grafana, el catálogo de
-  métricas del diseño (incluidas las 3 de negocio y 3 técnicas de la rúbrica) y **15 alertas**
-  ligadas a atributos de calidad.
-- **Cuatro experimentos de inyección de fallos** ejecutados y aprobados, de tipos distintos,
-  con [bitácora](bitacora-de-fallos.md).
+Terminamos yendo más allá de "entender": propusimos una **arquitectura original** que toma las
+problemáticas reales del sector (avalanchas de tráfico, sobreventa, reventa, dinero que se
+cobra sin entregar la boleta) y las resuelve con decisiones justificadas. Comprendimos cómo
+operan estas empresas a nivel técnico y logramos **abarcar casos interesantes de volumetría y
+de pruebas** —incluido inyección de fallos— sobre una aplicación que funciona de punta a punta.
+
+Concretamente entregamos: la aplicación con el recorrido completo **admisión → reserva → pago →
+emisión** contra PostgreSQL, Redis y Kafka reales; una plataforma web que hace visible ese
+recorrido; las **14 reglas de negocio** cubiertas por los **21 casos de prueba**;
+observabilidad con las métricas del diseño y **15 alertas**; y **cuatro experimentos de fallos**
+ejecutados y aprobados.
 
 ## 2. Logros de los que respondemos con evidencia
 
-- **El dominio es fiel al modelo.** Las 12 raíces de agregado del
-  [modelo de dominio](../02-modelamiento/modelo-de-dominio.md) tienen código; las reglas viven
-  como métodos de los agregados, no dispersas. La frontera de `Boleta` (AD-008) se respeta:
-  `sales` nunca importa `entitlements`, la emisión cruza por el puerto `EmisorDeBoletas`.
-- **La inyección de fallos cumplió su propósito real.** IF-03 (PostgreSQL congelado)
-  **encontró una debilidad de verdad**: sin timeout de cliente el servicio se colgaba y un
-  rechazo del relay de outbox podía tumbar el proceso. Se corrigió (timeouts acotados,
-  relay tolerante, red de seguridad `unhandledRejection`) y se **reverificó**. Ese ciclo
-  —romper, aprender, corregir, volver a probar— es exactamente lo que evalúa el criterio 3.
-- **Encontramos y corregimos una sobreventa.** Al enviar cinco webhooks **a la vez**, un pago
-  de una boleta llegó a emitir siete: faltaba una unidad de trabajo transaccional. Se
-  introdujo el puerto `UnidadDeTrabajo` y la métrica de sobreventa se pasó a calcular desde las
-  tablas (antes valía 0 pasara lo que pasara). Es la evidencia más honesta de que las pruebas y
-  el caos sirvieron para algo, no para adornar.
-- **Trazabilidad decisión → código → atributo.** Cada patrón y cada homólogo local de AWS está
-  mapeado a su ADR y a su atributo de calidad en [`patrones.md`](patrones.md) y
-  [`fidelidad-arquitectonica.md`](fidelidad-arquitectonica.md).
+- **Consistencia de principio a fin.** Todas las entregas quedaron enlazadas: propusimos una
+  idea y un caso de negocio bien conectados, y cada entregable fue **fiel a lo que nos
+  propusimos desde el inicio**. Cada elemento cumplió su propósito para hacer evolucionar un
+  producto cada vez mejor, sin contradecir lo anterior. Esa trazabilidad idea → arquitectura →
+  código → evidencia es lo que sostiene el criterio de coherencia.
+- **La aplicación resistió más de lo que esperábamos.** Uno de los escenarios de caos que
+  diseñamos para tumbar la app **no la tumbó**: tuvimos que **subir la intensidad del chaos**
+  para forzar la degradación. Que el sistema aguantara el escenario original es, en sí mismo, la
+  mejor evidencia de que las decisiones de resiliencia funcionaron.
+- **El dominio quedó fiel al modelo.** Las 12 raíces de agregado tienen código y las reglas
+  viven como métodos de los agregados; la frontera de `Boleta` (AD-008) se respeta.
+- **La inyección de fallos cumplió su propósito real.** IF-03 (PostgreSQL congelado) **encontró
+  una debilidad de verdad** —el servicio se colgaba sin timeout de cliente— y la corregimos y
+  reverificamos. Ese ciclo romper → aprender → corregir → volver a probar es el corazón del
+  criterio 3.
+- **Encontramos y corregimos una sobreventa.** Con cinco confirmaciones simultáneas, un pago de
+  una boleta llegó a emitir siete: faltaba una unidad de trabajo transaccional. La métrica de
+  sobreventa además siempre valía 0 (falsa confianza). Corregimos ambas cosas. Es la evidencia
+  más honesta de que las pruebas y el caos sirvieron para algo, no para adornar.
 
 ## 3. Dificultades y cómo las enfrentamos
 
-- **La máquina local no soportó el stack.** Docker/WSL colapsaba con Kafka + observabilidad.
-  Lo resolvimos moviendo el trabajo a **GitHub Codespaces** con un devcontainer; el costo fue
-  que parte de la campaña de fallos corrió sin Grafana y con la fila en memoria.
-- **El borde de seguridad rompió una prueba silenciosamente.** Al añadir el rate-limiting, el
-  experimento IF-05 pasó a dar 0/8 incluso en la línea base porque un solo fan era tratado como
-  bot. Lo detectamos al repetir la campaña y lo corregimos usando ocho fans distintos. Lección:
-  un cambio transversal puede invalidar pruebas que nadie volvió a correr.
-- **Fidelidad vs. alcance de un piloto.** Reproducir AWS (Multi-AZ, API Gateway, Cognito, KMS,
-  EKS) era inviable en el tiempo y la máquina disponibles. Optamos por **homólogos locales
-  equivalentes** (JWT firmado, AES-256-GCM, Kafka, Redis, minikube/KEDA) y lo documentamos en
-  vez de simularlo a medias.
+- **Traducir problemáticas de negocio a decisiones de arquitectura.** El reto de fondo fue
+  entender cómo cada problema real de una tiquetera —a nivel de infraestructura y de
+  experiencia— se resuelve con la arquitectura y con nuestras definiciones. Lo enfrentamos
+  fijando primero **objetivos, decisiones en conjunto (ADR) y atributos de calidad no
+  negociables** para nuestro caso; eso nos dio un criterio estable para decidir qué construir y
+  qué no.
+- **La máquina local no soportó el stack.** Docker/WSL colapsaba con Kafka + observabilidad. Lo
+  resolvimos moviéndonos a **GitHub Codespaces** con un devcontainer; el costo fue que parte de
+  la campaña de fallos corrió sin Grafana visible.
+- **Un cambio transversal rompió una prueba en silencio.** Al añadir el borde de seguridad, el
+  experimento IF-05 pasó a dar 0/8 incluso en la línea base (un solo fan se veía como bot). Lo
+  detectamos al repetir la campaña. Aprendizaje: un cambio transversal puede invalidar pruebas
+  que nadie volvió a correr.
 - **Coherencia entre lo escrito y lo hecho.** El `ESTADO.md` llegó a decir «sin empezar el
-  código» cuando ya había cinco incrementos. Hicimos una auditoría de coherencia
+  código» cuando ya había varios incrementos. Hicimos una **auditoría de coherencia**
   ([`coherencia-implementacion.md`](coherencia-implementacion.md)) y sincronizamos la
-  documentación con el estado real.
+  documentación con el estado real, tal como pide la clase 5-6.
 
-## 4. Deuda técnica deliberada (lo que decidimos NO hacer)
+## 4. Balance honesto: lo positivo y lo mejorable
 
-La asumimos a conciencia; no es descuido:
+Presentamos las dos caras, porque una autoevaluación creíble no oculta lo segundo.
 
-- **Contexto «Oferta de eventos» acotado.** Implementamos los agregados `Evento`, `Recinto`,
-  `Promotor` (con `Convenio`, `ReglasVenta`, `ReglasReventa`, `Cancelacion`, la regla R1 del
-  recinto y la copia de la comisión de reventa del convenio al publicar) para no dejar raíces
-  del modelo sin código, pero la **gestión** del catálogo (alta por promotor, edición) no está
-  en la demo: el catálogo se consume como lectura CQRS. `Localidad`/`Aforo`/`Silla` viven en el
-  contexto de venta por AD-003 (autoridad transaccional del aforo), no en catálogo; queda
-  justificado en [`coherencia-implementacion.md`](coherencia-implementacion.md). El valor de la
-  entrega está en el camino de venta.
-- **Circuit breaker completo.** Hay reintentos acotados, timeouts y compensación; falta el
-  disyuntor con estados abierto/semiabierto. Suficiente para la demo, deuda para producción.
-- **Infraestructura de producción.** Multi-AZ, RDS Proxy, sharding de Redis, OpenSearch,
-  Argo CD/Terraform y KEDA en clúster son diseño, no despliegue del piloto.
-- **IF-04 (pérdida de la proyección de Redis)** quedó como quinto experimento de respaldo; la
-  rúbrica pide cuatro de tipos distintos y esos están ejecutados.
-- **Concurrencia real de aforo.** La invariante R1/R2 bajo concurrencia se prueba con un test
-  de integración contra PostgreSQL (`skipIf` sin base); en local sin DB no corre, en Codespaces
-  sí.
+| Lo que estuvo bien | Lo que se pudo hacer mejor |
+|---|---|
+| El planteamiento arquitectónico: un modelo sólido, con atributos de calidad y ADR que guiaron cada decisión. | La implementación **no usa todos los patrones** que el modelo insinúa; no necesariamente hay de todo (p. ej., el circuit breaker quedó parcial). |
+| El recorrido crítico y sus reglas quedaron probados y resistieron el caos. | Algunas piezas podrían implementarse mejor o más completas (gestión del catálogo, proyecciones reconstruibles). |
+| Coherencia entre entregas y trazabilidad decisión → evidencia. | Faltó cerrar evidencias visuales (video, capturas de Grafana y de los fallos) por depender del stack en la nube. |
+| Fuimos realistas con el alcance: entregamos lo que podíamos sostener con calidad. | La ambición del diseño supera lo implementado; hay que ser explícitos sobre esa brecha (y lo somos). |
 
-## 5. Aprendizajes
+La lección de fondo: **la arquitectura ideal y la implementación viable no son la misma cosa**.
+Un buen modelo puede pedir más patrones y más infraestructura de los que tiene sentido
+construir en el tiempo y con la curva de aprendizaje de un equipo de curso. Reconocerlo —y
+elegir a conciencia qué sí y qué no— es aplicar el criterio de ingeniería, no rebajarlo.
 
-- **Una arquitectura hexagonal se paga sola bajo caos.** Poder reiniciar el proceso (IF-02) sin
+## 5. Deuda técnica deliberada (lo que decidimos NO hacer)
+
+Siguiendo a Cunningham y la clase 5-6: la deuda técnica **no es mala si se reconoce y se
+gestiona**. La nuestra es consciente y está justificada:
+
+- **Reventa de boletería, fuera de foco.** El modelo la contempla (R8, R9), pero no era el foco
+  del caso ni del recorrido de la demo; la dejamos a nivel de dominio, sin flujo de aplicación.
+  El valor estaba en la **venta primaria de alta demanda**, no en el mercado secundario.
+- **No llevamos la solución a una nube más robusta.** Por tiempo y por capacidades del equipo,
+  corrimos el piloto en local/Codespaces con **homólogos equivalentes** (JWT firmado en vez de
+  Cognito, AES-256-GCM en vez de KMS, Kafka/Redis en contenedor en vez de MSK/ElastiCache,
+  minikube/KEDA en vez de EKS) en lugar de desplegar Multi-AZ en AWS. Está documentado en
+  [`fidelidad-arquitectonica.md`](fidelidad-arquitectonica.md); lo asumimos como deuda, no como
+  omisión.
+- **Circuit breaker parcial.** Hay reintentos acotados, timeouts y compensación; falta el
+  disyuntor con estado abierto/semiabierto. Suficiente para la demo.
+- **Gestión del catálogo (contexto «Oferta de eventos»).** Implementamos su dominio
+  (`Evento`, `Recinto`, `Promotor`) para no dejar raíces del modelo sin código, pero el alta y
+  la edición por el promotor no están cableadas; el catálogo se consume como lectura (CQRS).
+- **IF-04 (pérdida de la proyección de Redis)** quedó como experimento de respaldo; la rúbrica
+  pide cuatro de tipos distintos y esos están ejecutados.
+
+## 6. Aprendizajes (aplicando los conceptos de la materia)
+
+- **Una arquitectura hexagonal se paga sola bajo caos.** Reiniciar el proceso (IF-02) sin
   perder estado, o rechazar de forma acotada con la base caída (IF-03), fue posible porque el
   estado de negocio vive en PostgreSQL y el dominio no conoce infraestructura.
-- **Idempotencia y transacciones no son opcionales en venta de alta demanda.** Las dos fallas
-  más serias (webhook repetido y sobreventa) fueron de concurrencia; el diseño ya las
-  anticipaba, pero solo el código bajo carga las hizo visibles.
-- **La observabilidad tiene que probar cosas ciertas.** Una métrica de sobreventa que siempre
-  vale 0 es peor que no tenerla: da falsa confianza. Aprendimos a validar que la métrica
-  reacciona antes de confiar en su alerta.
+- **Idempotencia y transacciones no son opcionales en alta demanda.** Las dos fallas más serias
+  (webhook repetido y sobreventa) fueron de concurrencia; el diseño ya las anticipaba, pero solo
+  el **código bajo carga** las hizo visibles. Es la diferencia entre diseñar y demostrar.
+- **La observabilidad tiene que medir cosas ciertas.** Una métrica de sobreventa que siempre
+  vale 0 es peor que no tenerla: da falsa confianza. Aprendimos a **validar que la métrica
+  reacciona** antes de confiar en su alerta (idea de *fitness function*: el umbral solo vale si
+  la señal es real).
 - **La documentación desincronizada cuesta puntos y confianza.** Mantener `ESTADO.md` fiel al
-  repositorio es parte del trabajo, no un extra.
+  repositorio es parte de la calidad, no un extra —exactamente el mensaje de la clase 5-6:
+  *menos suposiciones, más claridad*.
+- **Menos es más.** El aprendizaje más transversal: acotar el alcance a conciencia produjo una
+  entrega más sólida que intentar cubrirlo todo a medias.
 
-## 6. Propuestas concretas de evolución
+## 7. Propuestas concretas de evolución
 
-1. **Cerrar el circuit breaker** alrededor de la pasarela (umbral de apertura + medio-abierto)
-   y exponer su estado como métrica.
+1. **Cerrar el circuit breaker** alrededor de la pasarela (umbral de apertura + medio-abierto) y
+   exponer su estado como métrica.
 2. **Completar «Oferta de eventos»**: alta de eventos por promotor con su convenio, para que el
    catálogo deje de ser solo lectura.
 3. **Ejecutar IF-04** (pérdida de la proyección de Redis) y **capturar Grafana** durante los
    cuatro fallos para el video.
 4. **Corridas de volumetría con k6** (nominal, pico, estrés, resistencia) contra los umbrales de
-   la [volumetría](../02-modelamiento/volumetria.md), hoy pendientes.
+   la [volumetría](../02-modelamiento/volumetria.md).
 5. **Desplegar en un clúster real** (minikube/k3d con KEDA) para demostrar el autoescalado por
    lag, no solo declararlo.
-6. **Rotación de llaves y pruebas de seguridad automatizadas**, la deuda que el propio AD-004
-   reconoce.
+6. **Rotación de llaves y pruebas de seguridad automatizadas**, la deuda que el propio
+   [AD-004](../decisiones/0004-datos-personales-almacenamiento-y-acceso.md) reconoce.
+7. **Incorporar más patrones donde aporten** (no por completitud): el disyuntor completo, y
+   proyecciones reconstruibles desde el registro durable.
 
-## 7. Autonota honesta
+## 8. Cierre
 
-Lo que funciona, funciona de verdad y está probado; lo que falta, está **dicho**. El mayor
-riesgo de la entrega no es el código —el recorrido crítico y sus reglas están sólidos— sino las
-**evidencias visuales** (video y capturas de Grafana/fallos), que dependen de correr el stack
-completo en Codespaces. Si tuviéramos una semana más, la gastaríamos en el despliegue en
-clúster y en la volumetría, no en reescribir dominio.
+Lo que funciona, funciona de verdad y está probado; lo que falta, está **dicho**. Estamos
+conformes con el resultado y, sobre todo, con lo aprendido: entendimos un sector, propusimos y
+defendimos una arquitectura, y la llevamos a código siendo honestos sobre su alcance. El mayor
+riesgo restante no es el código —el recorrido crítico y sus reglas están sólidos— sino las
+**evidencias visuales**, que dependen de correr el stack completo en Codespaces. Si tuviéramos
+más tiempo, lo invertiríamos en el despliegue en clúster y en la volumetría, no en reescribir
+dominio.
