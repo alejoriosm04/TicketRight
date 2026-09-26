@@ -11,6 +11,9 @@ tarde y responde dos veces.
 **Entrega activa: Entrega 3 — Implementación · Sustentación · Simulación · Defensa**
 (sábado 26 de septiembre de 2026, 30%). El estado vivo está en [`ESTADO.md`](ESTADO.md).
 
+**Presentación y video:** https://statuesque-valkyrie-5daa13.netlify.app — la simulación y el análisis de los cuatro fallos y de la
+carga, con el video de la campaña completa.
+
 ## Este repositorio
 
 | Ruta | Qué contiene |
