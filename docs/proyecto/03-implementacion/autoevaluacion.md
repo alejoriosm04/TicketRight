@@ -100,6 +100,40 @@ sostiene con menor robustez que en producción—; y **(b)** piezas que quedaron
   reconoce).
 - Los flujos HTTP de devolución/retracto y de reventa.
 
+## Detalle por componente de la arquitectura
+
+Vista pieza por pieza de la arquitectura de referencia, para responder por todo lo que
+propusimos. Estado: ✅ implementado · 🟡 equivalente local o parcial · ❌ no hecho.
+
+| Componente de la arquitectura | Estado | Cómo quedó / alternativa usada |
+|---|---|---|
+| **Portal y canales** (fan, promotor, operación) | ✅ | Plataforma web funcional en `/app` conectada a las APIs, con roles por cuenta |
+| **Borde: API Gateway + WAF/Bot Control** | 🟡 | Borde propio: control de tasa (token bucket) por ruta + heurística de bots; sin CDN gestionada ni antibot con ML |
+| **Identidad y consentimiento** (Cognito/OIDC) | 🟡 | Cuentas de fan con JWT firmado propio y roles; datos personales cifrados; no hay proveedor federado |
+| **Cifrado de datos personales** (KMS) | 🟡 | AES-256-GCM con secreto; sin rotación gestionada de llaves |
+| **Auditoría** (CloudTrail) | 🟡 | Tabla de auditoría de solo anexado |
+| **Secretos** (Secrets Manager) | 🟡 | Secret de Kubernetes; sin rotación automática |
+| **Contenido estático** (S3 + CloudFront) | 🟡 | Portal estático servido en `/portal` con caché por ETag |
+| **Oferta de eventos** (catálogo, promotor, recinto, convenio) | 🟡 | Dominio implementado; el catálogo es de **solo lectura**: el promotor aún no crea eventos |
+| **Admisión: sala de espera / fila** (grilla en memoria) | ✅ | Fila en Redis, política de orden, turno reconstruible, admisión por lotes con token de un solo uso |
+| **Venta y recaudo: SAGA de compra** | ✅ | Orquestada: reserva → pago → emisión → compensación, con estado durable en PostgreSQL |
+| **Núcleo transaccional / autoridad del aforo** | ✅ | PostgreSQL con transacción y bloqueo de fila (`FOR UPDATE`); worker que libera reservas vencidas |
+| **Desglose de precio** (nominal + servicio + parafiscal) | ✅ | En el dominio, como objeto de valor |
+| **Derecho de asistencia: emisión de boleta** | ✅ | `Boleta` en su contexto; la emisión cruza por el puerto `EmisorDeBoletas` |
+| **Reventa** | 🟡 | Solo en el dominio (`Reventa`, `ReglasDeReventa`), con pruebas; sin endpoint ni pantalla |
+| **Devolución / retracto** | 🟡 | Reglas en el dominio; **sin flujo HTTP** |
+| **Liquidación al promotor** | 🟡 | `Liquidacion` en el dominio, con pruebas; sin endpoint ni pantalla |
+| **Bus de eventos durable** (MSK) | ✅ | Kafka con outbox transaccional, particionado por venta, consumidor idempotente y DLQ |
+| **Grilla en memoria / caché** (ElastiCache) | ✅ | Redis para la fila de admisión |
+| **Modelos de lectura / búsqueda** (OpenSearch, CQRS) | 🟡 | Lecturas separadas de la escritura (CQRS) sobre PostgreSQL; **OpenSearch no implementado** |
+| **Precalentamiento programado** (EventBridge Scheduler) | 🟡 | El gestor de perfiles y `programarVentana` existen, pero **nada los invoca** automáticamente |
+| **Circuit breaker ante la pasarela** | 🟡 | Reintentos + timeouts + compensación; **faltan los estados abierto/medio-abierto** |
+| **Plataforma de contenedores + autoescalado** (EKS + KEDA) | 🟡 | minikube con KEDA en Codespaces; sin Multi-AZ ni gestión de nube |
+| **Observabilidad** (OTel + Alloy + Prometheus + Tempo + Loki + Grafana) | ✅ | Stack completo, 14 métricas y 15 alertas; 1 tablero de 5 secciones (el diseño pedía 3 tableros) |
+| **Retención de evidencia** (24 meses) | 🟡 | En local: logs 7 días (Loki), trazas 1 hora (Tempo) |
+| **IaC y entrega** (Terraform + Argo CD) | ❌ | Despliegue con `kubectl`/`helm` y manifiestos versionados |
+| **Alta disponibilidad de nube** (Multi-AZ, VPC, Karpenter, 2.ª región) | ❌ | No implementado; el piloto corre en un solo nodo |
+
 ## Atributos de calidad de la Entrega 1: cuáles tienen evidencia
 
 **Con evidencia:**
