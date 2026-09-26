@@ -83,6 +83,7 @@ PAGES = [
     ("docs/proyecto/03-implementacion/bitacora-de-fallos.md", "Entrega-3-Bitacora-de-fallos", "Entrega 3 · Implementación", "Bitácora de fallos"),
     ("docs/proyecto/03-implementacion/pruebas-de-carga.md", "Entrega-3-Pruebas-de-carga", "Entrega 3 · Implementación", "Pruebas de carga"),
     ("docs/proyecto/03-implementacion/guia-codespaces.md", "Entrega-3-Guia-de-Codespaces", "Entrega 3 · Implementación", "Guía de Codespaces"),
+    ("docs/proyecto/03-implementacion/arquitectura-implementada.md", "Entrega-3-Arquitectura-implementada", "Entrega 3 · Implementación", "Arquitectura implementada"),
     ("docs/proyecto/03-implementacion/autoevaluacion.md", "Entrega-3-Autoevaluacion", "Entrega 3 · Implementación", "Autoevaluación"),
 
     ("docs/proyecto/decisiones/README.md", "ADR", "Decisiones · ADR", "Índice y formato"),

@@ -1,0 +1,524 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Arquitectura implementada de TicketRight — piloto de la Entrega 3",
+    "output": "arquitectura-implementada.html",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "https://github.com/alejoriosm04/TicketRight",
+      "provider": "github",
+      "link_mode": "web",
+      "revision": "b88d201cad2361b642010fa307502664548727e5"
+    },
+    "views": [
+      {
+        "id": "compra",
+        "label": "1 · Camino de compra",
+        "focus": [
+          "fans",
+          "borde",
+          "api",
+          "fila",
+          "saga",
+          "pasarela",
+          "postgres",
+          "emision"
+        ],
+        "note": "La fila regula la entrada, PostgreSQL decide el aforo y el cobro es idempotente."
+      },
+      {
+        "id": "eventos",
+        "label": "2 · Eventos y escalado",
+        "focus": [
+          "saga",
+          "postgres",
+          "kafka",
+          "keda"
+        ],
+        "note": "El outbox sale en la misma transacción; Kafka reparte y KEDA escala por el lag."
+      },
+      {
+        "id": "observabilidad",
+        "label": "3 · Observabilidad",
+        "focus": [
+          "api",
+          "telemetria",
+          "grafana"
+        ],
+        "note": "Métricas, trazas y logs correlacionados, con 15 alertas ligadas a atributos."
+      }
+    ]
+  },
+  "components": [
+    {
+      "id": "fans",
+      "type": "frontend",
+      "label": "Plataforma web /app",
+      "sublabel": "fan, promotor y operación",
+      "tag": "prototipo",
+      "pos": [
+        40,
+        250
+      ],
+      "size": [
+        180,
+        66
+      ],
+      "sources": [
+        {
+          "path": "docs/proyecto/02-modelamiento/prototipo/plataforma.js",
+          "line": 430,
+          "label": "vista de la fila"
+        },
+        {
+          "path": "apps/ventas/src/http/static-portal.ts",
+          "line": 85,
+          "label": "servida en /app"
+        }
+      ]
+    },
+    {
+      "id": "borde",
+      "type": "security",
+      "label": "Borde de seguridad",
+      "sublabel": "token bucket + bots",
+      "tag": "AD-004",
+      "pos": [
+        310,
+        250
+      ],
+      "size": [
+        180,
+        66
+      ],
+      "sources": [
+        {
+          "path": "apps/ventas/src/security/edge-gateway.ts",
+          "line": 51,
+          "label": "BordeDeSeguridad"
+        },
+        {
+          "path": "apps/ventas/src/security/accounts.ts",
+          "line": 36,
+          "label": "cuentas con rol"
+        }
+      ]
+    },
+    {
+      "id": "api",
+      "type": "backend",
+      "label": "API de ventas",
+      "sublabel": "Fastify · perfiles operativos",
+      "tag": "AD-005",
+      "pos": [
+        580,
+        250
+      ],
+      "size": [
+        180,
+        66
+      ],
+      "sources": [
+        {
+          "path": "apps/ventas/src/http/routes.ts",
+          "line": 282,
+          "label": "POST /compras"
+        },
+        {
+          "path": "apps/ventas/src/adapters/operational-profiles.ts",
+          "line": 42,
+          "label": "GestorDePerfiles"
+        }
+      ]
+    },
+    {
+      "id": "fila",
+      "type": "database",
+      "label": "Sala de espera",
+      "sublabel": "Redis · JWT de un uso",
+      "tag": "AD-006",
+      "brand": "redis",
+      "pos": [
+        580,
+        90
+      ],
+      "size": [
+        180,
+        66
+      ],
+      "sources": [
+        {
+          "path": "apps/ventas/src/adapters/waiting-room-redis.ts",
+          "line": 28,
+          "label": "SalaDeEsperaRedis"
+        },
+        {
+          "path": "apps/ventas/src/security/admission-token.ts",
+          "line": 15,
+          "label": "token de admisión"
+        }
+      ]
+    },
+    {
+      "id": "saga",
+      "type": "backend",
+      "label": "Orquestador de compra",
+      "sublabel": "SAGA · unidad de trabajo",
+      "tag": "AD-002",
+      "pos": [
+        850,
+        250
+      ],
+      "size": [
+        180,
+        66
+      ],
+      "sources": [
+        {
+          "path": "packages/sales/src/application/purchase.ts",
+          "line": 116,
+          "label": "OrquestadorDeCompra"
+        },
+        {
+          "path": "apps/ventas/src/db/connection.ts",
+          "line": 31,
+          "label": "BaseTransaccional"
+        }
+      ]
+    },
+    {
+      "id": "pasarela",
+      "type": "external",
+      "label": "Pasarela simulada",
+      "sublabel": "tardía · repetida · rechaza",
+      "tag": "tercero",
+      "pos": [
+        850,
+        90
+      ],
+      "size": [
+        180,
+        66
+      ],
+      "sources": [
+        {
+          "path": "apps/ventas/src/adapters/simulated-gateway.ts",
+          "line": 11,
+          "label": "PasarelaSimulada"
+        },
+        {
+          "path": "apps/ventas/src/http/routes.ts",
+          "line": 354,
+          "label": "POST /pagos/webhook"
+        }
+      ]
+    },
+    {
+      "id": "emision",
+      "type": "backend",
+      "label": "Emisión de boletas",
+      "sublabel": "puerto EmisorDeBoletas",
+      "tag": "AD-008",
+      "pos": [
+        850,
+        410
+      ],
+      "size": [
+        180,
+        66
+      ],
+      "sources": [
+        {
+          "path": "apps/ventas/src/adapters/postgres/ticket-issuer.ts",
+          "line": 6,
+          "label": "EmisorDeBoletasPostgres"
+        },
+        {
+          "path": "packages/entitlements/src/domain/ticket.ts",
+          "line": 97,
+          "label": "Boleta"
+        }
+      ]
+    },
+    {
+      "id": "postgres",
+      "type": "database",
+      "label": "PostgreSQL 18",
+      "sublabel": "autoridad del aforo + outbox",
+      "tag": "AD-003",
+      "brand": "postgresql",
+      "pos": [
+        1120,
+        250
+      ],
+      "size": [
+        180,
+        66
+      ],
+      "sources": [
+        {
+          "path": "apps/ventas/migrations/0001-esquema-inicial.sql",
+          "line": 13,
+          "label": "CHECK del aforo"
+        },
+        {
+          "path": "packages/sales/src/domain/inventory.ts",
+          "line": 82,
+          "label": "Localidad"
+        },
+        {
+          "path": "apps/ventas/src/adapters/outbox.ts",
+          "line": 5,
+          "label": "outbox"
+        }
+      ]
+    },
+    {
+      "id": "kafka",
+      "type": "messagebus",
+      "label": "Kafka",
+      "sublabel": "ventas.v1.eventos · DLQ",
+      "tag": "AD-002",
+      "brand": "apache-kafka",
+      "pos": [
+        1120,
+        410
+      ],
+      "size": [
+        180,
+        66
+      ],
+      "sources": [
+        {
+          "path": "apps/ventas/src/adapters/kafka.ts",
+          "line": 32,
+          "label": "relay del outbox"
+        },
+        {
+          "path": "apps/ventas/src/adapters/kafka.ts",
+          "line": 96,
+          "label": "consumidor idempotente"
+        }
+      ]
+    },
+    {
+      "id": "keda",
+      "type": "cloud",
+      "label": "minikube + KEDA",
+      "sublabel": "escala por lag del consumidor",
+      "tag": "AD-006",
+      "brand": "kubernetes",
+      "pos": [
+        1120,
+        570
+      ],
+      "size": [
+        180,
+        66
+      ],
+      "sources": [
+        {
+          "path": "deploy/k8s/40-keda-scaledobject.yaml",
+          "line": 10,
+          "label": "ScaledObject"
+        }
+      ]
+    },
+    {
+      "id": "telemetria",
+      "type": "database",
+      "label": "Telemetría",
+      "sublabel": "Prometheus · Tempo · Loki",
+      "tag": "15 alertas",
+      "brand": "prometheus",
+      "pos": [
+        580,
+        410
+      ],
+      "size": [
+        180,
+        66
+      ],
+      "sources": [
+        {
+          "path": "apps/ventas/src/observability/metrics.ts",
+          "line": 23,
+          "label": "métricas"
+        },
+        {
+          "path": "apps/ventas/src/observability/tracing.ts",
+          "line": 22,
+          "label": "trazas"
+        },
+        {
+          "path": "observability/prometheus/alerts.yml",
+          "line": 14,
+          "label": "alertas"
+        }
+      ]
+    },
+    {
+      "id": "grafana",
+      "type": "backend",
+      "label": "Grafana",
+      "sublabel": "tablero de 5 secciones",
+      "tag": "operación",
+      "brand": "grafana",
+      "pos": [
+        310,
+        410
+      ],
+      "size": [
+        180,
+        66
+      ],
+      "sources": [
+        {
+          "path": "observability/grafana/dashboards/ticketright.json",
+          "label": "tablero"
+        }
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "Piloto en GitHub Codespaces · minikube o docker compose",
+      "wraps": [
+        "borde",
+        "api",
+        "fila",
+        "saga",
+        "pasarela",
+        "emision",
+        "postgres",
+        "kafka",
+        "keda",
+        "telemetria",
+        "grafana"
+      ],
+      "pad": 26
+    }
+  ],
+  "connections": [
+    {
+      "id": "fans-borde",
+      "from": "fans",
+      "to": "borde",
+      "label": "HTTPS",
+      "variant": "emphasis"
+    },
+    {
+      "id": "borde-api",
+      "from": "borde",
+      "to": "api",
+      "label": "permitidas",
+      "variant": "security"
+    },
+    {
+      "id": "api-fila",
+      "from": "api",
+      "to": "fila",
+      "label": "turno y posición",
+      "fromSide": "top",
+      "toSide": "bottom"
+    },
+    {
+      "id": "api-saga",
+      "from": "api",
+      "to": "saga",
+      "label": "reservar · pagar",
+      "variant": "emphasis"
+    },
+    {
+      "id": "saga-pasarela",
+      "from": "saga",
+      "to": "pasarela",
+      "label": "cobro · webhook idempotente",
+      "fromSide": "top",
+      "toSide": "bottom"
+    },
+    {
+      "id": "saga-postgres",
+      "from": "saga",
+      "to": "postgres",
+      "label": "FOR UPDATE",
+      "variant": "emphasis"
+    },
+    {
+      "id": "saga-emision",
+      "from": "saga",
+      "to": "emision",
+      "label": "emitir",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelDy": 48
+    },
+    {
+      "id": "postgres-kafka",
+      "from": "postgres",
+      "to": "kafka",
+      "label": "outbox",
+      "variant": "dashed",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelDy": 48
+    },
+    {
+      "id": "keda-kafka",
+      "from": "keda",
+      "to": "kafka",
+      "label": "lee el lag",
+      "variant": "dashed",
+      "fromSide": "top",
+      "toSide": "bottom"
+    },
+    {
+      "id": "api-telemetria",
+      "from": "api",
+      "to": "telemetria",
+      "label": "señales",
+      "variant": "dashed",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelDy": 48
+    },
+    {
+      "id": "telemetria-grafana",
+      "from": "telemetria",
+      "to": "grafana",
+      "label": "consultas"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Del diseño al piloto",
+      "items": [
+        "API Gateway + WAF → borde propio",
+        "ElastiCache → Redis · MSK → Kafka",
+        "Aurora → PostgreSQL 18",
+        "EKS + KEDA → minikube + KEDA"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Garantías verificadas",
+      "items": [
+        "Cero sobreventa en carga y en fallos",
+        "Webhook repetido → una sola boleta",
+        "63 de 63 pruebas en CI"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Fuera del piloto",
+      "items": [
+        "OpenSearch, Multi-AZ, Terraform, Argo CD",
+        "Ventana programada: cambio manual",
+        "Circuit breaker completo"
+      ]
+    }
+  ]
+}
