@@ -831,9 +831,12 @@
     try {
       var m = await (await fetch("/metrics")).text();
       var disc = leerMetrica(m, "ticketright_open_discrepancies"), edad = leerMetrica(m, "ticketright_oldest_discrepancy_age_seconds"), enCurso = leerMetrica(m, "ticketright_payments_in_flight"), vencidas = leerMetrica(m, "ticketright_overdue_reservations");
+      // Mismos gauges que grafica Grafana (ticketright_queue_waiting/admitted): el número no se
+      // recalcula aparte, así que nunca se desalinea del tablero.
+      var enFila = leerMetrica(m, "ticketright_queue_waiting"), admitidas = leerMetrica(m, "ticketright_queue_admitted");
       var op = await api("GET", "/operacion/perfil"); var actual = op.perfil;
       document.getElementById("op").innerHTML =
-        '<div class="tr-kpis">' + kpi("Discrepancias abiertas", disc, disc > 0 ? "orange" : "green") + kpi("Edad más antigua", Math.round(edad) + "s", edad > 900 ? "red" : "green") + kpi("Pagos en curso", enCurso, "blue") + kpi("Reservas vencidas", vencidas, vencidas > 0 ? "orange" : "green") + '</div>' +
+        '<div class="tr-kpis">' + kpi("Personas en fila", enFila, enFila > 0 ? "orange" : "green") + kpi("Admitidas ahora", admitidas, "blue") + kpi("Discrepancias abiertas", disc, disc > 0 ? "orange" : "green") + kpi("Edad más antigua", Math.round(edad) + "s", edad > 900 ? "red" : "green") + kpi("Pagos en curso", enCurso, "blue") + kpi("Reservas vencidas", vencidas, vencidas > 0 ? "orange" : "green") + '</div>' +
         '<div class="tarjeta tr-mt"><h3>Perfil operativo</h3><p class="tr-mini">El perfil regula la admisión de la fila (back pressure, AD-006). Cambiarlo requiere rol de operación.</p>' +
         '<div class="tr-perfil-op" id="perfil-op">' + perfiles.map(function (p) { return '<button data-p="' + p[0] + '"' + (p[0] === actual ? ' class="on"' : "") + '>' + p[1] + '</button>'; }).join("") + '</div></div>' +
         '<div class="tarjeta"><h3>Correspondencia dinero ↔ boleta</h3><p class="tr-mut">' + (disc === 0 ? "✅ No hay dinero cobrado sin boleta. La conciliación está al día." : "⚠️ Hay " + disc + " pago(s) confirmado(s) sin boleta; la SAGA los está conciliando.") + '</p></div>';
